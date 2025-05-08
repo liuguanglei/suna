@@ -121,7 +121,7 @@ if config.ENV_MODE == EnvMode.LOCAL:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
@@ -149,13 +149,13 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     
-    workers = 2
+    workers = 1
     
     logger.info(f"Starting server on 0.0.0.0:8000 with {workers} workers")
     uvicorn.run(
         "api:app", 
         host="0.0.0.0", 
-        port=8000,
+        port=3457,
         workers=workers,
         reload=True
     )
