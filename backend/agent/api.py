@@ -45,6 +45,7 @@ MODEL_NAME_ALIASES = {
     "qwen3": "openrouter/qwen/qwen3-235b-a22b", 
 
     # Also include full names as keys to ensure they map to themselves
+    "openrouter/sonnet-3.7": "openrouter/anthropic/claude-3.7-sonnet",
     "anthropic/claude-3-7-sonnet-latest": "anthropic/claude-3-7-sonnet-latest",
     "openai/gpt-4.1-2025-04-14": "openai/gpt-4.1-2025-04-14",
     "openai/gpt-4o": "openai/gpt-4o",
@@ -381,6 +382,7 @@ async def start_agent(
         logger.info(f"Using model from config: {model_name}")
 
     # Log the model name after alias resolution
+    model_name = "openrouter/sonnet-3.7"  # TODO
     resolved_model = MODEL_NAME_ALIASES.get(model_name, model_name)
     logger.info(f"Resolved model name: {resolved_model}")
 

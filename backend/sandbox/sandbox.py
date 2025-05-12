@@ -92,6 +92,7 @@ def create_sandbox(password: str, project_id: str = None):
         
     params = CreateSandboxParams(
         image="kortix/suna:0.1.2",
+        # image="adamcohenhillel/kortix-suna:0.0.20",
         public=True,
         labels=labels,
         env_vars={
