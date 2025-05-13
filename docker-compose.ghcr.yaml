@@ -4,7 +4,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "9339:6379"
     volumes:
       - redis-data:/data
     command: redis-server --save 60 1 --loglevel warning
@@ -17,13 +17,13 @@ services:
   backend:
     image: ghcr.io/${GITHUB_REPOSITORY}/suna-backend:latest
     ports:
-      - "8000:8000"
+      - "3457:8000"
     volumes:
       - ./backend/.env:/app/.env:ro
     environment:
       - ENV_MODE=local
       - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_PORT=9339
       - REDIS_PASSWORD=
       - REDIS_SSL=False
     depends_on:
@@ -33,7 +33,7 @@ services:
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY}/suna-frontend:latest
     ports:
-      - "3000:3000"
+      - "3459:3000"
     volumes:
       - ./frontend/.env.local:/app/.env.local:ro
     environment:
