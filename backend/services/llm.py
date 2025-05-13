@@ -326,17 +326,18 @@ async def make_llm_api_call(
 setup_api_keys()
 
 # Test code for OpenRouter integration
-async def test_openrouter():
+async def test_openrouter(model_name="openrouter/openai/gpt-4o-mini"):
     """Test the OpenRouter integration with a simple query."""
     test_messages = [
-        {"role": "user", "content": "Hello, can you give me a quick test response?"}
+        # {"role": "user", "content": "你好，能给我一个快速测试的回复么？ /no_think"}
+        {"role": "user", "content": "你好，能给我一个快速测试的回复么？"}
     ]
 
     try:
         # Test with standard OpenRouter model
         print("\n--- Testing standard OpenRouter model ---")
         response = await make_llm_api_call(
-            model_name="openrouter/openai/gpt-4o-mini",
+            model_name=model_name,
             messages=test_messages,
             temperature=0.7,
             max_tokens=100
@@ -396,7 +397,9 @@ async def test_bedrock():
 if __name__ == "__main__":
     import asyncio
 
-    test_success = asyncio.run(test_bedrock())
+    # test_success = asyncio.run(test_bedrock())
+    # test_success = asyncio.run(test_openrouter(model_name="openrouter/qwen/qwen3-235b-a22b"))
+    test_success = asyncio.run(test_openrouter(model_name="openrouter/anthropic/claude-3.7-sonnet"))
 
     if test_success:
         print("\n✅ integration test completed successfully!")
