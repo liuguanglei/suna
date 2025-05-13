@@ -20,11 +20,11 @@ services:
       - "3457:8000"
     volumes:
       - ./backend/.env:/app/.env:ro
-      - ./backend/logs:/app/logs:ro
+      - ./backend/logs:/app/logs
     environment:
       - ENV_MODE=local
       - REDIS_HOST=redis
-      - REDIS_PORT=9339
+      - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_SSL=False
     depends_on:
