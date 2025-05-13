@@ -399,9 +399,15 @@ if __name__ == "__main__":
 
     # test_success = asyncio.run(test_bedrock())
     # test_success = asyncio.run(test_openrouter(model_name="openrouter/qwen/qwen3-235b-a22b"))
-    test_success = asyncio.run(test_openrouter(model_name="openrouter/anthropic/claude-3.7-sonnet"))
+    # test_success = asyncio.run(test_openrouter(model_name="openrouter/anthropic/claude-3.7-sonnet"))
+    # if test_success:
+    #     print("\n✅ integration test completed successfully!")
+    # else:
+    #     print("\n❌ Bedrock integration test failed!")
 
-    if test_success:
-        print("\n✅ integration test completed successfully!")
-    else:
-        print("\n❌ Bedrock integration test failed!")
+    messages = [{"role": "system", "content": ""}, {"role": "user", "content": "你是谁"}]
+    model_name = "openrouter/anthropic/claude-3.7-sonnet"
+    resp = asyncio.run(make_llm_api_call(messages=messages, model_name=model_name))
+    print(resp)
+
+
