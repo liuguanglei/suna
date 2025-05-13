@@ -21,7 +21,7 @@ RUN useradd -m -u 1000 appuser && \
 
 # Install Python dependencies
 COPY --chown=appuser:appuser requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt gunicorn -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 # Switch to non-root user
 USER appuser
