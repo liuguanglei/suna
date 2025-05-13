@@ -54,7 +54,8 @@ MODEL_NAME_ALIASES = {
     "openrouter/google/gemini-2.5-flash-preview": "openrouter/google/gemini-2.5-flash-preview",
     "xai/grok-3-fast-latest": "xai/grok-3-fast-latest",
     "deepseek/deepseek-chat": "openrouter/deepseek/deepseek-chat",
-    "deepseek/deepseek-chat-0324": "openrouter/deepseek/deepseek-chat-v3-0324:free",
+    "deepseek/deepseek-chat-0324-free": "openrouter/deepseek/deepseek-chat-v3-0324:free",
+    "deepseek/deepseek-chat-0324": "openrouter/deepseek/deepseek-chat-v3-0324",
     "xai/grok-3-mini-fast-beta": "xai/grok-3-mini-fast-beta",
 }
 
