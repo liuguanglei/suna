@@ -54,6 +54,7 @@ MODEL_NAME_ALIASES = {
     "openrouter/google/gemini-2.5-flash-preview": "openrouter/google/gemini-2.5-flash-preview",
     "xai/grok-3-fast-latest": "xai/grok-3-fast-latest",
     "deepseek/deepseek-chat": "openrouter/deepseek/deepseek-chat",
+    "deepseek/deepseek-chat-0324": "openrouter/deepseek/deepseek-chat-v3-0324:free",
     "xai/grok-3-mini-fast-beta": "xai/grok-3-mini-fast-beta",
 }
 
@@ -383,7 +384,8 @@ async def start_agent(
 
     # Log the model name after alias resolution
     # model_name = "openrouter/sonnet-3.7"  # TODO
-    model_name = "qwen3"  # TODO
+    # model_name = "qwen3"  # TODO
+    model_name = "deepseek/deepseek-chat-0324"  # TODO
     resolved_model = MODEL_NAME_ALIASES.get(model_name, model_name)
     logger.info(f"Resolved model name: {resolved_model}")
 
