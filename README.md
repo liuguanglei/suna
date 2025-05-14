@@ -108,7 +108,7 @@ You'll need the following components:
    - Generate an API key from your account settings
    - Go to [Images](https://app.daytona.io/dashboard/images)
    - Click "Add Image"
-   - Enter `kortix/suna:0.1` as the image name
+   - Enter `kortix/suna:0.1.2` as the image name
    - Set `/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf` as the Entrypoint
 
 4. **LLM API Keys**:
@@ -215,7 +215,7 @@ npm install
 
 # Install backend dependencies
 cd ../backend
-pip install -r requirements.txt
+poetry install
 ```
 
 6. **Start the application**:
@@ -229,7 +229,7 @@ npm run dev
    In another terminal, start the backend:
 ```bash
 cd backend
-python api.py
+poetry run python3.11 api.py
 ```
 
 5-6. **Docker Compose Alternative**:
