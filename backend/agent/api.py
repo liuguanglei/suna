@@ -58,16 +58,13 @@ MODEL_NAME_ALIASES = {
     # "openrouter/google/gemini-2.5-flash-preview": "openrouter/google/gemini-2.5-flash-preview",  # Commented out in constants.py
     # "xai/grok-3-fast-latest": "xai/grok-3-fast-latest",  # Commented out in constants.py
     "deepseek/deepseek-chat": "openrouter/deepseek/deepseek-chat",
-<<<<<<< HEAD
     "deepseek/deepseek-chat-0324-free": "openrouter/deepseek/deepseek-chat-v3-0324:free",
     "deepseek/deepseek-chat-0324": "openrouter/deepseek/deepseek-chat-v3-0324",
     "xai/grok-3-mini-fast-beta": "xai/grok-3-mini-fast-beta",
-=======
     # "deepseek/deepseek-r1": "openrouter/deepseek/deepseek-r1",
-
     "qwen/qwen3-235b-a22b": "openrouter/qwen/qwen3-235b-a22b",
     # "xai/grok-3-mini-fast-beta": "xai/grok-3-mini-fast-beta",  # Commented out in constants.py
->>>>>>> main
+
 }
 
 class AgentStartRequest(BaseModel):
