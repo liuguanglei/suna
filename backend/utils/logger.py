@@ -90,7 +90,7 @@ def setup_logger(name: str = 'agentpress') -> logging.Logger:
         
         # Create formatters
         file_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s'
+            '%(asctime)s - %(name)s - %(levelname)s - [%(filename)s %(module)s.%(funcName)s] [line:%(lineno)d] - %(message)s'
         )
         file_handler.setFormatter(file_formatter)
         
@@ -109,7 +109,7 @@ def setup_logger(name: str = 'agentpress') -> logging.Logger:
             console_handler.setLevel(logging.DEBUG)
         
         console_formatter = logging.Formatter(
-            '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+            '%(asctime)s - %(levelname)s - %(name)s [%(filename)s %(module)s.%(funcName)s] [line:%(lineno)d] - %(message)s'
         )
         console_handler.setFormatter(console_formatter)
         
