@@ -2,11 +2,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-<<<<<<< HEAD
       - "9339:6379"
-=======
-      - "6379:6379"
->>>>>>> main
     volumes:
       - redis_data:/data
       - ./backend/services/docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
