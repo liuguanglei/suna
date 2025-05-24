@@ -81,6 +81,8 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
       subscriptionStatus,
       allModels: modelOptions,
       canAccessModel,
+      getActualModelId,
+      refreshCustomModels,
     } = useModelSelection();
 
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -120,10 +122,10 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
         message = message ? `${message}\n\n${fileInfo}` : fileInfo;
       }
 
-      let baseModelName = selectedModel;
+      let baseModelName = getActualModelId(selectedModel);
       let thinkingEnabled = false;
       if (selectedModel.endsWith('-thinking')) {
-        baseModelName = selectedModel.replace(/-thinking$/, '');
+        baseModelName = getActualModelId(selectedModel.replace(/-thinking$/, ''));
         thinkingEnabled = true;
       }
 
@@ -232,6 +234,7 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
                 modelOptions={modelOptions}
                 subscriptionStatus={subscriptionStatus}
                 canAccessModel={canAccessModel}
+                refreshCustomModels={refreshCustomModels}
               />
             </CardContent>
           </div>
