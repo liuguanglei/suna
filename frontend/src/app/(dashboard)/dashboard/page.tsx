@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense, useEffect, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import {
   ChatInput,
@@ -23,10 +23,12 @@ import { useBillingError } from '@/hooks/useBillingError';
 import { BillingErrorAlert } from '@/components/billing/usage-limit-alert';
 import { useAccounts } from '@/hooks/use-accounts';
 import { config } from '@/lib/config';
-import { cn } from '@/lib/utils';
 import { useInitiateAgentWithInvalidation } from '@/hooks/react-query/dashboard/use-initiate-agent';
 import { ModalProviders } from '@/providers/modal-providers';
+import { AgentSelector } from '@/components/dashboard/agent-selector';
+import { cn } from '@/lib/utils';
 import { useModal } from '@/hooks/use-modal-store';
+import { Examples } from './_components/suggestions/examples';
 
 const PENDING_PROMPT_KEY = 'pendingAgentPrompt';
 
@@ -34,9 +36,11 @@ function DashboardContent() {
   const [inputValue, setInputValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [autoSubmit, setAutoSubmit] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
   const { billingError, handleBillingError, clearBillingError } =
     useBillingError();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const { setOpenMobile } = useSidebar();
   const { data: accounts } = useAccounts();
@@ -44,6 +48,16 @@ function DashboardContent() {
   const chatInputRef = useRef<ChatInputHandles>(null);
   const initiateAgentMutation = useInitiateAgentWithInvalidation();
   const { onOpen } = useModal();
+
+  useEffect(() => {
+    const agentIdFromUrl = searchParams.get('agent_id');
+    if (agentIdFromUrl && agentIdFromUrl !== selectedAgentId) {
+      setSelectedAgentId(agentIdFromUrl);
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('agent_id');
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false });
+    }
+  }, [searchParams, selectedAgentId, router]);
 
   const secondaryGradient =
     'bg-gradient-to-r from-blue-500 to-blue-500 bg-clip-text text-transparent';
@@ -72,6 +86,11 @@ function DashboardContent() {
 
       const formData = new FormData();
       formData.append('prompt', message);
+
+      // Add selected agent if one is chosen
+      if (selectedAgentId) {
+        formData.append('agent_id', selectedAgentId);
+      }
 
       files.forEach((file, index) => {
         formData.append('files', file, file.name);
@@ -105,7 +124,6 @@ function DashboardContent() {
     }
   };
 
-
   useEffect(() => {
     const timer = setTimeout(() => {
       const pendingPrompt = localStorage.getItem(PENDING_PROMPT_KEY);
@@ -133,7 +151,7 @@ function DashboardContent() {
   return (
     <>
       <ModalProviders />
-      <div className="flex flex-col items-center justify-center h-full w-full">
+      <div className="flex flex-col h-screen w-full">
         {isMobile && (
           <div className="absolute top-4 left-4 z-10">
             <Tooltip>
@@ -154,24 +172,39 @@ function DashboardContent() {
         )}
 
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[650px] max-w-[90%]">
-          <div className="flex flex-col items-center text-center mb-2 w-full">
-            <h1 className={cn('tracking-tight text-4xl font-semibold leading-tight')}>
-              Hey
-            </h1>
-            <p className="tracking-tight text-3xl font-normal text-muted-foreground/80 mt-2 flex items-center gap-2">
-              What would you like Suna to do today?
+          <div className="flex flex-col items-center text-center w-full">
+            <div className="flex items-center gap-1">
+              <h1 className="tracking-tight text-4xl text-muted-foreground leading-tight">
+                Hey, I am
+              </h1>
+              <AgentSelector 
+                selectedAgentId={selectedAgentId}
+                onAgentSelect={setSelectedAgentId}
+                variant="heading"
+              />
+            </div>
+            <p className="tracking-tight text-3xl font-normal text-muted-foreground/80 mt-2">
+              What would you like to do today?
             </p>
           </div>
-
-          <ChatInput
-            ref={chatInputRef}
-            onSubmit={handleSubmit}
-            loading={isSubmitting}
-            placeholder="Describe what you need help with..."
-            value={inputValue}
-            onChange={setInputValue}
-            hideAttachments={false}
-          />
+          
+          <div className={cn(
+            "w-full mb-2",
+            "max-w-full",
+            "sm:max-w-3xl"
+          )}>
+            <ChatInput
+              ref={chatInputRef}
+              onSubmit={handleSubmit}
+              loading={isSubmitting}
+              placeholder="Describe what you need help with..."
+              value={inputValue}
+              onChange={setInputValue}
+              hideAttachments={false}
+            />
+          </div>
+          
+          <Examples onSelectPrompt={setInputValue} />
         </div>
 
         <BillingErrorAlert
@@ -191,16 +224,18 @@ export default function DashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col items-center justify-center h-full w-full">
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[560px] max-w-[90%]">
-            <div className="flex flex-col items-center text-center mb-10">
-              <Skeleton className="h-10 w-40 mb-2" />
-              <Skeleton className="h-7 w-56" />
-            </div>
-
-            <Skeleton className="w-full h-[100px] rounded-xl" />
-            <div className="flex justify-center mt-3">
-              <Skeleton className="h-5 w-16" />
+        <div className="flex flex-col h-full w-full">
+          <div className="flex-1 flex flex-col items-center justify-center px-4">
+            <div className={cn(
+              "flex flex-col items-center text-center w-full space-y-8",
+              "max-w-[850px] sm:max-w-full sm:px-4"
+            )}>
+              <Skeleton className="h-10 w-40 sm:h-8 sm:w-32" />
+              <Skeleton className="h-7 w-56 sm:h-6 sm:w-48" />
+              <Skeleton className="w-full h-[100px] rounded-xl sm:h-[80px]" />
+              <div className="block sm:hidden lg:block w-full">
+                <Skeleton className="h-20 w-full" />
+              </div>
             </div>
           </div>
         </div>
