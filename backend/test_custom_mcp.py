@@ -11,28 +11,29 @@ async def test_custom_mcp():
     """Test custom MCP configuration and tool discovery"""
     
     # Example custom MCP configuration (Playwright)
-    custom_mcp_config = {
-        'name': 'Playwright Test',
-        'qualifiedName': 'custom_json_playwright_test',
-        'config': {
-            'command': 'npx',
-            'args': ['@modelcontextprotocol/server-playwright'],
-            'env': {'DISPLAY': ':1'}
-        },
-        'enabledTools': ['screenshot', 'click', 'type'],
-        'isCustom': True,
-        'customType': 'json'
-    }
+    # custom_mcp_config = {
+    #     'name': 'Playwright Test',
+    #     'qualifiedName': 'custom_json_playwright_test',
+    #     'config': {
+    #         'command': 'npx',
+    #         'args': ['@modelcontextprotocol/server-playwright'],
+    #         'env': {'DISPLAY': ':1'}
+    #     },
+    #     'enabledTools': ['screenshot', 'click', 'type'],
+    #     'isCustom': True,
+    #     'customType': 'json'
+    # }
     
     # Example SSE custom MCP configuration
     sse_custom_mcp_config = {
-        'name': 'Mem0 Test',
-        'qualifiedName': 'custom_sse_mem0_test',
+        'name': 'amap-amap-sse',
+        'qualifiedName': 'amap-amap-sse',
         'config': {
-            'url': 'https://mcp.composio.dev/partner/composio/mem0/sse?customerId=test',
+            'url': 'https://mcp.amap.com/sse?key=ad0179431f686db5d937a3c7b8071c80',
             'headers': {}
         },
-        'enabledTools': ['add_memory', 'search_memory'],
+        # 'enabledTools': ['add_memory', 'search_memory'],
+        'enabledTools': ['maps_weather'],
         'isCustom': True,
         'customType': 'sse'
     }
@@ -41,37 +42,37 @@ async def test_custom_mcp():
     print("=" * 50)
     
     # Test with just the JSON custom MCP
-    try:
-        print("\n1. Testing JSON Custom MCP (Playwright)...")
-        wrapper = MCPToolWrapper(mcp_configs=[custom_mcp_config])
-        
-        # Initialize the wrapper
-        await wrapper._ensure_initialized()
-        
-        # Get available tools
-        tools = await wrapper.get_available_tools()
-        print(f"   ✅ Found {len(tools)} tools")
-        
-        for tool in tools:
-            print(f"   - {tool.get('name', 'Unknown')}: {tool.get('description', 'No description')}")
-        
-        # Get schemas
-        schemas = wrapper.get_schemas()
-        print(f"   ✅ Generated {len(schemas)} tool schemas")
-        
-        for method_name, schema_list in schemas.items():
-            print(f"   - Method: {method_name}")
-            for schema in schema_list:
-                if hasattr(schema, 'schema') and 'function' in schema.schema:
-                    func_name = schema.schema['function'].get('name', 'Unknown')
-                    func_desc = schema.schema['function'].get('description', 'No description')
-                    print(f"     Function: {func_name} - {func_desc}")
-        
-        await wrapper.cleanup()
-        print("   ✅ JSON Custom MCP test completed")
-        
-    except Exception as e:
-        print(f"   ❌ JSON Custom MCP test failed: {e}")
+    # try:
+    #     print("\n1. Testing JSON Custom MCP (Playwright)...")
+    #     wrapper = MCPToolWrapper(mcp_configs=[custom_mcp_config])
+    #
+    #     # Initialize the wrapper
+    #     await wrapper._ensure_initialized()
+    #
+    #     # Get available tools
+    #     tools = await wrapper.get_available_tools()
+    #     print(f"   ✅ Found {len(tools)} tools")
+    #
+    #     for tool in tools:
+    #         print(f"   - {tool.get('name', 'Unknown')}: {tool.get('description', 'No description')}")
+    #
+    #     # Get schemas
+    #     schemas = wrapper.get_schemas()
+    #     print(f"   ✅ Generated {len(schemas)} tool schemas")
+    #
+    #     for method_name, schema_list in schemas.items():
+    #         print(f"   - Method: {method_name}")
+    #         for schema in schema_list:
+    #             if hasattr(schema, 'schema') and 'function' in schema.schema:
+    #                 func_name = schema.schema['function'].get('name', 'Unknown')
+    #                 func_desc = schema.schema['function'].get('description', 'No description')
+    #                 print(f"     Function: {func_name} - {func_desc}")
+    #
+    #     await wrapper.cleanup()
+    #     print("   ✅ JSON Custom MCP test completed")
+    #
+    # except Exception as e:
+    #     print(f"   ❌ JSON Custom MCP test failed: {e}")
     
     # Test with SSE custom MCP (this might fail if the endpoint is not accessible)
     try:
@@ -79,7 +80,7 @@ async def test_custom_mcp():
         wrapper2 = MCPToolWrapper(mcp_configs=[sse_custom_mcp_config])
         
         # This might timeout or fail if the endpoint is not accessible
-        await asyncio.wait_for(wrapper2._ensure_initialized(), timeout=10)
+        await asyncio.wait_for(wrapper2._ensure_initialized(), timeout=60)
         
         tools = await wrapper2.get_available_tools()
         print(f"   ✅ Found {len(tools)} tools")

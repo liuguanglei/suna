@@ -195,7 +195,7 @@ class MCPToolWrapper(Tool):
                     try:
                         # Use the working connect_sse_server method
                         all_tools = {}
-                        await self._connect_sse_server(server_name, server_config, all_tools, 15)
+                        await self._connect_sse_server(server_name, server_config, all_tools, 55)
                         
                         # Process the results
                         if server_name in all_tools and all_tools[server_name].get('status') == 'connected':

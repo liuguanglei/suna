@@ -152,6 +152,18 @@ async def run_agent(
                     'isCustom': True,
                     'customType': custom_mcp['type']
                 }
+                # mcp_config = {
+                #     'name': 'amap-amap-sse',
+                #     'qualifiedName': 'amap-amap-sse',
+                #     'config': {
+                #         'url': 'https://mcp.amap.com/sse?key=ad0179431f686db5d937a3c7b8071c80',
+                #         'headers': {}
+                #     },
+                #     'enabledTools': [],
+                #     # 'enabledTools': ['maps_weather'],
+                #     'isCustom': True,
+                #     'customType': 'sse'
+                # }
                 all_mcps.append(mcp_config)
         
         if all_mcps:
