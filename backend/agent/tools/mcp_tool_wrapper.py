@@ -505,7 +505,7 @@ class MCPToolWrapper(Tool):
                 url = custom_config['url']
                 headers = custom_config.get('headers', {})
                 
-                async with asyncio.timeout(30):  # 30 second timeout for tool execution
+                async with asyncio.timeout(60):  # 30 second timeout for tool execution
                     try:
                         # Try with headers first (same pattern as _connect_sse_server)
                         async with sse_client(url, headers=headers) as (read, write):
