@@ -362,7 +362,6 @@ async def start_agent(
     # model_name = "openrouter/sonnet-3.7"  # TODO
     # model_name = "openrouter/claude-sonnet-4"  # TODO
     model_name = "qwen3"  # TODO
-    # model_name = "qwen3"  # TODO
     # model_name = "deepseek/deepseek-chat-0324"  # TODO
     # model_name = "openai/gpt-4.1-2025-04-14"  # TODO
     resolved_model = MODEL_NAME_ALIASES.get(model_name, model_name)
@@ -850,7 +849,8 @@ async def initiate_agent_with_files(
 
     # Log the model name after alias resolution
     # model_name = "openrouter/sonnet-3.7"  # TODO
-    model_name = "openrouter/claude-sonnet-4"  # TODO
+    model_name = "qwen3"  # TODO
+    # model_name = "openrouter/claude-sonnet-4"  # TODO
     resolved_model = MODEL_NAME_ALIASES.get(model_name, model_name)
     logger.info(f"Resolved model name: {resolved_model}")
 
