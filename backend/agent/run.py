@@ -416,10 +416,12 @@ async def run_agent(
         # Set max_tokens based on model
         max_tokens = None
         if "sonnet" in model_name.lower():
-            # max_tokens = 64000
-            max_tokens = 40960
+            max_tokens = 64000
+            # max_tokens = 40960
         elif "gpt-4" in model_name.lower():
             max_tokens = 4096
+        else:
+            max_tokens = 40960
             
         generation = trace.generation(name="thread_manager.run_thread")
         try:
