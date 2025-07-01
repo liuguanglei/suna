@@ -162,10 +162,6 @@ MODEL_NAME_ALIASES = {
     # "deepseek/deepseek-r1": "openrouter/deepseek/deepseek-r1",
     # "qwen/qwen3-235b-a22b": "openrouter/qwen/qwen3-235b-a22b",
     # "xai/grok-3-mini-fast-beta": "xai/grok-3-mini-fast-beta",  # Commented out in constants.py
-<<<<<<< HEAD
     "openrouter/sonnet-3.7": "openrouter/anthropic/claude-3.7-sonnet",
     "openrouter/claude-sonnet-4": "openrouter/anthropic/claude-sonnet-4",
 }
-=======
-}
->>>>>>> main
