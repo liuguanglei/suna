@@ -1,6 +1,6 @@
 echo "-------begin build backend-------"
 cd backend
-sudo docker build -t suna-backend . -f Dockerfile
+sudo docker build -t ghcr.io/suna-ai/suna-backend . -f Dockerfile
 cd ..
 echo "-------build backend finished-------"
 
