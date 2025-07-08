@@ -35,8 +35,8 @@ async def transcribe_audio(
         
         # Check file size (25MB limit)
         content = await audio_file.read()
-        if len(content) > 25 * 1024 * 1024:  # 25MB
-            raise HTTPException(status_code=400, detail="File size exceeds 25MB limit")
+        if len(content) > 200 * 1024 * 1024:  # 25MB
+            raise HTTPException(status_code=400, detail="File size exceeds 200MB limit")
         
         # Reset file pointer
         await audio_file.seek(0)

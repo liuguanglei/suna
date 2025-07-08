@@ -158,7 +158,7 @@ export function SidebarLeft({
                 </SidebarMenuButton>
               </Link>
             )}
-            {customAgentsEnabled && (
+            /*{customAgentsEnabled && (
               <Link href="/settings/credentials">
                 <SidebarMenuButton className={cn({
                   'bg-primary/10 font-medium': pathname === '/settings/credentials',
@@ -169,7 +169,7 @@ export function SidebarLeft({
                   </span>
                 </SidebarMenuButton>
               </Link>
-            )}
+            )}*/
             {workflowsEnabled && (
               <Link href="/workflows">
                 <SidebarMenuButton className={cn({
