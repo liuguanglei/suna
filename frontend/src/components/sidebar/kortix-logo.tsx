@@ -18,11 +18,11 @@ export function KortixLogo({ size = 24 }: KortixLogoProps) {
 
   return (
     <Image
-        src="/kortix-symbol.svg"
-        alt="Kortix"
-        width={size}
-        height={size}
-        className={`${mounted && theme === 'dark' ? 'invert' : ''} flex-shrink-0`}
-      />
+      src="/ic_kongming_logo.png"
+      alt="Kortix"
+      width={size}
+      height={size}
+      className={`${mounted && theme === 'dark' ? 'invert' : ''} flex-shrink-0`}
+    />
   );
 }

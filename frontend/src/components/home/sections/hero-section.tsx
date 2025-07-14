@@ -9,9 +9,7 @@ import { useScroll } from 'motion/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
-import {
-  BillingError,
-} from '@/lib/api';
+import { BillingError } from '@/lib/api';
 import { useInitiateAgentMutation } from '@/hooks/react-query/dashboard/use-initiate-agent';
 import { useThreadQuery } from '@/hooks/react-query/threads/use-threads';
 import { generateThreadName } from '@/lib/actions/threads';
@@ -58,7 +56,9 @@ export function HeroSection() {
   const personalAccount = accounts?.find((account) => account.personal_account);
   const { onOpen } = useModal();
   const initiateAgentMutation = useInitiateAgentMutation();
-  const [initiatedThreadId, setInitiatedThreadId] = useState<string | null>(null);
+  const [initiatedThreadId, setInitiatedThreadId] = useState<string | null>(
+    null,
+  );
   const threadQuery = useThreadQuery(initiatedThreadId || '');
 
   // Auth dialog state
@@ -110,7 +110,9 @@ export function HeroSection() {
     if (threadQuery.data && initiatedThreadId) {
       const thread = threadQuery.data;
       if (thread.project_id) {
-        router.push(`/projects/${thread.project_id}/thread/${initiatedThreadId}`);
+        router.push(
+          `/projects/${thread.project_id}/thread/${initiatedThreadId}`,
+        );
       } else {
         router.push(`/thread/${initiatedThreadId}`);
       }
@@ -124,7 +126,7 @@ export function HeroSection() {
     try {
       const formData = new FormData();
       formData.append('prompt', inputValue.trim());
-      formData.append('model_name', 'openrouter/deepseek/deepseek-chat'); 
+      formData.append('model_name', 'openrouter/deepseek/deepseek-chat');
       formData.append('enable_thinking', 'false');
       formData.append('reasoning_effort', 'low');
       formData.append('stream', 'true');
@@ -420,7 +422,7 @@ export function HeroSection() {
               </SubmitButton>
 
               <Link
-                href={`/auth?mode=signup&returnUrl=${encodeURIComponent('/dashboard')}`}
+                href={`/?mode=signup&returnUrl=${encodeURIComponent('/dashboard')}`}
                 className="flex h-12 items-center justify-center w-full text-center rounded-full border border-border bg-background hover:bg-accent/20 transition-all"
                 onClick={() => setAuthDialogOpen(false)}
               >
@@ -430,7 +432,7 @@ export function HeroSection() {
 
             <div className="text-center pt-2">
               <Link
-                href={`/auth?returnUrl=${encodeURIComponent('/dashboard')}`}
+                href={`/?returnUrl=${encodeURIComponent('/dashboard')}`}
                 className="text-sm text-primary hover:underline"
                 onClick={() => setAuthDialogOpen(false)}
               >

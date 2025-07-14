@@ -422,9 +422,9 @@ export const PlaybackControls = ({
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-6 h-6 rounded-md overflow-hidden bg-primary/10">
-                <Link href="/">
+                <Link href="/dashboard">
                   <img
-                    src="/kortix-symbol.svg"
+                    src="/ic_kongming_logo.png"
                     alt="Kortix"
                     width={16}
                     height={16}
@@ -541,7 +541,7 @@ export const PlaybackControls = ({
                 onClick={skipToEnd}
                 className="text-xs"
               >
-                Skip to end
+                跳转到结尾
               </Button>
             </div>
           </div>
@@ -560,34 +560,31 @@ export const PlaybackControls = ({
     ],
   );
 
-  // When s are displayed yet, show the welcome overlay
+  // 当消息尚未显示时，显示欢迎覆盖层
   const renderWelcomeOverlay = useCallback(
     () => (
       <>
         {visibleMessages.length === 0 && !streamingText && !currentToolCall && (
           <div className="fixed inset-0 flex flex-col items-center justify-center">
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent dark:from-black/90 dark:via-black/50 dark:to-transparent" />
+            {/* 渐变覆盖层 */}
+            {/* <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent dark:from-black/90 dark:via-black/50 dark:to-transparent" /> */}
 
             <div className="text-center max-w-md mx-auto relative z-10 px-4">
               <div className="rounded-full bg-primary/10 backdrop-blur-sm w-12 h-12 mx-auto flex items-center justify-center mb-4">
                 <Play className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="text-lg font-medium mb-2 text-white">
-                Watch this agent in action
-              </h3>
-              <p className="text-sm text-white/80 mb-4">
-                This is a shared view-only agent run. Click play to replay the
-                entire conversation with realistic timing.
+              <h3 className="text-lg font-medium mb-2">观看此智能体演示</h3>
+              <p className="text-sm mb-4">
+                这是一个共享的只读智能体运行。点击播放以真实时序重放整个对话。
               </p>
               <Button
                 onClick={togglePlayback}
-                className="flex items-center mx-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-white/20"
+                className="flex items-center mx-auto"
                 size="lg"
                 variant="outline"
               >
                 <Play className="h-4 w-4 mr-2" />
-                Start Playback
+                开始播放
               </Button>
             </div>
           </div>

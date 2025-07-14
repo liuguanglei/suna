@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingState } from '../shared/LoadingState';
 import { extractCommandData } from './_utils';
 
@@ -41,17 +41,17 @@ export function CommandToolView({
     completed,
     actualIsSuccess,
     actualToolTimestamp,
-    actualAssistantTimestamp
+    actualAssistantTimestamp,
   } = extractCommandData(
     assistantContent,
     toolContent,
     isSuccess,
     toolTimestamp,
-    assistantTimestamp
+    assistantTimestamp,
   );
 
   const displayText = name === 'check-command-output' ? sessionName : command;
-  const displayLabel = name === 'check-command-output' ? 'Session' : 'Command';
+  const displayLabel = name === 'check-command-output' ? '会话' : '命令';
   const displayPrefix = name === 'check-command-output' ? 'tmux:' : '$';
 
   const toolTitle = getToolTitle(name);
@@ -60,14 +60,16 @@ export function CommandToolView({
     if (!output) return [];
     let processedOutput = output;
     try {
-      if (typeof output === 'string' && (output.trim().startsWith('{') || output.trim().startsWith('{'))) {
+      if (
+        typeof output === 'string' &&
+        (output.trim().startsWith('{') || output.trim().startsWith('{'))
+      ) {
         const parsed = JSON.parse(output);
         if (parsed && typeof parsed === 'object' && parsed.output) {
           processedOutput = parsed.output;
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     processedOutput = String(processedOutput);
     processedOutput = processedOutput.replace(/\\\\/g, '\\');
@@ -78,9 +80,12 @@ export function CommandToolView({
       .replace(/\\"/g, '"')
       .replace(/\\'/g, "'");
 
-    processedOutput = processedOutput.replace(/\\u([0-9a-fA-F]{4})/g, (match, group) => {
-      return String.fromCharCode(parseInt(group, 16));
-    });
+    processedOutput = processedOutput.replace(
+      /\\u([0-9a-fA-F]{4})/g,
+      (match, group) => {
+        return String.fromCharCode(parseInt(group, 16));
+      },
+    );
     return processedOutput.split('\n');
   }, [output]);
 
@@ -93,8 +98,8 @@ export function CommandToolView({
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20">
-              <Terminal className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+            <div className="relative p-2 rounded-lg bg-gradient-to-br from-neutral-200 to-neutral-300 border border-neutral-200">
+              <Terminal className="w-5 h-5 text-neutral-600 dark:text-neutral-600" />
             </div>
             <div>
               <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
@@ -106,21 +111,28 @@ export function CommandToolView({
           {!isStreaming && (
             <Badge
               variant="secondary"
+              className="bg-gradient-to-br from-neutral-200 to-neutral-300"
+            >
+              {/* <Badge
+              variant="secondary"
               className={
                 actualIsSuccess
-                  ? "bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300"
-                  : "bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300"
+                  ? 'bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300'
+                  : 'bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300'
               }
             >
               {actualIsSuccess ? (
                 <CheckCircle className="h-3.5 w-3.5 mr-1" />
               ) : (
                 <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-              )}
-              {actualIsSuccess ?
-                (name === 'check-command-output' ? 'Output retrieved successfully' : 'Command executed successfully') :
-                (name === 'check-command-output' ? 'Failed to retrieve output' : 'Command failed')
-              }
+              )} */}
+              {actualIsSuccess
+                ? name === 'check-command-output'
+                  ? '成功获取输出'
+                  : '命令执行成功'
+                : name === 'check-command-output'
+                  ? '获取输出失败'
+                  : '命令执行失败'}
             </Badge>
           )}
         </div>
@@ -132,45 +144,45 @@ export function CommandToolView({
             icon={Terminal}
             iconColor="text-purple-500 dark:text-purple-400"
             bgColor="bg-gradient-to-b from-purple-100 to-purple-50 shadow-inner dark:from-purple-800/40 dark:to-purple-900/60 dark:shadow-purple-950/20"
-            title={name === 'check-command-output' ? 'Checking command output' : 'Executing command'}
-            filePath={displayText || 'Processing command...'}
+            title={
+              name === 'check-command-output' ? '检查命令输出' : '正在执行命令'
+            }
+            filePath={displayText || '正在处理命令...'}
             showProgress={true}
           />
         ) : displayText ? (
           <ScrollArea className="h-full w-full">
             <div className="p-4">
-
-
               {output && (
                 <div className="mb-4">
-
-
                   <div className="bg-zinc-100 dark:bg-neutral-900 rounded-lg overflow-hidden border border-zinc-200/20">
                     <div className="bg-zinc-300 dark:bg-neutral-800 flex items-center justify-between dark:border-zinc-700/50">
                       <div className="bg-zinc-200 w-full dark:bg-zinc-800 px-4 py-2 flex items-center gap-2">
                         <TerminalIcon className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
-                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Terminal output</span>
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                          终端输出
+                        </span>
                       </div>
                       {exitCode !== null && exitCode !== 0 && (
-                        <Badge variant="outline" className="text-xs h-5 border-red-700/30 text-red-400">
+                        <Badge
+                          variant="outline"
+                          className="text-xs h-5 border-red-700/30 text-red-400"
+                        >
                           <AlertTriangle className="h-3 w-3 mr-1" />
-                          Error
+                          错误
                         </Badge>
                       )}
                     </div>
                     <div className="p-4 max-h-96 overflow-auto scrollbar-hide">
                       <pre className="text-xs text-zinc-600 dark:text-zinc-300 font-mono whitespace-pre-wrap break-all overflow-visible">
                         {linesToShow.map((line, index) => (
-                          <div
-                            key={index}
-                            className="py-0.5 bg-transparent"
-                          >
+                          <div key={index} className="py-0.5 bg-transparent">
                             {line || ' '}
                           </div>
                         ))}
                         {!showFullOutput && hasMoreLines && (
                           <div className="text-zinc-500 mt-2 border-t border-zinc-700/30 pt-2">
-                            + {formattedOutput.length - 10} more lines
+                            + {formattedOutput.length - 10} 更多行
                           </div>
                         )}
                       </pre>
@@ -183,7 +195,7 @@ export function CommandToolView({
                 <div className="bg-black rounded-lg overflow-hidden border border-zinc-700/20 shadow-md p-6 flex items-center justify-center">
                   <div className="text-center">
                     <CircleDashed className="h-8 w-8 text-zinc-500 mx-auto mb-2" />
-                    <p className="text-zinc-400 text-sm">No output received</p>
+                    <p className="text-zinc-400 text-sm">未收到输出</p>
                   </div>
                 </div>
               )}
@@ -195,22 +207,24 @@ export function CommandToolView({
               <Terminal className="h-10 w-10 text-zinc-400 dark:text-zinc-600" />
             </div>
             <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
-              {name === 'check-command-output' ? 'No Session Found' : 'No Command Found'}
+              {name === 'check-command-output' ? '未找到会话' : '未找到命令'}
             </h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center max-w-md">
               {name === 'check-command-output'
-                ? 'No session name was detected. Please provide a valid session name to check.'
-                : 'No command was detected. Please provide a valid command to execute.'
-              }
+                ? '未检测到会话名称。请提供有效的会话名称以进行检查。'
+                : '未检测到命令。请提供有效的命令以执行。'}
             </p>
           </div>
         )}
       </CardContent>
 
-      <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
+      {/* <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
         <div className="h-full flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           {!isStreaming && displayText && (
-            <Badge variant="outline" className="h-6 py-0.5 bg-zinc-50 dark:bg-zinc-900">
+            <Badge
+              variant="outline"
+              className="h-6 py-0.5 bg-zinc-50 dark:bg-zinc-900"
+            >
               <Terminal className="h-3 w-3 mr-1" />
               {displayLabel}
             </Badge>
@@ -225,7 +239,7 @@ export function CommandToolView({
               ? formatTimestamp(actualAssistantTimestamp)
               : ''}
         </div>
-      </div>
+      </div> */}
     </Card>
   );
-} 
+}

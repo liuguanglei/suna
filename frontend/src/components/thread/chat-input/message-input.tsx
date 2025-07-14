@@ -85,7 +85,8 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
     ref,
   ) => {
     const [billingModalOpen, setBillingModalOpen] = useState(false);
-    const { enabled: customAgentsEnabled, loading: flagsLoading } = useFeatureFlag('custom_agents');
+    const { enabled: customAgentsEnabled, loading: flagsLoading } =
+      useFeatureFlag('custom_agents');
 
     useEffect(() => {
       const textarea = ref as React.RefObject<HTMLTextAreaElement>;
@@ -124,7 +125,6 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
 
     return (
       <div className="relative flex flex-col w-full h-auto gap-4 justify-between">
-
         <div className="flex flex-col gap-2 items-center px-2">
           <Textarea
             ref={ref}
@@ -140,7 +140,6 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
             rows={2}
           />
         </div>
-
 
         <div className="flex items-center justify-between mt-1 ml-3 mb-1 pr-2">
           <div className="flex items-center gap-3">
@@ -158,25 +157,33 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
                 messages={messages}
               />
             )}
-
           </div>
-          
-          {subscriptionStatus === 'no_subscription' && !isLocalMode() &&
+
+          {subscriptionStatus === 'no_subscription' && !isLocalMode() && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <p role='button' className='text-sm text-amber-500 hidden sm:block cursor-pointer' onClick={() => setBillingModalOpen(true)}>Upgrade for full performance</p>
+                  <p
+                    role="button"
+                    className="text-sm text-amber-500 hidden sm:block cursor-pointer"
+                    onClick={() => setBillingModalOpen(true)}
+                  >
+                    Upgrade for full performance
+                  </p>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>The free tier is severely limited by inferior models; upgrade to experience the true full Suna experience.</p>
+                  <p>
+                    The free tier is severely limited by inferior models;
+                    upgrade to experience the true full Suna experience.
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          }
-          
-          <div className='flex items-center gap-2'>
+          )}
+
+          <div className="flex items-center gap-2">
             {/* Show model selector inline if custom agents are disabled, otherwise show settings dropdown */}
-            {!customAgentsEnabled || flagsLoading ? (
+            {/* {!customAgentsEnabled || flagsLoading ? (
               <ModelSelector
                 selectedModel={selectedModel}
                 onModelChange={onModelChange}
@@ -199,20 +206,22 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
                 refreshCustomModels={refreshCustomModels}
                 disabled={loading || (disabled && !isAgentRunning)}
               />
-            )}
-            
+            )} */}
+
             {/* Billing Modal */}
             <BillingModal
               open={billingModalOpen}
               onOpenChange={setBillingModalOpen}
-              returnUrl={typeof window !== 'undefined' ? window.location.href : '/'}
+              returnUrl={
+                typeof window !== 'undefined' ? window.location.href : '/'
+              }
             />
 
             <VoiceRecorder
               onTranscription={onTranscription}
               disabled={loading || (disabled && !isAgentRunning)}
             />
-            
+
             <Button
               type="submit"
               onClick={isAgentRunning && onStopAgent ? onStopAgent : onSubmit}
@@ -220,14 +229,18 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
               className={cn(
                 'w-7 h-7 flex-shrink-0 self-end',
                 isAgentRunning ? 'bg-red-500 hover:bg-red-600' : '',
-                (!value.trim() && uploadedFiles.length === 0 && !isAgentRunning) ||
+                (!value.trim() &&
+                  uploadedFiles.length === 0 &&
+                  !isAgentRunning) ||
                   loading ||
                   (disabled && !isAgentRunning)
                   ? 'opacity-50'
                   : '',
               )}
               disabled={
-                (!value.trim() && uploadedFiles.length === 0 && !isAgentRunning) ||
+                (!value.trim() &&
+                  uploadedFiles.length === 0 &&
+                  !isAgentRunning) ||
                 loading ||
                 (disabled && !isAgentRunning)
               }
@@ -242,13 +255,13 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
             </Button>
           </div>
         </div>
-        {subscriptionStatus === 'no_subscription' && !isLocalMode() &&
-          <div className='sm:hidden absolute -bottom-8 left-0 right-0 flex justify-center'>
-            <p className='text-xs text-amber-500 px-2 py-1'>
+        {subscriptionStatus === 'no_subscription' && !isLocalMode() && (
+          <div className="sm:hidden absolute -bottom-8 left-0 right-0 flex justify-center">
+            <p className="text-xs text-amber-500 px-2 py-1">
               Upgrade for better performance
             </p>
           </div>
-        }
+        )}
       </div>
     );
   },

@@ -141,7 +141,9 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
       let baseModelName = getActualModelId(selectedModel);
       let thinkingEnabled = false;
       if (selectedModel.endsWith('-thinking')) {
-        baseModelName = getActualModelId(selectedModel.replace(/-thinking$/, ''));
+        baseModelName = getActualModelId(
+          selectedModel.replace(/-thinking$/, ''),
+        );
         thinkingEnabled = true;
       }
 
@@ -168,7 +170,9 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
 
     const handleTranscription = (transcribedText: string) => {
       const currentValue = isControlled ? controlledValue : uncontrolledValue;
-      const newValue = currentValue ? `${currentValue} ${transcribedText}` : transcribedText;
+      const newValue = currentValue
+        ? `${currentValue} ${transcribedText}`
+        : transcribedText;
 
       if (isControlled) {
         controlledOnChange(newValue);
@@ -192,23 +196,29 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
       }
 
       // Check if file is referenced in existing chat messages before deleting from server
-      const isFileUsedInChat = messages.some(message => {
-        const content = typeof message.content === 'string' ? message.content : '';
+      const isFileUsedInChat = messages.some((message) => {
+        const content =
+          typeof message.content === 'string' ? message.content : '';
         return content.includes(`[Uploaded File: ${fileToRemove.path}]`);
       });
 
       // Only delete from server if file is not referenced in chat history
       if (sandboxId && fileToRemove.path && !isFileUsedInChat) {
-        deleteFileMutation.mutate({
-          sandboxId,
-          filePath: fileToRemove.path,
-        }, {
-          onError: (error) => {
-            console.error('Failed to delete file from server:', error);
-          }
-        });
+        deleteFileMutation.mutate(
+          {
+            sandboxId,
+            filePath: fileToRemove.path,
+          },
+          {
+            onError: (error) => {
+              console.error('Failed to delete file from server:', error);
+            },
+          },
+        );
       } else if (isFileUsedInChat) {
-        console.log(`Skipping server deletion for ${fileToRemove.path} - file is referenced in chat history`);
+        console.log(
+          `Skipping server deletion for ${fileToRemove.path} - file is referenced in chat history`,
+        );
       }
     };
 
@@ -250,7 +260,9 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
           }}
         >
           <div className="w-full text-sm flex flex-col justify-between items-start rounded-lg">
-            <CardContent className={`w-full p-1.5 pb-2 ${bgColor} rounded-2xl border`}>
+            <CardContent
+              className={`w-full p-1.5 pb-2 ${bgColor} rounded-2xl border`}
+            >
               <AttachmentGroup
                 files={uploadedFiles || []}
                 sandboxId={sandboxId}
@@ -272,7 +284,6 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
                 onStopAgent={onStopAgent}
                 isDraggingOver={isDraggingOver}
                 uploadedFiles={uploadedFiles}
-
                 fileInputRef={fileInputRef}
                 isUploading={isUploading}
                 sandboxId={sandboxId}
@@ -281,14 +292,12 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
                 setIsUploading={setIsUploading}
                 hideAttachments={hideAttachments}
                 messages={messages}
-
                 selectedModel={selectedModel}
                 onModelChange={handleModelChange}
                 modelOptions={modelOptions}
                 subscriptionStatus={subscriptionStatus}
                 canAccessModel={canAccessModel}
                 refreshCustomModels={refreshCustomModels}
-
                 selectedAgentId={selectedAgentId}
                 onAgentSelect={onAgentSelect}
               />
@@ -296,7 +305,7 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
           </div>
         </Card>
 
-        {isAgentRunning && (
+        {/* {isAgentRunning && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -307,7 +316,7 @@ export const ChatInput = forwardRef<ChatInputHandles, ChatInputProps>(
               <span>{agentName ? `${agentName} is working...` : 'Suna is working...'}</span>
             </div>
           </motion.div>
-        )}
+        )} */}
       </div>
     );
   },

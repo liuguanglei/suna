@@ -7,7 +7,7 @@ function forceLoginWithReturn(request: NextRequest) {
   const query = originalUrl.searchParams.toString();
   return NextResponse.redirect(
     new URL(
-      `/auth?returnUrl=${encodeURIComponent(path + (query ? `?${query}` : ''))}`,
+      `/?returnUrl=${encodeURIComponent(path + (query ? `?${query}` : ''))}`,
       request.url,
     ),
   );

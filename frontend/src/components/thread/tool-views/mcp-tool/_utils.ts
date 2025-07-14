@@ -1,4 +1,11 @@
-import { Search, Code, FileText, Network, Database, Server } from 'lucide-react';
+import {
+  Search,
+  Code,
+  FileText,
+  Network,
+  Database,
+  Server,
+} from 'lucide-react';
 
 export interface MCPResult {
   success: boolean;
@@ -27,13 +34,16 @@ export interface ParsedMCPTool {
 /**
  * Enhanced MCP tool name formatter that handles various naming conventions
  */
-export function formatMCPToolDisplayName(serverName: string, toolName: string): string {
+export function formatMCPToolDisplayName(
+  serverName: string,
+  toolName: string,
+): string {
   // Handle server name formatting
   const formattedServerName = formatServerName(serverName);
-  
+
   // Handle tool name formatting
   const formattedToolName = formatToolName(toolName);
-  
+
   return `${formattedServerName}: ${formattedToolName}`;
 }
 
@@ -42,19 +52,19 @@ export function formatMCPToolDisplayName(serverName: string, toolName: string): 
  */
 function formatServerName(serverName: string): string {
   const serverMappings: Record<string, string> = {
-    'exa': 'Exa Search',
-    'github': 'GitHub', 
-    'notion': 'Notion',
-    'slack': 'Slack',
-    'filesystem': 'File System',
-    'memory': 'Memory',
-    'anthropic': 'Anthropic',
-    'openai': 'OpenAI',
-    'composio': 'Composio',
-    'langchain': 'LangChain',
-    'llamaindex': 'LlamaIndex'
+    exa: 'Exa Search',
+    github: 'GitHub',
+    notion: 'Notion',
+    slack: 'Slack',
+    filesystem: 'File System',
+    memory: 'Memory',
+    anthropic: 'Anthropic',
+    openai: 'OpenAI',
+    composio: 'Composio',
+    langchain: 'LangChain',
+    llamaindex: 'LlamaIndex',
   };
-  
+
   const lowerName = serverName.toLowerCase();
   return serverMappings[lowerName] || capitalizeWords(serverName);
 }
@@ -63,20 +73,20 @@ function formatToolName(toolName: string): string {
   if (toolName.includes('-')) {
     return toolName
       .split('-')
-      .map(word => capitalizeWord(word))
+      .map((word) => capitalizeWord(word))
       .join(' ');
   }
   if (toolName.includes('_')) {
     return toolName
       .split('_')
-      .map(word => capitalizeWord(word))
+      .map((word) => capitalizeWord(word))
       .join(' ');
   }
   if (/[a-z][A-Z]/.test(toolName)) {
     return toolName
       .replace(/([a-z])([A-Z])/g, '$1 $2')
       .split(' ')
-      .map(word => capitalizeWord(word))
+      .map((word) => capitalizeWord(word))
       .join(' ');
   }
   return capitalizeWord(toolName);
@@ -85,8 +95,27 @@ function formatToolName(toolName: string): string {
 function capitalizeWord(word: string): string {
   if (!word) return '';
   const upperCaseWords = new Set([
-    'api', 'url', 'http', 'https', 'json', 'xml', 'csv', 'pdf', 'id', 'uuid',
-    'oauth', 'jwt', 'sql', 'html', 'css', 'js', 'ts', 'ai', 'ml', 'ui', 'ux'
+    'api',
+    'url',
+    'http',
+    'https',
+    'json',
+    'xml',
+    'csv',
+    'pdf',
+    'id',
+    'uuid',
+    'oauth',
+    'jwt',
+    'sql',
+    'html',
+    'css',
+    'js',
+    'ts',
+    'ai',
+    'ml',
+    'ui',
+    'ux',
   ]);
   const lowerWord = word.toLowerCase();
   if (upperCaseWords.has(lowerWord)) {
@@ -98,14 +127,14 @@ function capitalizeWord(word: string): string {
 function capitalizeWords(text: string): string {
   return text
     .split(/[\s_-]+/)
-    .map(word => capitalizeWord(word))
+    .map((word) => capitalizeWord(word))
     .join(' ');
 }
 
 function extractFromNewFormat(toolContent: string | object): MCPResult | null {
   try {
     let parsed: any;
-    
+
     if (typeof toolContent === 'string') {
       parsed = JSON.parse(toolContent);
     } else {
@@ -114,8 +143,12 @@ function extractFromNewFormat(toolContent: string | object): MCPResult | null {
 
     if (parsed && typeof parsed === 'object' && 'tool_execution' in parsed) {
       const toolExecution = parsed.tool_execution;
-      
-      if (toolExecution && typeof toolExecution === 'object' && 'result' in toolExecution) {
+
+      if (
+        toolExecution &&
+        typeof toolExecution === 'object' &&
+        'result' in toolExecution
+      ) {
         const result = toolExecution.result;
         const success = result.success === true;
         let output = result.output;
@@ -123,17 +156,17 @@ function extractFromNewFormat(toolContent: string | object): MCPResult | null {
         if (typeof output === 'string') {
           try {
             output = JSON.parse(output);
-          } catch (e) {
-          }
+          } catch (e) {}
         }
 
         const args = toolExecution.arguments || {};
         const toolName = args.tool_name || 'unknown_mcp_tool';
         const toolArgs = args.arguments || {};
-        
+
         const parts = toolName.split('_');
         const serverName = parts.length > 1 ? parts[1] : 'unknown';
-        const actualToolName = parts.length > 2 ? parts.slice(2).join('_') : toolName;
+        const actualToolName =
+          parts.length > 2 ? parts.slice(2).join('_') : toolName;
 
         return {
           success,
@@ -145,8 +178,8 @@ function extractFromNewFormat(toolContent: string | object): MCPResult | null {
             tool_name: actualToolName,
             full_tool_name: toolName,
             arguments_count: Object.keys(toolArgs).length,
-            is_mcp_tool: true
-          }
+            is_mcp_tool: true,
+          },
         };
       }
     }
@@ -159,37 +192,43 @@ function extractFromNewFormat(toolContent: string | object): MCPResult | null {
 
 function extractFromLegacyFormat(toolContent: string): MCPResult | null {
   try {
-    const toolResultMatch = toolContent.match(/ToolResult\(success=(\w+),\s*output='([\s\S]*)'\)/);
+    const toolResultMatch = toolContent.match(
+      /ToolResult\(success=(\w+),\s*output='([\s\S]*)'\)/,
+    );
     if (toolResultMatch) {
       const isSuccess = toolResultMatch[1] === 'True';
       let output = toolResultMatch[2];
-      
-      output = output.replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\"/g, '"');
-      
+
+      output = output
+        .replace(/\\n/g, '\n')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
+
       return {
         success: isSuccess,
         data: output,
         isError: !isSuccess,
-        content: output
+        content: output,
       };
     }
 
-    const xmlMatch = toolContent.match(/<tool_result>\s*<call-mcp-tool>\s*([\s\S]*?)\s*<\/call-mcp-tool>\s*<\/tool_result>/);
+    const xmlMatch = toolContent.match(
+      /<tool_result>\s*<call-mcp-tool>\s*([\s\S]*?)\s*<\/call-mcp-tool>\s*<\/tool_result>/,
+    );
     if (xmlMatch && xmlMatch[1]) {
       const innerContent = xmlMatch[1].trim();
-      
+
       try {
         const parsed = JSON.parse(innerContent);
-        
+
         if (parsed.mcp_metadata) {
           let actualContent = parsed.content;
           if (typeof actualContent === 'string') {
             try {
               actualContent = JSON.parse(actualContent);
-            } catch (e) {
-            }
+            } catch (e) {}
           }
-          
+
           return {
             success: !parsed.isError,
             data: actualContent,
@@ -197,36 +236,35 @@ function extractFromLegacyFormat(toolContent: string): MCPResult | null {
             content: actualContent,
             mcp_metadata: parsed.mcp_metadata,
             error_type: parsed.error_type,
-            raw_result: parsed.raw_result
+            raw_result: parsed.raw_result,
           };
         }
-        
+
         return {
           success: !parsed.isError,
           data: parsed.content || parsed,
           isError: parsed.isError,
-          content: parsed.content
+          content: parsed.content,
         };
       } catch (e) {
         return {
           success: true,
           data: innerContent,
-          content: innerContent
+          content: innerContent,
         };
       }
     }
 
     const parsed = JSON.parse(toolContent);
-    
+
     if (parsed.mcp_metadata) {
       let actualContent = parsed.content;
       if (typeof actualContent === 'string') {
         try {
           actualContent = JSON.parse(actualContent);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
-      
+
       return {
         success: !parsed.isError,
         data: actualContent,
@@ -234,27 +272,29 @@ function extractFromLegacyFormat(toolContent: string): MCPResult | null {
         content: actualContent,
         mcp_metadata: parsed.mcp_metadata,
         error_type: parsed.error_type,
-        raw_result: parsed.raw_result
+        raw_result: parsed.raw_result,
       };
     }
-    
+
     return {
       success: !parsed.isError,
       data: parsed.content || parsed,
       isError: parsed.isError,
-      content: parsed.content
+      content: parsed.content,
     };
   } catch (e) {
     return null;
   }
 }
 
-export function parseMCPResult(toolContent: string | object | undefined): MCPResult {
+export function parseMCPResult(
+  toolContent: string | object | undefined,
+): MCPResult {
   if (!toolContent) {
     return {
       success: true,
       data: '',
-      content: ''
+      content: '',
     };
   }
 
@@ -270,11 +310,12 @@ export function parseMCPResult(toolContent: string | object | undefined): MCPRes
     }
   }
 
-  const content = typeof toolContent === 'string' ? toolContent : JSON.stringify(toolContent);
+  const content =
+    typeof toolContent === 'string' ? toolContent : JSON.stringify(toolContent);
   return {
     success: true,
     data: content,
-    content: content
+    content: content,
   };
 }
 
@@ -282,10 +323,12 @@ export function parseMCPToolCall(assistantContent: string): ParsedMCPTool {
   try {
     const toolNameMatch = assistantContent.match(/tool_name="([^"]+)"/);
     const fullToolName = toolNameMatch ? toolNameMatch[1] : 'unknown_mcp_tool';
-    
-    const contentMatch = assistantContent.match(/<call-mcp-tool[^>]*>([\s\S]*?)<\/call-mcp-tool>/);
+
+    const contentMatch = assistantContent.match(
+      /<call-mcp-tool[^>]*>([\s\S]*?)<\/call-mcp-tool>/,
+    );
     let args = {};
-    
+
     if (contentMatch && contentMatch[1]) {
       try {
         args = JSON.parse(contentMatch[1].trim());
@@ -293,20 +336,20 @@ export function parseMCPToolCall(assistantContent: string): ParsedMCPTool {
         args = { raw: contentMatch[1].trim() };
       }
     }
-    
+
     const parts = fullToolName.split('_');
     const serverName = parts.length > 1 ? parts[1] : 'unknown';
     const toolName = parts.length > 2 ? parts.slice(2).join('_') : fullToolName;
-    
+
     // Use the enhanced formatting function
     const displayName = formatMCPToolDisplayName(serverName, toolName);
-    
+
     return {
       serverName,
       toolName,
       fullToolName,
       displayName,
-      arguments: args
+      arguments: args,
     };
   } catch (e) {
     return {
@@ -314,7 +357,7 @@ export function parseMCPToolCall(assistantContent: string): ParsedMCPTool {
       toolName: 'unknown',
       fullToolName: 'unknown_mcp_tool',
       displayName: 'MCP Tool',
-      arguments: {}
+      arguments: {},
     };
   }
 }
@@ -339,16 +382,16 @@ export function getMCPServerIcon(serverName: string) {
 export function getMCPServerColor(serverName: string) {
   switch (serverName.toLowerCase()) {
     case 'exa':
-      return 'from-blue-500/20 to-blue-600/10 border-blue-500/20';
+      return 'from-neutral-200 to-neutral-300 border-neutral-200';
     case 'github':
-      return 'from-purple-500/20 to-purple-600/10 border-purple-500/20';
+      return 'from-neutral-200 to-neutral-300 border-neutral-200';
     case 'notion':
-      return 'from-gray-500/20 to-gray-600/10 border-gray-500/20';
+      return 'from-neutral-200 to-neutral-300 border-neutral-200';
     case 'slack':
-      return 'from-green-500/20 to-green-600/10 border-green-500/20';
+      return 'from-neutral-200 to-neutral-300 border-neutral-200';
     case 'filesystem':
-      return 'from-orange-500/20 to-orange-600/10 border-orange-500/20';
+      return 'from-neutral-200 to-neutral-300 border-neutral-200';
     default:
-      return 'from-indigo-500/20 to-indigo-600/10 border-indigo-500/20';
+      return 'from-neutral-200 to-neutral-300 border-neutral-200';
   }
-} 
+}

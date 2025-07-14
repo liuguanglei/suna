@@ -15,13 +15,10 @@ import {
   Calendar,
   Check,
   ArrowUpRight,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { ToolViewProps } from '../types';
-import {
-  formatTimestamp,
-  getToolTitle,
-} from '../utils';
+import { formatTimestamp, getToolTitle } from '../utils';
 import { extractWebScrapeData } from './_utils';
 import { cn, truncateString } from '@/lib/utils';
 import { useTheme } from 'next-themes';
@@ -29,8 +26,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export function WebScrapeToolView({
   name = 'scrape-webpage',
@@ -55,13 +57,13 @@ export function WebScrapeToolView({
     urlCount,
     actualIsSuccess,
     actualToolTimestamp,
-    actualAssistantTimestamp
+    actualAssistantTimestamp,
   } = extractWebScrapeData(
     assistantContent,
     toolContent,
     isSuccess,
     toolTimestamp,
-    assistantTimestamp
+    assistantTimestamp,
   );
 
   const toolTitle = getToolTitle(name);
@@ -74,7 +76,7 @@ export function WebScrapeToolView({
     }
   };
 
-  const domain = url ? formatDomain(url) : 'Unknown';
+  const domain = url ? formatDomain(url) : '未知';
 
   const getFavicon = (url: string) => {
     try {
@@ -110,7 +112,7 @@ export function WebScrapeToolView({
       setCopiedFile(filePath);
       setTimeout(() => setCopiedFile(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      console.error('复制失败:', err);
     }
   };
 
@@ -118,12 +120,12 @@ export function WebScrapeToolView({
     const timestampMatch = filePath.match(/(\d{8}_\d{6})/);
     const domainMatch = filePath.match(/(\w+)_com\.json$/);
     const fileName = filePath.split('/').pop() || filePath;
-    
+
     return {
       timestamp: timestampMatch ? timestampMatch[1] : '',
-      domain: domainMatch ? domainMatch[1] : 'unknown',
+      domain: domainMatch ? domainMatch[1] : '未知',
       fileName,
-      fullPath: filePath
+      fullPath: filePath,
     };
   };
 
@@ -132,32 +134,35 @@ export function WebScrapeToolView({
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
-              <Globe className="w-5 h-5 text-primary" />
+            <div className="relative p-2 rounded-lg bg-gradient-to-br from-neutral-200 to-neutral-300 border border-neutral-200">
+              <Globe className="w-5 h-5 text-neutral-600 dark:text-neutral-600" />
             </div>
-            
             <div>
               <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
                 {toolTitle}
               </CardTitle>
             </div>
           </div>
-          
+
           {!isStreaming && (
-            <Badge 
+            <Badge
+              variant="secondary"
+              className="bg-gradient-to-br from-neutral-200 to-neutral-300"
+            >
+              {/* <Badge
               variant="secondary"
               className={
-                actualIsSuccess 
-                  ? "bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300" 
-                  : "bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300"
+                actualIsSuccess
+                  ? 'bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300'
+                  : 'bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300'
               }
             >
               {actualIsSuccess ? (
                 <CheckCircle className="h-3.5 w-3.5" />
               ) : (
                 <AlertTriangle className="h-3.5 w-3.5" />
-              )}
-              {actualIsSuccess ? 'Scraping completed' : 'Scraping failed'}
+              )} */}
+              {actualIsSuccess ? '网页抓取完成' : '网页抓取失败'}
             </Badge>
           )}
         </div>
@@ -171,43 +176,50 @@ export function WebScrapeToolView({
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
               <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
-                Extracting Content
+                提取内容中
               </h3>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
-                Analyzing and processing <span className="font-mono text-xs break-all">{domain}</span>
+                正在分析和处理{' '}
+                <span className="font-mono text-xs break-all">{domain}</span>
               </p>
               <Progress value={progress} className="w-full h-1" />
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">{progress}% complete</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
+                {progress}% 完成
+              </p>
             </div>
           </div>
         ) : url ? (
-          // Results State
+          // 结果状态
           <ScrollArea className="h-full w-full">
             <div className="p-4 py-0 my-4">
-              {/* Target URL Section */}
+              {/* 目标 URL 部分 */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center gap-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">
                   <Globe className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-                  Source URL
+                  源 URL
                 </div>
                 <div className="group relative">
                   <div className="flex items-center gap-3 p-4 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors rounded-xl border border-zinc-200 dark:border-zinc-800">
                     {favicon && (
-                      <img 
-                        src={favicon} 
-                        alt="" 
+                      <img
+                        src={favicon}
+                        alt=""
                         className="w-6 h-6 rounded-md flex-shrink-0"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
-                        }} 
+                        }}
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="font-mono text-sm text-zinc-900 dark:text-zinc-100 truncate">{truncateString(url, 70)}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{domain}</p>
+                      <p className="font-mono text-sm text-zinc-900 dark:text-zinc-100 truncate">
+                        {truncateString(url, 70)}
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                        {domain}
+                      </p>
                     </div>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="sm"
                       className="opacity-70 group-hover:opacity-100 transition-opacity"
                       asChild
@@ -220,48 +232,54 @@ export function WebScrapeToolView({
                 </div>
               </div>
 
-              {/* Results Section */}
+              {/* 结果部分 */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">
                     <Zap className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-                    Generated Files
+                    生成的文件
                   </div>
                   <Badge variant="outline" className="gap-1">
-                    {files.length} file{files.length !== 1 ? 's' : ''}
+                    {files.length} 个文件
                   </Badge>
                 </div>
 
-                {/* File List */}
+                {/* 文件列表 */}
                 {files.length > 0 ? (
                   <div className="space-y-3">
                     {files.map((filePath, idx) => {
                       const fileInfo = formatFileInfo(filePath);
                       const isCopied = copiedFile === filePath;
-                      
+
                       return (
-                        <div 
-                          key={idx} 
+                        <div
+                          key={idx}
                           className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200 hover:shadow-sm"
                         >
                           <div className="flex items-start gap-3">
                             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/10 flex items-center justify-center border border-green-500/20 flex-shrink-0">
                               <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
-                            
+
                             <div className="flex-1 min-w-0 space-y-2">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <Badge variant="outline" className="text-xs font-normal">
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs font-normal"
+                                >
                                   JSON
                                 </Badge>
                                 {fileInfo.timestamp && (
-                                  <Badge variant="outline" className="text-xs font-normal">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs font-normal"
+                                  >
                                     <Calendar className="w-3 h-3 mr-1" />
                                     {fileInfo.timestamp.replace('_', ' ')}
                                   </Badge>
                                 )}
                               </div>
-                              
+
                               <div className="space-y-1">
                                 <p className="font-mono text-sm text-zinc-900 dark:text-zinc-100 font-medium">
                                   {fileInfo.fileName}
@@ -279,8 +297,8 @@ export function WebScrapeToolView({
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                      "opacity-0 group-hover:opacity-100 transition-all duration-200",
-                                      isCopied && "opacity-100"
+                                      'opacity-0 group-hover:opacity-100 transition-all duration-200',
+                                      isCopied && 'opacity-100',
                                     )}
                                     onClick={() => copyFilePath(filePath)}
                                   >
@@ -292,7 +310,7 @@ export function WebScrapeToolView({
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>{isCopied ? 'Copied!' : 'Copy file path'}</p>
+                                  <p>{isCopied ? '已复制!' : '复制文件路径'}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -304,7 +322,7 @@ export function WebScrapeToolView({
                 ) : (
                   <div className="text-center py-8 text-zinc-500 dark:text-zinc-400">
                     <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No files generated</p>
+                    <p className="text-sm">未生成文件</p>
                   </div>
                 )}
               </div>
@@ -316,26 +334,26 @@ export function WebScrapeToolView({
               <Globe className="h-10 w-10 text-zinc-400 dark:text-zinc-600" />
             </div>
             <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
-              No URL Detected
+              未检测到 URL
             </h3>
             <p className="text-zinc-500 dark:text-zinc-400 text-center max-w-sm">
-              Unable to extract a valid URL from the scraping request
+              无法从抓取请求中提取有效的 URL
             </p>
           </div>
         )}
       </CardContent>
-      
-      {/* Footer */}
-      <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
+
+      {/* 底部 */}
+      {/* <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
         <div className="h-full flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           {!isStreaming && files.length > 0 && (
             <Badge className="h-6 py-0.5">
               <div className="w-2 h-2 rounded-full bg-green-500 mr-1.5" />
-              {files.length} file{files.length !== 1 ? 's' : ''} saved
+              已保存 {files.length} 个文件
             </Badge>
           )}
         </div>
-        
+
         <div className="text-xs text-zinc-500 dark:text-zinc-400">
           {actualToolTimestamp && !isStreaming
             ? formatTimestamp(actualToolTimestamp)
@@ -343,7 +361,7 @@ export function WebScrapeToolView({
               ? formatTimestamp(actualAssistantTimestamp)
               : ''}
         </div>
-      </div>
+      </div> */}
     </Card>
   );
 }
