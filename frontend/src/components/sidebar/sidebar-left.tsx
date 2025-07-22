@@ -48,7 +48,11 @@ export function SidebarLeft({
   });
 
   const pathname = usePathname();
-  const { flags, loading: flagsLoading } = useFeatureFlags(['custom_agents', 'agent_marketplace', 'workflows']);
+  const { flags, loading: flagsLoading } = useFeatureFlags([
+    'custom_agents',
+    'agent_marketplace',
+    'workflows',
+  ]);
   const customAgentsEnabled = flags.custom_agents;
   const marketplaceEnabled = flags.agent_marketplace;
   const workflowsEnabled = flags.workflows;
@@ -103,7 +107,9 @@ export function SidebarLeft({
           </Link>
           {state !== 'collapsed' && (
             <div className="ml-2 transition-all duration-200 ease-in-out whitespace-nowrap">
-              {/* <span className="font-semibold"> SUNA</span> */}
+              <span className="font-semibold text-[#FA7038]">
+                奇智孔明AInnoGC
+              </span>
             </div>
           )}
           <div className="ml-auto flex items-center gap-2">
@@ -112,7 +118,7 @@ export function SidebarLeft({
                 <TooltipTrigger asChild>
                   <SidebarTrigger className="h-8 w-8" />
                 </TooltipTrigger>
-                <TooltipContent>Toggle sidebar (CMD+B)</TooltipContent>
+                <TooltipContent>收起侧边栏</TooltipContent>
               </Tooltip>
             )}
             {isMobile && (
@@ -132,13 +138,15 @@ export function SidebarLeft({
         </div>
       </SidebarHeader>
       <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-        {!flagsLoading && (customAgentsEnabled || marketplaceEnabled) && (
+        {/* {!flagsLoading && (customAgentsEnabled || marketplaceEnabled) && (
           <SidebarGroup>
             {customAgentsEnabled && (
               <Link href="/agents">
-                <SidebarMenuButton className={cn({
-                  'bg-primary/10 font-medium': pathname === '/agents',
-                })}>
+                <SidebarMenuButton
+                  className={cn({
+                    'bg-primary/10 font-medium': pathname === '/agents',
+                  })}
+                >
                   <Bot className="h-4 w-4 mr-2" />
                   <span className="flex items-center justify-between w-full">
                     Agent Playground
@@ -148,9 +156,11 @@ export function SidebarLeft({
             )}
             {marketplaceEnabled && (
               <Link href="/marketplace">
-                <SidebarMenuButton className={cn({
-                  'bg-primary/10 font-medium': pathname === '/marketplace',
-                })}>
+                <SidebarMenuButton
+                  className={cn({
+                    'bg-primary/10 font-medium': pathname === '/marketplace',
+                  })}
+                >
                   <Store className="h-4 w-4 mr-2" />
                   <span className="flex items-center justify-between w-full">
                     Marketplace
@@ -158,11 +168,28 @@ export function SidebarLeft({
                 </SidebarMenuButton>
               </Link>
             )}
+            {customAgentsEnabled && (
+              <Link href="/settings/credentials">
+                <SidebarMenuButton
+                  className={cn({
+                    'bg-primary/10 font-medium':
+                      pathname === '/settings/credentials',
+                  })}
+                >
+                  <Key className="h-4 w-4 mr-2" />
+                  <span className="flex items-center justify-between w-full">
+                    Credentials
+                  </span>
+                </SidebarMenuButton>
+              </Link>
+            )}
             {workflowsEnabled && (
               <Link href="/workflows">
-                <SidebarMenuButton className={cn({
-                  'bg-primary/10 font-medium': pathname === '/workflows',
-                })}>
+                <SidebarMenuButton
+                  className={cn({
+                    'bg-primary/10 font-medium': pathname === '/workflows',
+                  })}
+                >
                   <Workflow className="h-4 w-4 mr-2" />
                   <span className="flex items-center justify-between w-full">
                     Workflows
@@ -171,14 +198,14 @@ export function SidebarLeft({
               </Link>
             )}
           </SidebarGroup>
-        )}
+        )} */}
         <NavAgents />
       </SidebarContent>
-      {state !== 'collapsed' && (
+      {/* {state !== 'collapsed' && (
         <div className="px-3 py-2">
           <CTACard />
         </div>
-      )}
+      )} */}
       <SidebarFooter>
         {state === 'collapsed' && (
           <div className="mt-2 flex justify-center">
@@ -186,7 +213,7 @@ export function SidebarLeft({
               <TooltipTrigger asChild>
                 <SidebarTrigger className="h-8 w-8" />
               </TooltipTrigger>
-              <TooltipContent>Expand sidebar (CMD+B)</TooltipContent>
+              <TooltipContent>展开侧边栏</TooltipContent>
             </Tooltip>
           </div>
         )}

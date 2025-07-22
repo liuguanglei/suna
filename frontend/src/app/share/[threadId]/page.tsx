@@ -85,7 +85,9 @@ export default function ThreadPage({
   const [currentToolCall, setCurrentToolCall] =
     useState<StreamingToolCall | null>(null);
 
-  const [externalNavIndex, setExternalNavIndex] = React.useState<number | undefined>(undefined);
+  const [externalNavIndex, setExternalNavIndex] = React.useState<
+    number | undefined
+  >(undefined);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -195,10 +197,17 @@ export default function ThreadPage({
       if (!toolCall) return;
 
       // Normalize the tool name by replacing underscores with hyphens
-      const rawToolName = toolCall.name || toolCall.xml_tag_name || 'Unknown Tool';
+      const rawToolName =
+        toolCall.name || toolCall.xml_tag_name || 'Unknown Tool';
       const toolName = rawToolName.replace(/_/g, '-').toLowerCase();
 
-      console.log('[STREAM] Received tool call:', toolName, '(raw:', rawToolName, ')');
+      console.log(
+        '[STREAM] Received tool call:',
+        toolName,
+        '(raw:',
+        rawToolName,
+        ')',
+      );
 
       // If user explicitly closed the panel, don't reopen it for streaming calls
       if (userClosedPanelRef.current) return;
@@ -227,7 +236,10 @@ export default function ThreadPage({
         const matchingTag = fileOpTags.find((tag) => toolName === tag);
         if (matchingTag) {
           // Check if arguments already have the proper XML format
-          if (!toolArguments.includes(`<${matchingTag}>`) && !toolArguments.includes('file_path=')) {
+          if (
+            !toolArguments.includes(`<${matchingTag}>`) &&
+            !toolArguments.includes('file_path=')
+          ) {
             // If toolArguments looks like a raw file path, format it properly
             const filePath = toolArguments.trim();
             if (filePath && !filePath.startsWith('<')) {
@@ -243,7 +255,7 @@ export default function ThreadPage({
 
       const newToolCall: ToolCallInput = {
         assistantCall: {
-          name: toolName,  // Use normalized tool name
+          name: toolName, // Use normalized tool name
           content: formattedContent,
           timestamp: new Date().toISOString(),
         },
@@ -368,9 +380,9 @@ export default function ThreadPage({
 
         const projectData = threadData?.project_id
           ? await getProject(threadData.project_id).catch((err) => {
-            console.warn('[SHARE] Could not load project data:', err);
-            return null;
-          })
+              console.warn('[SHARE] Could not load project data:', err);
+              return null;
+            })
           : null;
 
         if (isMounted) {
@@ -410,10 +422,20 @@ export default function ThreadPage({
 
           assistantMessages.forEach((assistantMsg) => {
             const resultMessage = unifiedMessages.find((toolMsg) => {
-              if (toolMsg.type !== 'tool' || !toolMsg.metadata || !assistantMsg.message_id) return false;
+              if (
+                toolMsg.type !== 'tool' ||
+                !toolMsg.metadata ||
+                !assistantMsg.message_id
+              )
+                return false;
               try {
-                const metadata = safeJsonParse<ParsedMetadata>(toolMsg.metadata, {});
-                return metadata.assistant_message_id === assistantMsg.message_id;
+                const metadata = safeJsonParse<ParsedMetadata>(
+                  toolMsg.metadata,
+                  {},
+                );
+                return (
+                  metadata.assistant_message_id === assistantMsg.message_id
+                );
               } catch (e) {
                 return false;
               }
@@ -426,7 +448,10 @@ export default function ThreadPage({
                 // Parse the assistant content first
                 const assistantContent = (() => {
                   try {
-                    const parsed = safeJsonParse<{ content?: string }>(assistantMsg.content, {});
+                    const parsed = safeJsonParse<{ content?: string }>(
+                      assistantMsg.content,
+                      {},
+                    );
                     return parsed.content || assistantMsg.content;
                   } catch {
                     return assistantMsg.content;
@@ -444,26 +469,35 @@ export default function ThreadPage({
                 } else {
                   // Fallback to checking for tool_calls JSON structure
                   const assistantContentParsed = safeJsonParse<{
-                    tool_calls?: Array<{ function?: { name?: string }; name?: string }>;
+                    tool_calls?: Array<{
+                      function?: { name?: string };
+                      name?: string;
+                    }>;
                   }>(assistantMsg.content, {});
                   if (
                     assistantContentParsed.tool_calls &&
                     assistantContentParsed.tool_calls.length > 0
                   ) {
                     const firstToolCall = assistantContentParsed.tool_calls[0];
-                    const rawName = firstToolCall.function?.name || firstToolCall.name || 'unknown';
+                    const rawName =
+                      firstToolCall.function?.name ||
+                      firstToolCall.name ||
+                      'unknown';
                     // Normalize tool name here too
                     toolName = rawName.replace(/_/g, '-').toLowerCase();
                   }
                 }
-              } catch { }
+              } catch {}
 
               let isSuccess = true;
               try {
                 // Parse tool result content
                 const toolResultContent = (() => {
                   try {
-                    const parsed = safeJsonParse<{ content?: string }>(resultMessage.content, {});
+                    const parsed = safeJsonParse<{ content?: string }>(
+                      resultMessage.content,
+                      {},
+                    );
                     return parsed.content || resultMessage.content;
                   } catch {
                     return resultMessage.content;
@@ -471,29 +505,36 @@ export default function ThreadPage({
                 })();
 
                 // Check for ToolResult pattern first
-                if (toolResultContent && typeof toolResultContent === 'string') {
+                if (
+                  toolResultContent &&
+                  typeof toolResultContent === 'string'
+                ) {
                   // Look for ToolResult(success=True/False) pattern
-                  const toolResultMatch = toolResultContent.match(/ToolResult\s*\(\s*success\s*=\s*(True|False|true|false)/i);
+                  const toolResultMatch = toolResultContent.match(
+                    /ToolResult\s*\(\s*success\s*=\s*(True|False|true|false)/i,
+                  );
                   if (toolResultMatch) {
                     isSuccess = toolResultMatch[1].toLowerCase() === 'true';
                   } else {
                     // Fallback: only check for error keywords if no ToolResult pattern found
                     const toolContent = toolResultContent.toLowerCase();
-                    isSuccess = !(toolContent.includes('failed') ||
+                    isSuccess = !(
+                      toolContent.includes('failed') ||
                       toolContent.includes('error') ||
-                      toolContent.includes('failure'));
+                      toolContent.includes('failure')
+                    );
                   }
                 }
-              } catch { }
+              } catch {}
 
               historicalToolPairs.push({
                 assistantCall: {
                   name: toolName,
-                  content: assistantMsg.content,  // Store original content
+                  content: assistantMsg.content, // Store original content
                   timestamp: assistantMsg.created_at,
                 },
                 toolResult: {
-                  content: resultMessage.content,  // Store original content
+                  content: resultMessage.content, // Store original content
                   isSuccess: isSuccess,
                   timestamp: resultMessage.created_at,
                 },
@@ -621,14 +662,17 @@ export default function ThreadPage({
     [messages, toolCalls],
   );
 
-  const handleOpenFileViewer = useCallback((filePath?: string, filePathList?: string[]) => {
-    if (filePath) {
-      setFileToView(filePath);
-    } else {
-      setFileToView(null);
-    }
-    setFileViewerOpen(true);
-  }, []);
+  const handleOpenFileViewer = useCallback(
+    (filePath?: string, filePathList?: string[]) => {
+      if (filePath) {
+        setFileToView(filePath);
+      } else {
+        setFileToView(null);
+      }
+      setFileViewerOpen(true);
+    },
+    [],
+  );
 
   // Initialize PlaybackControls
   const playbackController: PlaybackController = PlaybackControls({
@@ -727,7 +771,7 @@ export default function ThreadPage({
           const toolIndex = toolCalls.findIndex((tc) => {
             // Find the assistant message
             const assistantMessage = messages.find(
-              (m) => m.message_id === assistantId && m.type === 'assistant'
+              (m) => m.message_id === assistantId && m.type === 'assistant',
             );
             if (!assistantMessage) return false;
 
@@ -805,21 +849,19 @@ export default function ThreadPage({
           <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-[100]">
             <div className="flex h-14 items-center gap-4 px-4">
               <div className="flex-1">
-                <span className="text-foreground font-medium">
-                  Shared Conversation
-                </span>
+                <span className="text-foreground font-medium">共享对话</span>
               </div>
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center p-4">
             <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-lg border bg-card p-6 text-center">
-              <h2 className="text-lg font-semibold text-destructive">Error</h2>
+              <h2 className="text-lg font-semibold text-destructive">错误</h2>
               <p className="text-sm text-muted-foreground">{error}</p>
               <button
                 className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-                onClick={() => router.push('/')}
+                onClick={() => router.push('/dashboard')}
               >
-                Back to Home
+                回到首页
               </button>
             </div>
           </div>

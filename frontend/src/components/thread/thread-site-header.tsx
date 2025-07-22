@@ -1,34 +1,43 @@
 'use client';
 
-import { Button } from "@/components/ui/button"
-import { FolderOpen, Link, PanelRightOpen, Check, X, Menu, Share2, Book } from "lucide-react"
-import { usePathname } from "next/navigation"
-import { toast } from "sonner"
+import { Button } from '@/components/ui/button';
+import {
+  FolderOpen,
+  Link,
+  PanelRightOpen,
+  Check,
+  X,
+  Menu,
+  Share2,
+  Book,
+} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { useState, useRef, KeyboardEvent } from "react"
-import { Input } from "@/components/ui/input"
-import { useUpdateProject } from "@/hooks/react-query"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
-import { useSidebar } from "@/components/ui/sidebar"
-import { ShareModal } from "@/components/sidebar/share-modal"
-import { useQueryClient } from "@tanstack/react-query";
-import { projectKeys } from "@/hooks/react-query/sidebar/keys";
-import { threadKeys } from "@/hooks/react-query/threads/keys";
-import { KnowledgeBaseManager } from "@/components/thread/knowledge-base/knowledge-base-manager";
+} from '@/components/ui/tooltip';
+import { useState, useRef, KeyboardEvent } from 'react';
+import { Input } from '@/components/ui/input';
+import { useUpdateProject } from '@/hooks/react-query';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import { useSidebar } from '@/components/ui/sidebar';
+import { ShareModal } from '@/components/sidebar/share-modal';
+import { useQueryClient } from '@tanstack/react-query';
+import { projectKeys } from '@/hooks/react-query/sidebar/keys';
+import { threadKeys } from '@/hooks/react-query/threads/keys';
+import { KnowledgeBaseManager } from '@/components/thread/knowledge-base/knowledge-base-manager';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { useFeatureFlags } from "@/lib/feature-flags";
+} from '@/components/ui/dialog';
+import { useFeatureFlags } from '@/lib/feature-flags';
 
 interface ThreadSiteHeaderProps {
   threadId: string;
@@ -51,27 +60,27 @@ export function SiteHeader({
   isMobileView,
   debugMode,
 }: ThreadSiteHeaderProps) {
-  const pathname = usePathname()
-  const [isEditing, setIsEditing] = useState(false)
-  const [editName, setEditName] = useState(projectName)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const pathname = usePathname();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(projectName);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showKnowledgeBase, setShowKnowledgeBase] = useState(false);
   const queryClient = useQueryClient();
   const { flags, loading: flagsLoading } = useFeatureFlags(['knowledge_base']);
   const knowledgeBaseEnabled = flags.knowledge_base;
 
-  const isMobile = useIsMobile() || isMobileView
-  const { setOpenMobile } = useSidebar()
-  const updateProjectMutation = useUpdateProject()
+  const isMobile = useIsMobile() || isMobileView;
+  const { setOpenMobile } = useSidebar();
+  const updateProjectMutation = useUpdateProject();
 
   const openShareModal = () => {
-    setShowShareModal(true)
-  }
+    setShowShareModal(true);
+  };
 
   const openKnowledgeBase = () => {
-    setShowKnowledgeBase(true)
-  }
+    setShowKnowledgeBase(true);
+  };
 
   const startEditing = () => {
     setEditName(projectName);
@@ -97,7 +106,7 @@ export function SiteHeader({
     if (editName !== projectName) {
       try {
         if (!projectId) {
-          toast.error('Cannot rename: Project ID is missing');
+          toast.error('无法重命名：缺少项目 ID');
           setEditName(projectName);
           setIsEditing(false);
           return;
@@ -105,11 +114,13 @@ export function SiteHeader({
 
         const updatedProject = await updateProjectMutation.mutateAsync({
           projectId,
-          data: { name: editName }
-        })
+          data: { name: editName },
+        });
         if (updatedProject) {
           onProjectRenamed?.(editName);
-          queryClient.invalidateQueries({ queryKey: threadKeys.project(projectId) });
+          queryClient.invalidateQueries({
+            queryKey: threadKeys.project(projectId),
+          });
         } else {
           throw new Error('Failed to update project');
         }
@@ -122,8 +133,8 @@ export function SiteHeader({
       }
     }
 
-    setIsEditing(false)
-  }
+    setIsEditing(false);
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -135,17 +146,19 @@ export function SiteHeader({
 
   return (
     <>
-      <header className={cn(
-        "bg-background sticky top-0 flex h-14 shrink-0 items-center gap-2 z-20 w-full",
-        isMobile && "px-2"
-      )}>
+      <header
+        className={cn(
+          'bg-background sticky top-0 flex h-14 shrink-0 items-center gap-2 z-20 w-full',
+          isMobile && 'px-2',
+        )}
+      >
         {isMobile && (
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setOpenMobile(true)}
             className="h-9 w-9 mr-1"
-            aria-label="Open sidebar"
+            aria-label="打开侧边栏"
           >
             <Menu className="h-4 w-4" />
           </Button>
@@ -186,7 +199,7 @@ export function SiteHeader({
             <div
               className="text-base font-medium text-muted-foreground hover:text-foreground cursor-pointer flex items-center"
               onClick={startEditing}
-              title="Click to rename project"
+              title="点击以重命名项目"
             >
               {projectName}
             </div>
@@ -197,7 +210,7 @@ export function SiteHeader({
           {/* Debug mode indicator */}
           {debugMode && (
             <div className="bg-amber-500 text-black text-xs px-2 py-0.5 rounded-md mr-2">
-              Debug
+              调试
             </div>
           )}
 
@@ -208,7 +221,7 @@ export function SiteHeader({
               size="icon"
               onClick={onToggleSidePanel}
               className="h-9 w-9 cursor-pointer"
-              aria-label="Toggle computer panel"
+              aria-label="切换侧边栏"
             >
               <PanelRightOpen className="h-4 w-4" />
             </Button>
@@ -227,7 +240,7 @@ export function SiteHeader({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>View Files in Task</p>
+                  <p>查看任务中的文件</p>
                 </TooltipContent>
               </Tooltip>
 
@@ -244,11 +257,11 @@ export function SiteHeader({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Knowledge Base</p>
+                    <p>知识库</p>
                   </TooltipContent>
                 </Tooltip>
               )}
-              <Tooltip>
+              {/* <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
@@ -260,11 +273,11 @@ export function SiteHeader({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Share Chat</p>
+                  <p>分享对话</p>
                 </TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
 
-              <Tooltip>
+              {/* <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
@@ -276,9 +289,9 @@ export function SiteHeader({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Toggle Computer Preview (CMD+I)</p>
+                  <p>切换电脑预览 (CMD+I)</p>
                 </TooltipContent>
-              </Tooltip>
+              </Tooltip> */}
             </TooltipProvider>
           )}
         </div>
@@ -289,14 +302,14 @@ export function SiteHeader({
         threadId={threadId}
         projectId={projectId}
       />
-      
+
       <Dialog open={showKnowledgeBase} onOpenChange={setShowKnowledgeBase}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0">
           <div className="flex flex-col h-full">
             <DialogHeader className="px-6 py-4">
               <DialogTitle className="flex items-center gap-2 text-lg">
                 <Book className="h-5 w-5" />
-                Knowledge Base
+                知识库
               </DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto p-6">
@@ -306,5 +319,5 @@ export function SiteHeader({
         </DialogContent>
       </Dialog>
     </>
-  )
-} 
+  );
+}

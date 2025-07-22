@@ -33,14 +33,16 @@ export function safeJsonParse<T>(
   if (!jsonString) {
     return fallback;
   }
-  
+
   try {
     // First attempt: Parse as normal JSON
     const parsed = JSON.parse(jsonString);
-    
+
     // Check if the result is a string that looks like JSON (double-escaped case)
-    if (typeof parsed === 'string' && 
-        (parsed.startsWith('{') || parsed.startsWith('['))) {
+    if (
+      typeof parsed === 'string' &&
+      (parsed.startsWith('{') || parsed.startsWith('['))
+    ) {
       try {
         // Second attempt: Parse the string result as JSON (handles double-escaped)
         return JSON.parse(parsed) as T;
@@ -49,14 +51,14 @@ export function safeJsonParse<T>(
         return parsed as unknown as T;
       }
     }
-    
+
     return parsed as T;
   } catch (outerError) {
     // If the input is already an object/array (shouldn't happen but just in case)
     if (typeof jsonString === 'object') {
       return jsonString as T;
     }
-    
+
     // Try one more time in case it's a plain string that should be returned as-is
     if (typeof jsonString === 'string') {
       // Check if it's a string representation of a simple value
@@ -64,13 +66,13 @@ export function safeJsonParse<T>(
       if (jsonString === 'false') return false as unknown as T;
       if (jsonString === 'null') return null as unknown as T;
       if (!isNaN(Number(jsonString))) return Number(jsonString) as unknown as T;
-      
+
       // Return as string if it doesn't look like JSON
       if (!jsonString.startsWith('{') && !jsonString.startsWith('[')) {
         return jsonString as unknown as T;
       }
     }
-    
+
     // console.warn('Failed to parse JSON string:', jsonString, outerError); // Optional: log errors
     return fallback;
   }
@@ -121,7 +123,7 @@ export const getToolIcon = (toolName: string): ElementType => {
     case 'crawl-webpage':
       return Globe;
     case 'scrape-webpage':
-        return Globe;
+      return Globe;
 
     // API and data operations
     case 'call-data-provider':
@@ -162,11 +164,14 @@ export const getToolIcon = (toolName: string): ElementType => {
         if (parts.length >= 3) {
           const serverName = parts[1];
           const toolNamePart = parts.slice(2).join('_');
-          
+
           // Map specific MCP tools to appropriate icons
           if (toolNamePart.includes('search') || toolNamePart.includes('web')) {
             return Search;
-          } else if (toolNamePart.includes('research') || toolNamePart.includes('paper')) {
+          } else if (
+            toolNamePart.includes('research') ||
+            toolNamePart.includes('paper')
+          ) {
             return BookOpen;
           } else if (serverName === 'exa') {
             return Search; // Exa is primarily a search service
@@ -174,7 +179,7 @@ export const getToolIcon = (toolName: string): ElementType => {
         }
         return PlugIcon; // Default icon for MCP tools
       }
-      
+
       // Add logging for debugging unhandled tool types
       console.log(
         `[PAGE] Using default icon for unknown tool type: ${toolName}`,
@@ -286,109 +291,106 @@ export const extractPrimaryParam = (
 };
 
 const TOOL_DISPLAY_NAMES = new Map([
-  ['execute-command', 'Executing Command'],
-  ['check-command-output', 'Checking Command Output'],
-  ['terminate-command', 'Terminating Command'],
-  ['list-commands', 'Listing Commands'],
-  
-  ['create-file', 'Creating File'],
-  ['delete-file', 'Deleting File'],
-  ['full-file-rewrite', 'Rewriting File'],
-  ['str-replace', 'Editing Text'],
-  ['str_replace', 'Editing Text'],
-  
-  ['browser-click-element', 'Clicking Element'],
-  ['browser-close-tab', 'Closing Tab'],
-  ['browser-drag-drop', 'Dragging Element'],
-  ['browser-get-dropdown-options', 'Getting Options'],
-  ['browser-go-back', 'Going Back'],
-  ['browser-input-text', 'Entering Text'],
-  ['browser-navigate-to', 'Navigating to Page'],
-  ['browser-scroll-down', 'Scrolling Down'],
-  ['browser-scroll-to-text', 'Scrolling to Text'],
-  ['browser-scroll-up', 'Scrolling Up'],
-  ['browser-select-dropdown-option', 'Selecting Option'],
-  ['browser-click-coordinates', 'Clicking Coordinates'],
-  ['browser-send-keys', 'Pressing Keys'],
-  ['browser-switch-tab', 'Switching Tab'],
-  ['browser-wait', 'Waiting'],
+  ['execute-command', '执行命令'],
+  ['check-command-output', '检查命令输出'],
+  ['terminate-command', '终止命令'],
+  ['list-commands', '列出命令'],
 
-  ['execute-data-provider-call', 'Calling data provider'],
-  ['execute_data_provider_call', 'Calling data provider'],
-  ['get-data-provider-endpoints', 'Getting endpoints'],
-  
-  ['deploy', 'Deploying'],
-  ['ask', 'Ask'],
-  ['complete', 'Completing Task'],
-  ['crawl-webpage', 'Crawling Website'],
-  ['expose-port', 'Exposing Port'],
-  ['scrape-webpage', 'Scraping Website'],
-  ['web-search', 'Searching Web'],
-  ['see-image', 'Viewing Image'],
-  
-  ['call-mcp-tool', 'External Tool'],
+  ['create-file', '创建文件'],
+  ['delete-file', '删除文件'],
+  ['full-file-rewrite', '重写文件'],
+  ['str-replace', '编辑文本'],
+  ['str_replace', '编辑文本'],
 
-  ['update-agent', 'Updating Agent'],
-  ['get-current-agent-config', 'Getting Agent Config'],
-  ['search-mcp-servers', 'Searching MCP Servers'],
-  ['get-mcp-server-tools', 'Getting MCP Server Tools'],
-  ['configure-mcp-server', 'Configuring MCP Server'],
-  ['get-popular-mcp-servers', 'Getting Popular MCP Servers'],
-  ['test-mcp-server-connection', 'Testing MCP Server Connection'],
+  ['browser-click-element', '点击元素'],
+  ['browser-close-tab', '关闭标签'],
+  ['browser-drag-drop', '拖动元素'],
+  ['browser-get-dropdown-options', '获取下拉选项'],
+  ['browser-go-back', '返回'],
+  ['browser-input-text', '输入文本'],
+  ['browser-navigate-to', '导航到页面'],
+  ['browser-scroll-down', '向下滚动'],
+  ['browser-scroll-to-text', '滚动到文本'],
+  ['browser-scroll-up', '向上滚动'],
+  ['browser-select-dropdown-option', '选择选项'],
+  ['browser-click-coordinates', '点击坐标'],
+  ['browser-send-keys', '按键操作'],
+  ['browser-switch-tab', '切换标签'],
+  ['browser-wait', '等待'],
 
+  ['execute-data-provider-call', '调用数据提供者'],
+  ['execute_data_provider_call', '调用数据提供者'],
+  ['get-data-provider-endpoints', '获取端点'],
 
-  //V2
+  ['deploy', '部署'],
+  ['ask', '询问'],
+  ['complete', '完成任务'],
+  ['crawl-webpage', '爬取网页'],
+  ['expose-port', '暴露端口'],
+  ['scrape-webpage', '抓取网页'],
+  ['web-search', '网页搜索'],
+  ['see-image', '查看图片'],
 
-  ['execute_command', 'Executing Command'],
-  ['check_command_output', 'Checking Command Output'],
-  ['terminate_command', 'Terminating Command'],
-  ['list_commands', 'Listing Commands'],
-  
-  ['create_file', 'Creating File'],
-  ['delete_file', 'Deleting File'],
-  ['full_file_rewrite', 'Rewriting File'],
-  ['str_replace', 'Editing Text'],
-  
-  ['browser_click_element', 'Clicking Element'],
-  ['browser_close_tab', 'Closing Tab'],
-  ['browser_drag_drop', 'Dragging Element'],
-  ['browser_get_dropdown_options', 'Getting Options'],
-  ['browser_go_back', 'Going Back'],
-  ['browser_input_text', 'Entering Text'],
-  ['browser_navigate_to', 'Navigating to Page'],
-  ['browser_scroll_down', 'Scrolling Down'],
-  ['browser_scroll_to_text', 'Scrolling to Text'],
-  ['browser_scroll_up', 'Scrolling Up'],
-  ['browser_select_dropdown_option', 'Selecting Option'],
-  ['browser_click_coordinates', 'Clicking Coordinates'],
-  ['browser_send_keys', 'Pressing Keys'],
-  ['browser_switch_tab', 'Switching Tab'],
-  ['browser_wait', 'Waiting'],
+  ['call-mcp-tool', '调用外部工具'],
 
-  ['execute_data_provider_call', 'Calling data provider'],
-  ['get_data_provider_endpoints', 'Getting endpoints'],
-  
-  ['deploy', 'Deploying'],
-  ['ask', 'Ask'],
-  ['complete', 'Completing Task'],
-  ['crawl_webpage', 'Crawling Website'],
-  ['expose_port', 'Exposing Port'],
-  ['scrape_webpage', 'Scraping Website'],
-  ['web_search', 'Searching Web'],
-  ['see_image', 'Viewing Image'],
-  
-  ['call_mcp_tool', 'External Tool'],
+  ['update-agent', '更新代理'],
+  ['get-current-agent-config', '获取代理配置'],
+  ['search-mcp-servers', '搜索 MCP 服务器'],
+  ['get-mcp-server-tools', '获取 MCP 服务器工具'],
+  ['configure-mcp-server', '配置 MCP 服务器'],
+  ['get-popular-mcp-servers', '获取热门 MCP 服务器'],
+  ['test-mcp-server-connection', '测试 MCP 服务器连接'],
 
-  ['update_agent', 'Updating Agent'],
-  ['get_current_agent_config', 'Getting Agent Config'],
-  ['search_mcp_servers', 'Searching MCP Servers'],
-  ['get_mcp_server_tools', 'Getting MCP Server Tools'],
-  ['configure_mcp_server', 'Configuring MCP Server'],
-  ['get_popular_mcp_servers', 'Getting Popular MCP Servers'],
-  ['test_mcp_server_connection', 'Testing MCP Server Connection'],
+  // V2
 
+  ['execute_command', '执行命令'],
+  ['check_command_output', '检查命令输出'],
+  ['terminate_command', '终止命令'],
+  ['list_commands', '列出命令'],
+
+  ['create_file', '创建文件'],
+  ['delete_file', '删除文件'],
+  ['full_file_rewrite', '重写文件'],
+  ['str_replace', '编辑文本'],
+
+  ['browser_click_element', '点击元素'],
+  ['browser_close_tab', '关闭标签'],
+  ['browser_drag_drop', '拖动元素'],
+  ['browser_get_dropdown_options', '获取下拉选项'],
+  ['browser_go_back', '返回'],
+  ['browser_input_text', '输入文本'],
+  ['browser_navigate_to', '导航到页面'],
+  ['browser_scroll_down', '向下滚动'],
+  ['browser_scroll_to_text', '滚动到文本'],
+  ['browser_scroll_up', '向上滚动'],
+  ['browser_select_dropdown_option', '选择选项'],
+  ['browser_click_coordinates', '点击坐标'],
+  ['browser_send_keys', '按键操作'],
+  ['browser_switch_tab', '切换标签'],
+  ['browser_wait', '等待'],
+
+  ['execute_data_provider_call', '调用数据提供者'],
+  ['get_data_provider_endpoints', '获取端点'],
+
+  ['deploy', '部署'],
+  ['ask', '询问'],
+  ['complete', '完成任务'],
+  ['crawl_webpage', '爬取网页'],
+  ['expose_port', '暴露端口'],
+  ['scrape_webpage', '抓取网页'],
+  ['web_search', '网页搜索'],
+  ['see_image', '查看图片'],
+
+  ['call_mcp_tool', '调用外部工具'],
+
+  ['update_agent', '更新代理'],
+  ['get_current_agent_config', '获取代理配置'],
+  ['search_mcp_servers', '搜索 MCP 服务器'],
+  ['get_mcp_server_tools', '获取 MCP 服务器工具'],
+  ['configure_mcp_server', '配置 MCP 服务器'],
+  ['get_popular_mcp_servers', '获取热门 MCP 服务器'],
+  ['test_mcp_server_connection', '测试 MCP 服务器连接'],
 ]);
-
 
 const MCP_SERVER_NAMES = new Map([
   ['exa', 'Exa Search'],
@@ -401,47 +403,45 @@ const MCP_SERVER_NAMES = new Map([
 
 function formatMCPToolName(serverName: string, toolName: string): string {
   const serverMappings: Record<string, string> = {
-    'exa': 'Exa Search',
-    'github': 'GitHub',
-    'notion': 'Notion', 
-    'slack': 'Slack',
-    'filesystem': 'File System',
-    'memory': 'Memory',
-    'anthropic': 'Anthropic',
-    'openai': 'OpenAI',
-    'composio': 'Composio',
-    'langchain': 'LangChain',
-    'llamaindex': 'LlamaIndex'
+    exa: 'Exa Search',
+    github: 'GitHub',
+    notion: 'Notion',
+    slack: 'Slack',
+    filesystem: 'File System',
+    memory: 'Memory',
+    anthropic: 'Anthropic',
+    openai: 'OpenAI',
+    composio: 'Composio',
+    langchain: 'LangChain',
+    llamaindex: 'LlamaIndex',
   };
-  
-  const formattedServerName = serverMappings[serverName.toLowerCase()] || 
+
+  const formattedServerName =
+    serverMappings[serverName.toLowerCase()] ||
     serverName.charAt(0).toUpperCase() + serverName.slice(1);
-  
+
   let formattedToolName = toolName;
-  
+
   if (toolName.includes('-')) {
     formattedToolName = toolName
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  }
-  else if (toolName.includes('_')) {
+  } else if (toolName.includes('_')) {
     formattedToolName = toolName
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  }
-  else if (/[a-z][A-Z]/.test(toolName)) {
+  } else if (/[a-z][A-Z]/.test(toolName)) {
     formattedToolName = toolName
       .replace(/([a-z])([A-Z])/g, '$1 $2')
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  }
-  else {
+  } else {
     formattedToolName = toolName.charAt(0).toUpperCase() + toolName.slice(1);
   }
-  
+
   return `${formattedServerName}: ${formattedToolName}`;
 }
 

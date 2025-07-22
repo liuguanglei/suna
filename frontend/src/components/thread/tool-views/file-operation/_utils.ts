@@ -1,4 +1,12 @@
-import { LucideIcon, FilePen, Replace, Trash2, FileCode, FileSpreadsheet, File } from 'lucide-react';
+import {
+  LucideIcon,
+  FilePen,
+  Replace,
+  Trash2,
+  FileCode,
+  FileSpreadsheet,
+  File,
+} from 'lucide-react';
 
 export type FileOperation = 'create' | 'rewrite' | 'delete';
 
@@ -77,7 +85,10 @@ export const getLanguageFromFileName = (fileName: string): string => {
   return extensionMap[extension] || 'text';
 };
 
-export const getOperationType = (name?: string, assistantContent?: any): FileOperation => {
+export const getOperationType = (
+  name?: string,
+  assistantContent?: any,
+): FileOperation => {
   if (name) {
     if (name.includes('create')) return 'create';
     if (name.includes('rewrite')) return 'rewrite';
@@ -87,58 +98,63 @@ export const getOperationType = (name?: string, assistantContent?: any): FileOpe
   if (!assistantContent) return 'create';
 
   // Assuming normalizeContentToString is imported from existing utils
-  const contentStr = typeof assistantContent === 'string' ? assistantContent : JSON.stringify(assistantContent);
+  const contentStr =
+    typeof assistantContent === 'string'
+      ? assistantContent
+      : JSON.stringify(assistantContent);
   if (!contentStr) return 'create';
 
   if (contentStr.includes('<create-file>')) return 'create';
   if (contentStr.includes('<full-file-rewrite>')) return 'rewrite';
-  if (
-    contentStr.includes('delete-file') ||
-    contentStr.includes('<delete>')
-  )
+  if (contentStr.includes('delete-file') || contentStr.includes('<delete>'))
     return 'delete';
 
   if (contentStr.toLowerCase().includes('create file')) return 'create';
-  if (contentStr.toLowerCase().includes('rewrite file'))
-    return 'rewrite';
+  if (contentStr.toLowerCase().includes('rewrite file')) return 'rewrite';
   if (contentStr.toLowerCase().includes('delete file')) return 'delete';
 
   return 'create';
 };
 
-export const getOperationConfigs = (): Record<FileOperation, OperationConfig> => ({
+export const getOperationConfigs = (): Record<
+  FileOperation,
+  OperationConfig
+> => ({
   create: {
     icon: FilePen,
-    color: 'text-emerald-600 dark:text-emerald-400',
-    successMessage: 'File created successfully',
-    progressMessage: 'Creating file...',
-    bgColor: 'bg-gradient-to-b from-emerald-100 to-emerald-50 shadow-inner dark:from-emerald-800/40 dark:to-emerald-900/60 dark:shadow-emerald-950/20',
-    gradientBg: 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/10',
-    borderColor: 'border-emerald-500/20',
-    badgeColor: 'bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 shadow-sm dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300',
-    hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800'
+    color: 'text-neutral-600 dark:text-neutral-400',
+    successMessage: '文件创建成功',
+    progressMessage: '正在创建文件...',
+    bgColor: 'bg-gradient-to-b from-neutral-200 to-neutral-300',
+    gradientBg: 'bg-gradient-to-br from-neutral-500/20 to-neutral-600/10',
+    borderColor: 'border-neutral-200',
+    badgeColor:
+      'bg-gradient-to-b from-neutral-200 to-neutral-100 text-neutral-700 shadow-sm dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300',
+    hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800',
   },
   rewrite: {
     icon: Replace,
-    color: 'text-blue-600 dark:text-blue-400',
-    successMessage: 'File rewritten successfully',
-    progressMessage: 'Rewriting file...',
-    bgColor: 'bg-gradient-to-b from-blue-100 to-blue-50 shadow-inner dark:from-blue-800/40 dark:to-blue-900/60 dark:shadow-blue-950/20',
-    gradientBg: 'bg-gradient-to-br from-blue-500/20 to-blue-600/10',
-    borderColor: 'border-blue-500/20',
-    badgeColor: 'bg-gradient-to-b from-blue-200 to-blue-100 text-blue-700 shadow-sm dark:from-blue-800/50 dark:to-blue-900/60 dark:text-blue-300',
-    hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800'
+    color: 'text-neutral-600 dark:text-neutral-400',
+    successMessage: '文件重写成功',
+    progressMessage: '正在重写文件...',
+    bgColor: 'bg-gradient-to-br from-neutral-200 to-neutral-300',
+    gradientBg: 'bg-gradient-to-br from-neutral-500/20 to-neutral-600/10',
+    borderColor: 'border-neutral-200',
+    badgeColor:
+      'bg-gradient-to-b from-neutral-200 to-neutral-100 text-neutral-700 shadow-sm dark:from-blue-800/50 dark:to-blue-900/60 dark:text-blue-300',
+    hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800',
   },
   delete: {
     icon: Trash2,
-    color: 'text-rose-600 dark:text-rose-400',
-    successMessage: 'File deleted successfully',
-    progressMessage: 'Deleting file...',
-    bgColor: 'bg-gradient-to-b from-rose-100 to-rose-50 shadow-inner dark:from-rose-800/40 dark:to-rose-900/60 dark:shadow-rose-950/20',
-    gradientBg: 'bg-gradient-to-br from-rose-500/20 to-rose-600/10',
-    borderColor: 'border-rose-500/20',
-    badgeColor: 'bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 shadow-sm dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300',
-    hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800'
+    color: 'text-neutral-600 dark:text-neutral-400',
+    successMessage: '文件删除成功',
+    progressMessage: '正在删除文件...',
+    bgColor: 'bg-gradient-to-br from-neutral-200 to-neutral-300',
+    gradientBg: 'bg-gradient-to-br from-neutral-500/20 to-neutral-600/10',
+    borderColor: 'border-neutral-200',
+    badgeColor:
+      'bg-gradient-to-b from-neutral-200 to-neutral-100 text-neutral-700 shadow-sm dark:from-neutral-800/50 dark:to-rose-900/60 dark:text-rose-300',
+    hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800',
   },
 });
 
@@ -150,9 +166,7 @@ export const getFileIcon = (fileName: string): LucideIcon => {
 };
 
 export const processFilePath = (filePath: string | null): string | null => {
-  return filePath
-    ? filePath.trim().replace(/\\n/g, '\n').split('\n')[0]
-    : null;
+  return filePath ? filePath.trim().replace(/\\n/g, '\n').split('\n')[0] : null;
 };
 
 export const getFileName = (processedFilePath: string | null): string => {
@@ -167,7 +181,8 @@ export const getFileExtension = (fileName: string): string => {
 
 export const isFileType = {
   markdown: (fileExtension: string): boolean => fileExtension === 'md',
-  html: (fileExtension: string): boolean => fileExtension === 'html' || fileExtension === 'htm',
+  html: (fileExtension: string): boolean =>
+    fileExtension === 'html' || fileExtension === 'htm',
   csv: (fileExtension: string): boolean => fileExtension === 'csv',
 };
 
@@ -176,7 +191,5 @@ export const hasLanguageHighlighting = (language: string): boolean => {
 };
 
 export const splitContentIntoLines = (fileContent: string | null): string[] => {
-  return fileContent
-    ? fileContent.replace(/\\n/g, '\n').split('\n')
-    : [];
+  return fileContent ? fileContent.replace(/\\n/g, '\n').split('\n') : [];
 };

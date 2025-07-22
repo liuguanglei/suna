@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { UserIcon } from 'lucide-react';
-import { signOut } from '@/app/auth/actions';
+import { signOut } from '@/app/(home)/actions';
 import { useRouter } from 'next/navigation';
 
 interface ClientUserAccountButtonProps {

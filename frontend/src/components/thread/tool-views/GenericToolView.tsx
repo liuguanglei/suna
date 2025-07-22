@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { LoadingState } from './shared/LoadingState';
 
 export function GenericToolView({
@@ -37,16 +37,19 @@ export function GenericToolView({
   const formatContent = (content: any) => {
     if (!content) return null;
 
-    // Use the new parser for backwards compatibility
+    // 使用新的解析器以确保向后兼容
     const { toolResult } = extractToolData(content);
 
     if (toolResult) {
-      // Format the structured content nicely
+      // 格式化结构化内容
       const formatted: any = {
         tool: toolResult.xmlTagName || toolResult.functionName,
       };
 
-      if (toolResult.arguments && Object.keys(toolResult.arguments).length > 0) {
+      if (
+        toolResult.arguments &&
+        Object.keys(toolResult.arguments).length > 0
+      ) {
         formatted.parameters = toolResult.arguments;
       }
 
@@ -61,9 +64,9 @@ export function GenericToolView({
       return JSON.stringify(formatted, null, 2);
     }
 
-    // Fallback to legacy format handling
+    // 回退到旧格式处理
     if (typeof content === 'object') {
-      // Check for direct structured format (legacy)
+      // 检查是否为直接结构化格式（旧版）
       if ('tool_name' in content || 'xml_tag_name' in content) {
         const formatted: any = {
           tool: content.tool_name || content.xml_tag_name || 'unknown',
@@ -80,15 +83,19 @@ export function GenericToolView({
         return JSON.stringify(formatted, null, 2);
       }
 
-      // Check if it has a content field that might contain the structured data (legacy)
+      // 检查是否包含可能包含结构化数据的 content 字段（旧版）
       if ('content' in content && typeof content.content === 'object') {
         const innerContent = content.content;
         if ('tool_name' in innerContent || 'xml_tag_name' in innerContent) {
           const formatted: any = {
-            tool: innerContent.tool_name || innerContent.xml_tag_name || 'unknown',
+            tool:
+              innerContent.tool_name || innerContent.xml_tag_name || 'unknown',
           };
 
-          if (innerContent.parameters && Object.keys(innerContent.parameters).length > 0) {
+          if (
+            innerContent.parameters &&
+            Object.keys(innerContent.parameters).length > 0
+          ) {
             formatted.parameters = innerContent.parameters;
           }
 
@@ -100,7 +107,7 @@ export function GenericToolView({
         }
       }
 
-      // Fall back to old format handling
+      // 回退到旧格式处理
       if (content.content && typeof content.content === 'string') {
         return content.content;
       }
@@ -133,8 +140,8 @@ export function GenericToolView({
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-600/10 border border-orange-500/20">
-              <Wrench className="w-5 h-5 text-orange-500 dark:text-orange-400" />
+            <div className="relative p-2 rounded-lg bg-gradient-to-br from-neutral-200 to-neutral-300 border border-neutral-200">
+              <Wrench className="w-5 h-5 text-neutral-600 dark:text-neutral-600" />
             </div>
             <div>
               <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
@@ -146,18 +153,22 @@ export function GenericToolView({
           {!isStreaming && (
             <Badge
               variant="secondary"
+              className="bg-gradient-to-br from-neutral-200 to-neutral-300"
+            >
+              {/* <Badge
+              variant="secondary"
               className={
                 isSuccess
-                  ? "bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300"
-                  : "bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300"
+                  ? 'bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300'
+                  : 'bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300'
               }
             >
               {isSuccess ? (
                 <CheckCircle className="h-3.5 w-3.5" />
               ) : (
                 <AlertTriangle className="h-3.5 w-3.5" />
-              )}
-              {isSuccess ? 'Tool executed successfully' : 'Tool execution failed'}
+              )} */}
+              {isSuccess ? '工具执行成功' : '工具执行失败'}
             </Badge>
           )}
         </div>
@@ -169,7 +180,7 @@ export function GenericToolView({
             icon={Wrench}
             iconColor="text-orange-500 dark:text-orange-400"
             bgColor="bg-gradient-to-b from-orange-100 to-orange-50 shadow-inner dark:from-orange-800/40 dark:to-orange-900/60 dark:shadow-orange-950/20"
-            title="Executing tool"
+            title="正在执行工具"
             filePath={name}
             showProgress={true}
           />
@@ -180,7 +191,7 @@ export function GenericToolView({
                 <div className="space-y-2">
                   <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300 flex items-center">
                     <Wrench className="h-4 w-4 mr-2 text-zinc-500 dark:text-zinc-400" />
-                    Input
+                    输入
                   </div>
                   <div className="border-muted bg-muted/20 rounded-lg overflow-hidden border">
                     <div className="p-4">
@@ -196,7 +207,7 @@ export function GenericToolView({
                 <div className="space-y-2">
                   <div className="text-sm font-medium text-zinc-700 dark:text-zinc-300 flex items-center">
                     <Wrench className="h-4 w-4 mr-2 text-zinc-500 dark:text-zinc-400" />
-                    Output
+                    输出
                   </div>
                   <div className="border-muted bg-muted/20 rounded-lg overflow-hidden border">
                     <div className="p-4">
@@ -215,23 +226,27 @@ export function GenericToolView({
               <Wrench className="h-10 w-10 text-zinc-400 dark:text-zinc-600" />
             </div>
             <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
-              No Content Available
+              无内容可显示
             </h3>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center max-w-md">
-              This tool execution did not produce any input or output content to display.
+              此工具执行未产生任何输入或输出内容。
             </p>
           </div>
         )}
       </CardContent>
 
-      <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
+      {/* <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
         <div className="h-full flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-          {!isStreaming && (formattedAssistantContent || formattedToolContent) && (
-            <Badge variant="outline" className="h-6 py-0.5 bg-zinc-50 dark:bg-zinc-900">
-              <Wrench className="h-3 w-3" />
-              Tool
-            </Badge>
-          )}
+          {!isStreaming &&
+            (formattedAssistantContent || formattedToolContent) && (
+              <Badge
+                variant="outline"
+                className="h-6 py-0.5 bg-zinc-50 dark:bg-zinc-900"
+              >
+                <Wrench className="h-3 w-3" />
+                工具
+              </Badge>
+            )}
         </div>
 
         <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-2">
@@ -242,7 +257,7 @@ export function GenericToolView({
               ? formatTimestamp(assistantTimestamp)
               : ''}
         </div>
-      </div>
+      </div> */}
     </Card>
   );
 }
