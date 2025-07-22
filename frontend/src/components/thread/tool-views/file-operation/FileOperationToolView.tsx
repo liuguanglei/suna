@@ -26,16 +26,11 @@ import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { CodeBlockCode } from '@/components/ui/code-block';
 import { constructHtmlPreviewUrl } from '@/lib/utils/url';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 import {
   getLanguageFromFileName,
@@ -94,20 +89,20 @@ export function FileOperationToolView({
   if (!fileContent && operation !== 'delete') {
     fileContent = isStreaming
       ? extractStreamingFileContent(
-        assistantContent,
-        operation === 'create' ? 'create-file' : 'full-file-rewrite',
-      ) || ''
+          assistantContent,
+          operation === 'create' ? 'create-file' : 'full-file-rewrite',
+        ) || ''
       : extractFileContent(
-        assistantContent,
-        operation === 'create' ? 'create-file' : 'full-file-rewrite',
-      );
+          assistantContent,
+          operation === 'create' ? 'create-file' : 'full-file-rewrite',
+        );
   }
 
   const toolTitle = getToolTitle(name || `file-${operation}`);
   const processedFilePath = processFilePath(filePath);
   const fileName = getFileName(processedFilePath);
   const fileExtension = getFileExtension(fileName);
-  
+
   const isMarkdown = isFileType.markdown(fileExtension);
   const isHtml = isFileType.html(fileExtension);
   const isCsv = isFileType.csv(fileExtension);
@@ -143,7 +138,9 @@ export function FileOperationToolView({
         <div className="flex items-center justify-center h-full p-12">
           <div className="text-center">
             <FileIcon className="h-12 w-12 mx-auto mb-4 text-zinc-400" />
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">No content to preview</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              无内容可预览
+            </p>
           </div>
         </div>
       );
@@ -154,7 +151,7 @@ export function FileOperationToolView({
         <div className="flex flex-col h-[calc(100vh-16rem)]">
           <iframe
             src={htmlPreviewUrl}
-            title={`HTML Preview of ${fileName}`}
+            title={`HTML 预览 ${fileName}`}
             className="flex-grow border-0"
             sandbox="allow-same-origin allow-scripts"
           />
@@ -165,9 +162,7 @@ export function FileOperationToolView({
     if (isMarkdown) {
       return (
         <div className="p-1 py-0 prose dark:prose-invert prose-zinc max-w-none">
-          <MarkdownRenderer
-            content={processUnicodeContent(fileContent)}
-          />
+          <MarkdownRenderer content={processUnicodeContent(fileContent)} />
         </div>
       );
     }
@@ -184,7 +179,7 @@ export function FileOperationToolView({
 
     return (
       <div className="p-4">
-        <div className='w-full h-full bg-muted/20 border rounded-xl px-4 py-2 pb-6'>
+        <div className="w-full h-full bg-muted/20 border rounded-xl px-4 py-2 pb-6">
           <pre className="text-sm font-mono text-zinc-800 dark:text-zinc-300 whitespace-pre-wrap break-words">
             {processUnicodeContent(fileContent)}
           </pre>
@@ -195,19 +190,24 @@ export function FileOperationToolView({
 
   const renderDeleteOperation = () => (
     <div className="flex flex-col items-center justify-center h-full py-12 px-6 bg-gradient-to-b from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900">
-      <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-6", config.bgColor)}>
-        <Icon className={cn("h-10 w-10", config.color)} />
+      <div
+        className={cn(
+          'w-20 h-20 rounded-full flex items-center justify-center mb-6',
+          config.bgColor,
+        )}
+      >
+        <Icon className={cn('h-10 w-10', config.color)} />
       </div>
       <h3 className="text-xl font-semibold mb-6 text-zinc-900 dark:text-zinc-100">
-        File Deleted
+        文件已删除
       </h3>
       <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 w-full max-w-md text-center mb-4 shadow-sm">
         <code className="text-sm font-mono text-zinc-700 dark:text-zinc-300 break-all">
-          {processedFilePath || 'Unknown file path'}
+          {processedFilePath || '未知文件路径'}
         </code>
       </div>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        This file has been permanently removed
+        该文件已被永久删除
       </p>
     </div>
   );
@@ -218,7 +218,9 @@ export function FileOperationToolView({
         <div className="flex items-center justify-center h-full p-12">
           <div className="text-center">
             <FileIcon className="h-12 w-12 mx-auto mb-4 text-zinc-400" />
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">No source code to display</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              无源代码可显示
+            </p>
           </div>
         </div>
       );
@@ -253,7 +255,7 @@ export function FileOperationToolView({
         {contentLines.map((line, idx) => (
           <div
             key={idx}
-            className={cn("table-row transition-colors", config.hoverColor)}
+            className={cn('table-row transition-colors', config.hoverColor)}
           >
             <div className="table-cell text-right pr-3 pl-6 py-0.5 text-xs font-mono text-zinc-500 dark:text-zinc-500 select-none w-12 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
               {idx + 1}
@@ -274,8 +276,14 @@ export function FileOperationToolView({
         <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2 mb-0">
           <div className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className={cn("relative p-2 rounded-lg border", config.gradientBg, config.borderColor)}>
-                <Icon className={cn("h-5 w-5", config.color)} />
+              <div
+                className={cn(
+                  'relative p-2 rounded-lg border',
+                  config.gradientBg,
+                  config.borderColor,
+                )}
+              >
+                <Icon className={cn('h-5 w-5', config.color)} />
               </div>
               <div>
                 <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
@@ -283,23 +291,38 @@ export function FileOperationToolView({
                 </CardTitle>
               </div>
             </div>
-            <div className='flex items-center gap-2'>
+            <div className="flex items-center gap-2">
               {isHtml && htmlPreviewUrl && !isStreaming && (
-                <Button variant="outline" size="sm" className="h-8 text-xs bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800" asChild>
-                  <a href={htmlPreviewUrl} target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  asChild
+                >
+                  <a
+                    href={htmlPreviewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                    Open in Browser
+                    在浏览器中打开
                   </a>
                 </Button>
               )}
               <TabsList className="-mr-2 h-7 bg-zinc-100/70 dark:bg-zinc-800/70 rounded-lg">
-                <TabsTrigger value="code" className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-primary">
+                <TabsTrigger
+                  value="code"
+                  className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900"
+                >
                   <Code className="h-4 w-4" />
-                  Source
+                  源代码
                 </TabsTrigger>
-                <TabsTrigger value="preview" className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-primary">
+                <TabsTrigger
+                  value="preview"
+                  className="rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-900"
+                >
                   <Eye className="h-4 w-4" />
-                  Preview
+                  预览
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -307,7 +330,10 @@ export function FileOperationToolView({
         </CardHeader>
 
         <CardContent className="p-0 -my-2 h-full flex-1 overflow-hidden relative">
-          <TabsContent value="code" className="flex-1 h-full mt-0 p-0 overflow-hidden">
+          <TabsContent
+            value="code"
+            className="flex-1 h-full mt-0 p-0 overflow-hidden"
+          >
             <ScrollArea className="h-screen w-full min-h-0">
               {isStreaming && !fileContent ? (
                 <LoadingState
@@ -315,21 +341,26 @@ export function FileOperationToolView({
                   iconColor={config.color}
                   bgColor={config.bgColor}
                   title={config.progressMessage}
-                  filePath={processedFilePath || 'Processing file...'}
-                  subtitle="Please wait while the file is being processed"
+                  filePath={processedFilePath || '正在处理文件...'}
+                  subtitle="正在处理文件，请稍候"
                   showProgress={false}
                 />
               ) : operation === 'delete' ? (
                 <div className="flex flex-col items-center justify-center h-full py-12 px-6">
-                  <div className={cn("w-20 h-20 rounded-full flex items-center justify-center mb-6", config.bgColor)}>
-                    <Icon className={cn("h-10 w-10", config.color)} />
+                  <div
+                    className={cn(
+                      'w-20 h-20 rounded-full flex items-center justify-center mb-6',
+                      config.bgColor,
+                    )}
+                  >
+                    <Icon className={cn('h-10 w-10', config.color)} />
                   </div>
                   <h3 className="text-xl font-semibold mb-6 text-zinc-900 dark:text-zinc-100">
-                    Delete Operation
+                    删除操作
                   </h3>
                   <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 w-full max-w-md text-center">
                     <code className="text-sm font-mono text-zinc-700 dark:text-zinc-300 break-all">
-                      {processedFilePath || 'Unknown file path'}
+                      {processedFilePath || '未知文件路径'}
                     </code>
                   </div>
                 </div>
@@ -339,7 +370,10 @@ export function FileOperationToolView({
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="preview" className="w-full flex-1 h-full mt-0 p-0 overflow-hidden">
+          <TabsContent
+            value="preview"
+            className="w-full flex-1 h-full mt-0 p-0 overflow-hidden"
+          >
             <ScrollArea className="h-full w-full min-h-0">
               {isStreaming && !fileContent ? (
                 <LoadingState
@@ -347,8 +381,8 @@ export function FileOperationToolView({
                   iconColor={config.color}
                   bgColor={config.bgColor}
                   title={config.progressMessage}
-                  filePath={processedFilePath || 'Processing file...'}
-                  subtitle="Please wait while the file is being processed"
+                  filePath={processedFilePath || '正在处理文件...'}
+                  subtitle="正在处理文件，请稍候"
                   showProgress={false}
                 />
               ) : operation === 'delete' ? (
@@ -360,7 +394,7 @@ export function FileOperationToolView({
                 <div className="sticky bottom-4 right-4 float-right mr-4 mb-4">
                   <Badge className="bg-blue-500/90 text-white border-none shadow-lg animate-pulse">
                     <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    Streaming...
+                    正在流式传输...
                   </Badge>
                 </div>
               )}
@@ -368,11 +402,13 @@ export function FileOperationToolView({
           </TabsContent>
         </CardContent>
 
-        <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
+        {/* <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
           <div className="h-full flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
             <Badge variant="outline" className="py-0.5 h-6">
               <FileIcon className="h-3 w-3" />
-              {hasHighlighting ? language.toUpperCase() : fileExtension.toUpperCase() || 'TEXT'}
+              {hasHighlighting
+                ? language.toUpperCase()
+                : fileExtension.toUpperCase() || 'TEXT'}
             </Badge>
           </div>
 
@@ -383,7 +419,7 @@ export function FileOperationToolView({
                 ? formatTimestamp(assistantTimestamp)
                 : ''}
           </div>
-        </div>
+        </div> */}
       </Tabs>
     </Card>
   );

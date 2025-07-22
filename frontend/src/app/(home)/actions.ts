@@ -6,16 +6,19 @@ import { redirect } from 'next/navigation';
 async function sendWelcomeEmail(email: string, name?: string) {
   try {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-    const response = await fetch(`${backendUrl}/send-welcome-email-background`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${backendUrl}/send-welcome-email-background`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          name,
+        }),
       },
-      body: JSON.stringify({
-        email,
-        name,
-      }),
-    });
+    );
 
     if (response.ok) {
       console.log(`Welcome email queued for ${email}`);
@@ -80,7 +83,7 @@ export async function signUp(prevState: any, formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?returnUrl=${returnUrl}`,
+      emailRedirectTo: `${origin}/callback?returnUrl=${returnUrl}`,
     },
   });
 
@@ -88,12 +91,16 @@ export async function signUp(prevState: any, formData: FormData) {
     return { message: error.message || 'Could not create account' };
   }
 
-  const userName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const userName = email
+    .split('@')[0]
+    .replace(/[._-]/g, ' ')
+    .replace(/\b\w/g, (l) => l.toUpperCase());
 
-  const { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { error: signInError, data: signInData } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
   if (signInData) {
     sendWelcomeEmail(email, userName);
@@ -121,7 +128,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/reset-password`,
+    redirectTo: `${origin}/reset-password`,
   });
 
   if (error) {

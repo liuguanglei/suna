@@ -256,7 +256,8 @@ export const siteConfig = {
         'Dedicated account manager',
       ],
       stripePriceId: config.SUBSCRIPTION_TIERS.TIER_125_800.priceId,
-      yearlyStripePriceId: config.SUBSCRIPTION_TIERS.TIER_125_800_YEARLY.priceId,
+      yearlyStripePriceId:
+        config.SUBSCRIPTION_TIERS.TIER_125_800_YEARLY.priceId,
       upgradePlans: [],
       hidden: true,
     },
@@ -281,7 +282,8 @@ export const siteConfig = {
         'Custom SLA',
       ],
       stripePriceId: config.SUBSCRIPTION_TIERS.TIER_200_1000.priceId,
-      yearlyStripePriceId: config.SUBSCRIPTION_TIERS.TIER_200_1000_YEARLY.priceId,
+      yearlyStripePriceId:
+        config.SUBSCRIPTION_TIERS.TIER_200_1000_YEARLY.priceId,
       upgradePlans: [],
       hidden: true,
     },
@@ -1214,7 +1216,7 @@ export const siteConfig = {
     backgroundImage: '/holo.png',
     button: {
       text: 'Get Started for free',
-      href: '/auth',
+      href: '/',
     },
     subtext: 'The generalist AI Agent that acts on your behalf',
   },

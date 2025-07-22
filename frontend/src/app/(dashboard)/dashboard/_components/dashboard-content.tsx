@@ -8,9 +8,7 @@ import {
   ChatInput,
   ChatInputHandles,
 } from '@/components/thread/chat-input/chat-input';
-import {
-  BillingError,
-} from '@/lib/api';
+import { BillingError } from '@/lib/api';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -39,7 +37,9 @@ export function DashboardContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [autoSubmit, setAutoSubmit] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
-  const [initiatedThreadId, setInitiatedThreadId] = useState<string | null>(null);
+  const [initiatedThreadId, setInitiatedThreadId] = useState<string | null>(
+    null,
+  );
   const { billingError, handleBillingError, clearBillingError } =
     useBillingError();
   const router = useRouter();
@@ -56,14 +56,14 @@ export function DashboardContent() {
   const { data: agentsResponse } = useAgents({
     limit: 100,
     sort_by: 'name',
-    sort_order: 'asc'
+    sort_order: 'asc',
   });
 
   const agents = agentsResponse?.agents || [];
-  const selectedAgent = selectedAgentId 
-    ? agents.find(agent => agent.agent_id === selectedAgentId)
+  const selectedAgent = selectedAgentId
+    ? agents.find((agent) => agent.agent_id === selectedAgentId)
     : null;
-  const displayName = selectedAgent?.name || 'Suna';
+  const displayName = selectedAgent?.name || '奇智孔明AInnoGC';
   const agentAvatar = selectedAgent?.avatar;
 
   const threadQuery = useThreadQuery(initiatedThreadId || '');
@@ -83,7 +83,9 @@ export function DashboardContent() {
       const thread = threadQuery.data;
       console.log('Thread data received:', thread);
       if (thread.project_id) {
-        router.push(`/projects/${thread.project_id}/thread/${initiatedThreadId}`);
+        router.push(
+          `/projects/${thread.project_id}/thread/${initiatedThreadId}`,
+        );
       } else {
         router.push(`/agents/${initiatedThreadId}`);
       }
@@ -93,6 +95,10 @@ export function DashboardContent() {
 
   const secondaryGradient =
     'bg-gradient-to-r from-blue-500 to-blue-500 bg-clip-text text-transparent';
+
+  const onSelectShareChat = (id) => {
+    router.push(`/share/${id}`);
+  };
 
   const handleSubmit = async (
     message: string,
@@ -129,11 +135,18 @@ export function DashboardContent() {
         formData.append('files', file, normalizedName);
       });
 
-      if (options?.model_name) formData.append('model_name', options.model_name);
-      formData.append('enable_thinking', String(options?.enable_thinking ?? false));
+      if (options?.model_name)
+        formData.append('model_name', options.model_name);
+      formData.append(
+        'enable_thinking',
+        String(options?.enable_thinking ?? false),
+      );
       formData.append('reasoning_effort', options?.reasoning_effort ?? 'low');
       formData.append('stream', String(options?.stream ?? true));
-      formData.append('enable_context_manager', String(options?.enable_context_manager ?? false));
+      formData.append(
+        'enable_context_manager',
+        String(options?.enable_context_manager ?? false),
+      );
 
       console.log('FormData content:', Array.from(formData.entries()));
 
@@ -150,7 +163,7 @@ export function DashboardContent() {
       console.error('Error during submission process:', error);
       if (error instanceof BillingError) {
         console.log('Handling BillingError:', error.detail);
-        onOpen("paymentRequiredDialog");
+        onOpen('paymentRequiredDialog');
       }
     } finally {
       setIsSubmitting(false);
@@ -207,7 +220,7 @@ export function DashboardContent() {
           <div className="flex flex-col items-center text-center w-full">
             <div className="flex items-center gap-1">
               <h1 className="tracking-tight text-4xl text-muted-foreground leading-tight">
-                Hey, I am
+                你好，我是
               </h1>
               <h1 className="ml-1 tracking-tight text-4xl font-semibold leading-tight text-primary">
                 {displayName}
@@ -218,20 +231,16 @@ export function DashboardContent() {
                 )}
               </h1>
             </div>
-            <p className="tracking-tight text-3xl font-normal text-muted-foreground/80 mt-2">
-              What would you like to do today?
+            <p className="tracking-tight text-1xl font-normal mt-2">
+              作为一个面向智能制造的Agent，为你执行有价值的任务
             </p>
           </div>
-          <div className={cn(
-            "w-full mb-2",
-            "max-w-full",
-            "sm:max-w-3xl"
-          )}>
+          <div className={cn('w-full mb-2', 'max-w-full', 'sm:max-w-3xl')}>
             <ChatInput
               ref={chatInputRef}
               onSubmit={handleSubmit}
               loading={isSubmitting}
-              placeholder="Describe what you need help with..."
+              placeholder="请输入文字，回车换行，“ctrl+回车”直接发送"
               value={inputValue}
               onChange={setInputValue}
               hideAttachments={false}
@@ -239,7 +248,10 @@ export function DashboardContent() {
               onAgentSelect={setSelectedAgentId}
             />
           </div>
-          <Examples onSelectPrompt={setInputValue} />
+          <Examples
+            onSelectPrompt={setInputValue}
+            onSelectShareChat={onSelectShareChat}
+          />
         </div>
         <BillingErrorAlert
           message={billingError?.message}

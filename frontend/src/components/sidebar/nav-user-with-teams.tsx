@@ -142,7 +142,7 @@ export function NavUserWithTeams({
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/auth');
+    router.push('/');
   };
 
   const getInitials = (name: string) => {
@@ -166,11 +166,11 @@ export function NavUserWithTeams({
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className="data-[state=open]:bg-[#FFE6CB] data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className="rounded-lg bg-[#F78802] text-white">
                     {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -178,7 +178,7 @@ export function NavUserWithTeams({
                   <span className="truncate font-medium">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
-                <ChevronsUpDown className="ml-auto size-4" />
+                {/* <ChevronsUpDown className="ml-auto size-4" /> */}
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -187,11 +187,11 @@ export function NavUserWithTeams({
               align="start"
               sideOffset={4}
             >
-              <DropdownMenuLabel className="p-0 font-normal">
+              {/* <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">
+                    <AvatarFallback className="rounded-lg bg-[#F78802] text-white">
                       {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -201,10 +201,10 @@ export function NavUserWithTeams({
                   </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator /> */}
 
               {/* Teams Section */}
-              {personalAccount && (
+              {/* {personalAccount && (
                 <>
                   <DropdownMenuLabel className="text-muted-foreground text-xs">
                     Personal Account
@@ -230,9 +230,9 @@ export function NavUserWithTeams({
                     <DropdownMenuShortcut>⌘1</DropdownMenuShortcut>
                   </DropdownMenuItem>
                 </>
-              )}
+              )} */}
 
-              {teamAccounts?.length > 0 && (
+              {/* {teamAccounts?.length > 0 && (
                 <>
                   <DropdownMenuLabel className="text-muted-foreground text-xs mt-2">
                     Teams
@@ -260,7 +260,7 @@ export function NavUserWithTeams({
                     </DropdownMenuItem>
                   ))}
                 </>
-              )}
+              )} */}
 
               {/* <DropdownMenuSeparator />
               <DialogTrigger asChild>
@@ -276,22 +276,22 @@ export function NavUserWithTeams({
                   <div className="text-muted-foreground font-medium">Add team</div>
                 </DropdownMenuItem>
               </DialogTrigger> */}
-              <DropdownMenuSeparator />
+              {/* <DropdownMenuSeparator /> */}
 
               {/* User Settings Section */}
-              <DropdownMenuGroup>
+              {/* <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                   <Link href="/settings/billing">
                     <CreditCard className="h-4 w-4" />
                     Billing
                   </Link>
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild>
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
-                </DropdownMenuItem> */}
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
                 >
@@ -301,11 +301,14 @@ export function NavUserWithTeams({
                     <span>Theme</span>
                   </div>
                 </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className='text-destructive focus:text-destructive focus:bg-destructive/10' onClick={handleLogout}>
+              </DropdownMenuGroup> */}
+              {/* <DropdownMenuSeparator /> */}
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                onClick={handleLogout}
+              >
                 <LogOut className="h-4 w-4 text-destructive" />
-                Log out
+                退出登录
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
