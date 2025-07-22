@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:7-alpine
+    image: registry.ainnovation.com/bg_cto/newagent-redis
     ports:
       - "9339:6379"
     volumes:
@@ -14,7 +14,7 @@ services:
       retries: 3
 
   rabbitmq:
-    image: rabbitmq
+    image: registry.ainnovation.com/bg_cto/newagent-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -29,7 +29,7 @@ services:
       start_period: 10s
 
   backend:
-    image: ghcr.io/suna-ai/suna-backend:latest
+    image: registry.ainnovation.com/bg_cto/newagent-backend
     platform: linux/amd64
     build:
       context: ./backend
@@ -57,11 +57,11 @@ services:
         condition: service_started
 
   worker:
-    image: ghcr.io/suna-ai/suna-backend:latest
+    image: registry.ainnovation.com/bg_cto/newagent-backend
     platform: linux/amd64
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+#    build:
+#      context: ./backend
+#      dockerfile: Dockerfile
     command: uv run dramatiq --skip-logging --processes 4 --threads 4 run_agent_background
     volumes:
       - ./backend/.env:/app/.env:ro
@@ -81,17 +81,34 @@ services:
         condition: service_healthy
 
   frontend:
+    image: registry.ainnovation.com/bg_cto/newagent-frontend
     init: true
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+    ports:
+      - "3458:3000"
+    volumes:
+      - ./frontend/.env.local:/app/.env.local:ro
+    environment:
+      - NODE_ENV=production
+    command: ["npm", "run", "start"]
+    depends_on:
+      - backend
+
+  frontend_ori:
+    image: registry.ainnovation.com/bg_cto/newagent-frontend-ori
+    init: true
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
     ports:
       - "3459:3000"
     volumes:
       - ./frontend/.env.local:/app/.env.local:ro
     environment:
       - NODE_ENV=production
-    command: ["npm", "run", "start"]
+    command: [ "npm", "run", "start" ]
     depends_on:
       - backend
 
