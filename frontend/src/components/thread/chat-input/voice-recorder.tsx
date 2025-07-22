@@ -79,8 +79,9 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
         });
 
         transcriptionMutation.mutate(audioFile, {
-          onSuccess: (data) => {
-            onTranscription(data.text);
+          onSuccess: (data: any) => {
+            console.log('Transcription successful:', data);
+            onTranscription(data.result.text);
             setState('idle');
           },
           onError: (error) => {
