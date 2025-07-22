@@ -31,9 +31,9 @@ services:
   backend:
     image: registry.ainnovation.com/bg_cto/newagent-backend
     platform: linux/amd64
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
     ports:
       - "3457:8000"
     volumes:
@@ -59,9 +59,9 @@ services:
   worker:
     image: registry.ainnovation.com/bg_cto/newagent-backend
     platform: linux/amd64
-#    build:
-#      context: ./backend
-#      dockerfile: Dockerfile
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
     command: uv run dramatiq --skip-logging --processes 4 --threads 4 run_agent_background
     volumes:
       - ./backend/.env:/app/.env:ro
@@ -83,9 +83,9 @@ services:
   frontend:
     image: registry.ainnovation.com/bg_cto/newagent-frontend
     init: true
-#    build:
-#      context: ./frontend
-#      dockerfile: Dockerfile
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile
     ports:
       - "3458:3000"
     volumes:

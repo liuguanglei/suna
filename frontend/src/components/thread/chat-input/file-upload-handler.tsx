@@ -24,7 +24,7 @@ const handleLocalFiles = (
   setUploadedFiles: React.Dispatch<React.SetStateAction<UploadedFile[]>>,
 ) => {
   const filteredFiles = files.filter((file) => {
-    if (file.size > 50 * 1024 * 1024) {
+    if (file.size > 200 * 1024 * 1024) {
       toast.error(`File size exceeds 50MB limit: ${file.name}`);
       return false;
     }
@@ -67,8 +67,8 @@ const uploadFiles = async (
     const newUploadedFiles: UploadedFile[] = [];
 
     for (const file of files) {
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error(`File size exceeds 50MB limit: ${file.name}`);
+      if (file.size > 200 * 1024 * 1024) {
+        toast.error(`File size exceeds 200MB limit: ${file.name}`);
         continue;
       }
 

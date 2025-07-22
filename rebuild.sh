@@ -4,12 +4,6 @@ sudo docker build -t ghcr.io/suna-ai/suna-backend . -f Dockerfile
 cd ..
 echo "-------build backend finished-------"
 
-echo "-------begin build worker-------"
-cd backend
-sudo docker build -t suna-worker . -f Dockerfile
-cd ..
-echo "-------build worker finished-------"
-
 echo "-------begin build frontend-------"
 cd frontend
 sudo docker build -t suna-frontend . -f Dockerfile
