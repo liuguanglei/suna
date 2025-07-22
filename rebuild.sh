@@ -1,12 +1,12 @@
 echo "-------begin build backend-------"
 cd backend
-sudo docker build -t ghcr.io/suna-ai/suna-backend . -f Dockerfile
+sudo docker build -t registry.ainnovation.com/bg_cto/newagent-backend . -f Dockerfile
 cd ..
 echo "-------build backend finished-------"
 
 echo "-------begin build frontend-------"
 cd frontend
-sudo docker build -t suna-frontend . -f Dockerfile
+sudo docker build -t registry.ainnovation.com/bg_cto/newagent-frontend . -f Dockerfile
 cd ..
 echo "-------build frontend finished-------"
 
