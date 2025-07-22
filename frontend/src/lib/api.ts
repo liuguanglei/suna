@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { handleApiError } from './error-handler';
+import { v4 as uuidv4 } from 'uuid';
 
 // Get backend URL from environment variables
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
@@ -1939,6 +1940,62 @@ export interface TranscriptionResponse {
   text: string;
 }
 
+async function fileToWavBase64(file): Promise<any> {
+  // 1. File → ArrayBuffer
+  const arrayBuffer = await file.arrayBuffer();
+
+  // 2. 解码音频
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+  // 3. AudioBuffer → WAV Blob
+  const wavBlob = audioBufferToWav(audioBuffer);
+
+  // 4. WAV Blob → base64
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result); // data:audio/wav;base64,...
+    reader.readAsDataURL(wavBlob);
+  });
+}
+
+// 工具函数：把 File → Base64（含前缀）
+function audioBufferToWav(buffer) {
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length * numChannels * 2 + 44;
+  const arrayBuffer = new ArrayBuffer(length);
+  const view = new DataView(arrayBuffer);
+  const writeString = (offset, str) => {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  };
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, length - 8, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
+  view.setUint16(34, 16, true); // 16-bit
+  writeString(36, 'data');
+  view.setUint32(40, length - 44, true);
+
+  let offset = 44;
+  for (let i = 0; i < buffer.length; i++) {
+    for (let channel = 0; channel < numChannels; channel++) {
+      const sample = buffer.getChannelData(channel)[i];
+      const clamped = Math.max(-1, Math.min(1, sample));
+      view.setInt16(offset, clamped < 0 ? clamped * 0x8000 : clamped * 0x7FFF, true);
+      offset += 2;
+    }
+  }
+  return new Blob([arrayBuffer], { type: 'audio/wav' });
+}
+
 // Transcription API Functions
 export const transcribeAudio = async (audioFile: File): Promise<TranscriptionResponse> => {
   try {
@@ -1947,20 +2004,44 @@ export const transcribeAudio = async (audioFile: File): Promise<TranscriptionRes
       data: { session },
     } = await supabase.auth.getSession();
 
+
     if (!session?.access_token) {
       throw new NoAccessTokenAvailableError();
     }
 
     const formData = new FormData();
     formData.append('audio_file', audioFile);
-
-    const response = await fetch(`${API_URL}/transcription`, {
+    const base64 = await fileToWavBase64(audioFile)
+    const response = await fetch("https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash", {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${session.access_token}`,
+        "X-Api-App-Key": process.env.NEXT_PUBLIC_BYTEDANCE_APP_ID_STT,
+        "X-Api-Access-Key": process.env.NEXT_PUBLIC_BYTEDANCE_ACCESS_KEY_STT,
+        "X-Api-Resource-Id": "volc.bigasr.auc_turbo",
+        "X-Api-Request-Id": uuidv4(),
+        "X-Api-Sequence": "-1"
       },
-      body: formData,
-    });
+
+      body: JSON.stringify({
+        "user": {
+          "uid": process.env.NEXT_PUBLIC_BYTEDANCE_APP_ID_STT
+        },
+        "audio": {
+          "data": base64.split(',')[1]
+        },
+        "request": {
+          "model_name": "bigmodel"
+        }
+      })
+    })
+
+    // const response = await fetch(`${API_URL}/transcription`, {
+    //   method: 'POST',
+    //   headers: {
+    //     Authorization: `Bearer ${session.access_token}`,
+    //   },
+    //   body: formData,
+    // });
 
     if (!response.ok) {
       const errorText = await response
@@ -1974,7 +2055,6 @@ export const transcribeAudio = async (audioFile: File): Promise<TranscriptionRes
         `Error transcribing audio: ${response.statusText} (${response.status})`,
       );
     }
-
     return response.json();
   } catch (error) {
     if (error instanceof NoAccessTokenAvailableError) {
