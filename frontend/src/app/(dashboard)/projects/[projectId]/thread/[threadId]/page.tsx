@@ -599,7 +599,7 @@ export default function ThreadPage({
       );
       const isFreeTier = subscriptionStatus === 'no_subscription';
       if (!hasSeenUpgradeDialog && isFreeTier && !isLocalMode()) {
-        setShowUpgradeDialog(true);
+        // setShowUpgradeDialog(true);
       }
     }
   }, [subscriptionData, subscriptionStatus, initialLoadCompleted]);
