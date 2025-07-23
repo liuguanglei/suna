@@ -6,7 +6,7 @@ let nextConfig: NextConfig = {
     '127.0.0.1',
     'localhost',
     '192.168.10.81',
-    '192.168.10.29',
+    '192.168.10.29:3458',
     'bg.ainnovation.com',
     '10.18.144.205',
   ],
