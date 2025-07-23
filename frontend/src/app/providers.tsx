@@ -31,7 +31,7 @@ export const ToolCallsContext = createContext<{
   setToolCalls: React.Dispatch<React.SetStateAction<ParsedTag[]>>;
 }>({
   toolCalls: [],
-  setToolCalls: () => { },
+  setToolCalls: () => {},
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -43,7 +43,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <ToolCallsContext.Provider value={{ toolCalls, setToolCalls }}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <ReactQueryProvider dehydratedState={dehydratedState}>
             {children}
           </ReactQueryProvider>
