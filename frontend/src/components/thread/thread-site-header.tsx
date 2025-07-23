@@ -106,7 +106,7 @@ export function SiteHeader({
     if (editName !== projectName) {
       try {
         if (!projectId) {
-          toast.error('无法重命名：缺少项目 ID');
+          console.error('无法重命名：缺少项目 ID');
           setEditName(projectName);
           setIsEditing(false);
           return;
@@ -128,7 +128,7 @@ export function SiteHeader({
         const errorMessage =
           error instanceof Error ? error.message : 'Failed to rename project';
         console.error('Failed to rename project:', errorMessage);
-        toast.error(errorMessage);
+        console.error(errorMessage);
         setEditName(projectName);
       }
     }

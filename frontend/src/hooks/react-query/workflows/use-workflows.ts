@@ -9,7 +9,15 @@ export interface WorkflowStep {
   id: string;
   name: string;
   description?: string;
-  type: 'TOOL' | 'MCP_TOOL' | 'CONDITION' | 'LOOP' | 'PARALLEL' | 'WAIT' | 'WEBHOOK' | 'TRANSFORM';
+  type:
+    | 'TOOL'
+    | 'MCP_TOOL'
+    | 'CONDITION'
+    | 'LOOP'
+    | 'PARALLEL'
+    | 'WAIT'
+    | 'WEBHOOK'
+    | 'TRANSFORM';
   config: Record<string, any>;
   next_steps: string[];
   error_handler?: string;
@@ -92,12 +100,14 @@ export interface WorkflowFlow {
 
 const getAuthHeaders = async () => {
   const supabase = createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session?.access_token) {
     throw new Error('No access token available');
   }
   return {
-    'Authorization': `Bearer ${session.access_token}`,
+    Authorization: `Bearer ${session.access_token}`,
     'Content-Type': 'application/json',
   };
 };
@@ -118,7 +128,9 @@ const api = {
       return response.json();
     },
 
-    create: async (workflow: Partial<WorkflowDefinition>): Promise<WorkflowDefinition> => {
+    create: async (
+      workflow: Partial<WorkflowDefinition>,
+    ): Promise<WorkflowDefinition> => {
       const headers = await getAuthHeaders();
       const response = await fetch(`${API_URL}/workflows`, {
         method: 'POST',
@@ -129,7 +141,12 @@ const api = {
       return response.json();
     },
 
-    update: async ({ id, ...updates }: { id: string } & Partial<WorkflowDefinition>): Promise<WorkflowDefinition> => {
+    update: async ({
+      id,
+      ...updates
+    }: {
+      id: string;
+    } & Partial<WorkflowDefinition>): Promise<WorkflowDefinition> => {
       const headers = await getAuthHeaders();
       const response = await fetch(`${API_URL}/workflows/${id}`, {
         method: 'PUT',
@@ -149,7 +166,13 @@ const api = {
       if (!response.ok) throw new Error('Failed to delete workflow');
     },
 
-    execute: async ({ id, variables }: { id: string; variables?: Record<string, any> }): Promise<WorkflowExecution> => {
+    execute: async ({
+      id,
+      variables,
+    }: {
+      id: string;
+      variables?: Record<string, any>;
+    }): Promise<WorkflowExecution> => {
       const headers = await getAuthHeaders();
       const response = await fetch(`${API_URL}/workflows/${id}/execute`, {
         method: 'POST',
@@ -162,16 +185,23 @@ const api = {
 
     getFlow: async (id: string): Promise<WorkflowFlow> => {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${API_URL}/workflows/${id}/flow`, { headers });
+      const response = await fetch(`${API_URL}/workflows/${id}/flow`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch workflow flow');
       return response.json();
     },
 
-    updateFlow: async ({ id, nodes, edges, metadata }: { 
-      id: string; 
-      nodes: WorkflowNode[]; 
-      edges: WorkflowEdge[]; 
-      metadata: Partial<WorkflowFlow['metadata']> 
+    updateFlow: async ({
+      id,
+      nodes,
+      edges,
+      metadata,
+    }: {
+      id: string;
+      nodes: WorkflowNode[];
+      edges: WorkflowEdge[];
+      metadata: Partial<WorkflowFlow['metadata']>;
     }): Promise<WorkflowDefinition> => {
       const headers = await getAuthHeaders();
       const response = await fetch(`${API_URL}/workflows/${id}/flow`, {
@@ -183,7 +213,11 @@ const api = {
       return response.json();
     },
 
-    convertFlow: async ({ nodes, edges, metadata }: {
+    convertFlow: async ({
+      nodes,
+      edges,
+      metadata,
+    }: {
       nodes: WorkflowNode[];
       edges: WorkflowEdge[];
       metadata: Partial<WorkflowDefinition>;
@@ -201,7 +235,13 @@ const api = {
       return response.json();
     },
 
-    validateFlow: async ({ nodes, edges }: { nodes: WorkflowNode[]; edges: WorkflowEdge[] }): Promise<{ valid: boolean; errors: string[] }> => {
+    validateFlow: async ({
+      nodes,
+      edges,
+    }: {
+      nodes: WorkflowNode[];
+      edges: WorkflowEdge[];
+    }): Promise<{ valid: boolean; errors: string[] }> => {
       const headers = await getAuthHeaders();
       const response = await fetch(`${API_URL}/workflows/builder/validate`, {
         method: 'POST',
@@ -214,33 +254,45 @@ const api = {
 
     getBuilderNodes: async (): Promise<any[]> => {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${API_URL}/workflows/builder/nodes`, { headers });
+      const response = await fetch(`${API_URL}/workflows/builder/nodes`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch builder nodes');
       return response.json();
     },
 
     getTemplates: async (): Promise<any[]> => {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${API_URL}/workflows/templates`, { headers });
+      const response = await fetch(`${API_URL}/workflows/templates`, {
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch templates');
       return response.json();
     },
 
-    createFromTemplate: async ({ templateId, variables, projectId }: { 
-      templateId: string; 
+    createFromTemplate: async ({
+      templateId,
+      variables,
+      projectId,
+    }: {
+      templateId: string;
       variables?: Record<string, any>;
       projectId: string;
     }): Promise<WorkflowDefinition> => {
       const headers = await getAuthHeaders();
-      const response = await fetch(`${API_URL}/workflows/templates/${templateId}/create`, {
-        method: 'POST',
-        headers: {
-          ...headers,
-          'x-project-id': projectId,
+      const response = await fetch(
+        `${API_URL}/workflows/templates/${templateId}/create`,
+        {
+          method: 'POST',
+          headers: {
+            ...headers,
+            'x-project-id': projectId,
+          },
+          body: JSON.stringify({ variables }),
         },
-        body: JSON.stringify({ variables }),
-      });
-      if (!response.ok) throw new Error('Failed to create workflow from template');
+      );
+      if (!response.ok)
+        throw new Error('Failed to create workflow from template');
       return response.json();
     },
   },
@@ -285,7 +337,7 @@ export const useWorkflowTemplates = () => {
 
 export const useCreateWorkflow = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.workflows.create,
     onSuccess: () => {
@@ -293,14 +345,14 @@ export const useCreateWorkflow = () => {
       toast.success('Workflow created successfully');
     },
     onError: () => {
-      toast.error('Failed to create workflow');
+      console.error('Failed to create workflow');
     },
   });
 };
 
 export const useUpdateWorkflow = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.workflows.update,
     onSuccess: (data) => {
@@ -309,14 +361,14 @@ export const useUpdateWorkflow = () => {
       toast.success('Workflow updated successfully');
     },
     onError: () => {
-      toast.error('Failed to update workflow');
+      console.error('Failed to update workflow');
     },
   });
 };
 
 export const useDeleteWorkflow = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.workflows.delete,
     onSuccess: () => {
@@ -324,7 +376,7 @@ export const useDeleteWorkflow = () => {
       toast.success('Workflow deleted successfully');
     },
     onError: () => {
-      toast.error('Failed to delete workflow');
+      console.error('Failed to delete workflow');
     },
   });
 };
@@ -336,14 +388,14 @@ export const useExecuteWorkflow = () => {
       toast.success('Workflow execution started');
     },
     onError: () => {
-      toast.error('Failed to execute workflow');
+      console.error('Failed to execute workflow');
     },
   });
 };
 
 export const useConvertFlow = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.workflows.convertFlow,
     onSuccess: () => {
@@ -351,14 +403,14 @@ export const useConvertFlow = () => {
       toast.success('Workflow created from flow');
     },
     onError: () => {
-      toast.error('Failed to convert flow to workflow');
+      console.error('Failed to convert flow to workflow');
     },
   });
 };
 
 export const useUpdateWorkflowFlow = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.workflows.updateFlow,
     onSuccess: (data) => {
@@ -367,7 +419,7 @@ export const useUpdateWorkflowFlow = () => {
       toast.success('Workflow updated successfully');
     },
     onError: () => {
-      toast.error('Failed to update workflow');
+      console.error('Failed to update workflow');
     },
   });
 };
@@ -380,7 +432,7 @@ export const useValidateFlow = () => {
 
 export const useCreateFromTemplate = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.workflows.createFromTemplate,
     onSuccess: () => {
@@ -388,31 +440,40 @@ export const useCreateFromTemplate = () => {
       toast.success('Workflow created from template');
     },
     onError: () => {
-      toast.error('Failed to create workflow from template');
+      console.error('Failed to create workflow from template');
     },
   });
 };
 
 export const useUpdateWorkflowStatus = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: 'draft' | 'active' | 'paused' | 'disabled' | 'archived' }) => {
-      return api.workflows.update({ id, state: status.toUpperCase() as 'DRAFT' | 'ACTIVE' | 'PAUSED' });
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: string;
+      status: 'draft' | 'active' | 'paused' | 'disabled' | 'archived';
+    }) => {
+      return api.workflows.update({
+        id,
+        state: status.toUpperCase() as 'DRAFT' | 'ACTIVE' | 'PAUSED',
+      });
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: workflowKeys.detail(data.id) });
       queryClient.invalidateQueries({ queryKey: workflowKeys.lists() });
     },
     onError: () => {
-      toast.error('Failed to update workflow status');
+      console.error('Failed to update workflow status');
     },
   });
 };
 
 export const useAutoSaveWorkflowFlow = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.workflows.updateFlow,
     onSuccess: (data) => {
@@ -427,11 +488,11 @@ export const useAutoSaveWorkflowFlow = () => {
           max_retries: data.max_retries,
           agent_id: data.agent_id,
           is_template: data.is_template,
-        }
+        },
       });
     },
     onError: (error) => {
       console.error('Auto-save failed:', error);
     },
   });
-}; 
+};

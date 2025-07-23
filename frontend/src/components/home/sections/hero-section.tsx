@@ -144,7 +144,7 @@ export function HeroSection() {
           error instanceof TypeError &&
           error.message.includes('Failed to fetch');
         if (!isLocalMode() || isConnectionError) {
-          toast.error(
+          console.error(
             error.message || 'Failed to create agent. Please try again.',
           );
         }

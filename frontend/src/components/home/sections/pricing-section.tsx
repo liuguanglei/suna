@@ -215,7 +215,7 @@ function PricingTier({
             console.error(
               "Error: Received status 'checkout_created' but no checkout URL.",
             );
-            toast.error('Failed to initiate subscription. Please try again.');
+            console.error('Failed to initiate subscription. Please try again.');
           }
           break;
         case 'upgraded':
@@ -252,7 +252,7 @@ function PricingTier({
             'Received unexpected status from createCheckoutSession:',
             response.status,
           );
-          toast.error('An unexpected error occurred. Please try again.');
+          console.error('An unexpected error occurred. Please try again.');
       }
     } catch (error: any) {
       console.error('Error processing subscription:', error);
@@ -260,7 +260,7 @@ function PricingTier({
         error?.response?.data?.detail ||
         error?.message ||
         'Failed to process subscription. Please try again.';
-      toast.error(errorMessage);
+      console.error(errorMessage);
     }
   };
 

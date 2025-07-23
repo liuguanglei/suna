@@ -1,38 +1,45 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { 
-  Plus, 
-  Settings, 
-  Star, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Plus,
+  Settings,
+  Star,
   Clock,
   CheckCircle,
   AlertCircle,
   Key,
   Shield,
   Loader2,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
-import { 
-  useCredentialProfilesForMcp, 
+import {
+  useCredentialProfilesForMcp,
   useSetDefaultProfile,
   useCreateCredentialProfile,
   type CredentialProfile,
-  type CreateCredentialProfileRequest
+  type CreateCredentialProfileRequest,
 } from '@/hooks/react-query/mcp/use-credential-profiles';
 import { useMCPServerDetails } from '@/hooks/react-query/mcp/use-mcp-servers';
 import { toast } from 'sonner';
@@ -41,7 +48,10 @@ interface CredentialProfileSelectorProps {
   mcpQualifiedName: string;
   mcpDisplayName: string;
   selectedProfileId?: string;
-  onProfileSelect: (profileId: string | null, profile: CredentialProfile | null) => void;
+  onProfileSelect: (
+    profileId: string | null,
+    profile: CredentialProfile | null,
+  ) => void;
   disabled?: boolean;
 }
 
@@ -58,7 +68,7 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
   onOpenChange,
   mcpQualifiedName,
   mcpDisplayName,
-  onSuccess
+  onSuccess,
 }) => {
   const [formData, setFormData] = useState<{
     profile_name: string;
@@ -69,10 +79,11 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
     profile_name: `${mcpDisplayName} Profile`,
     display_name: mcpDisplayName,
     config: {},
-    is_default: false
+    is_default: false,
   });
 
-  const { data: serverDetails, isLoading: isLoadingDetails } = useMCPServerDetails(mcpQualifiedName);
+  const { data: serverDetails, isLoading: isLoadingDetails } =
+    useMCPServerDetails(mcpQualifiedName);
   const createProfileMutation = useCreateCredentialProfile();
 
   const getConfigProperties = () => {
@@ -90,12 +101,12 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
   };
 
   const handleConfigChange = (key: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       config: {
         ...prev.config,
-        [key]: value
-      }
+        [key]: value,
+      },
     }));
   };
 
@@ -106,38 +117,38 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
         profile_name: formData.profile_name,
         display_name: formData.display_name,
         config: formData.config,
-        is_default: formData.is_default
+        is_default: formData.is_default,
       };
 
       const response = await createProfileMutation.mutateAsync(request);
-      toast.success('Credential profile created successfully!');
-      
-             // Create a profile object to return
-       const newProfile: CredentialProfile = {
-         profile_id: response.profile_id || 'new-profile',
-         mcp_qualified_name: mcpQualifiedName,
-         profile_name: formData.profile_name,
-         display_name: formData.display_name,
-         config_keys: Object.keys(formData.config),
-         is_active: true,
-         is_default: formData.is_default,
-         last_used_at: null,
-         created_at: new Date().toISOString(),
-         updated_at: new Date().toISOString()
-       };
-      
+      toast.success('凭证配置文件创建成功！');
+
+      // Create a profile object to return
+      const newProfile: CredentialProfile = {
+        profile_id: response.profile_id || 'new-profile',
+        mcp_qualified_name: mcpQualifiedName,
+        profile_name: formData.profile_name,
+        display_name: formData.display_name,
+        config_keys: Object.keys(formData.config),
+        is_active: true,
+        is_default: formData.is_default,
+        last_used_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
       onSuccess(newProfile);
       onOpenChange(false);
-      
+
       // Reset form
       setFormData({
         profile_name: `${mcpDisplayName} Profile`,
         display_name: mcpDisplayName,
         config: {},
-        is_default: false
+        is_default: false,
       });
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create credential profile');
+      console.error(error.message || 'Failed to create credential profile');
     }
   };
 
@@ -153,7 +164,8 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
             Create Credential Profile
           </DialogTitle>
           <DialogDescription>
-            Create a new credential profile for <strong>{mcpDisplayName}</strong>
+            Create a new credential profile for{' '}
+            <strong>{mcpDisplayName}</strong>
           </DialogDescription>
         </DialogHeader>
 
@@ -171,11 +183,17 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
                   <Input
                     id="profile_name"
                     value={formData.profile_name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, profile_name: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        profile_name: e.target.value,
+                      }))
+                    }
                     placeholder="Enter a name for this profile"
                   />
                   <p className="text-xs text-muted-foreground">
-                    This helps you identify different configurations for the same MCP server
+                    This helps you identify different configurations for the
+                    same MCP server
                   </p>
                 </div>
               </div>
@@ -186,26 +204,34 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
                     <Settings className="h-4 w-4" />
                     Connection Settings
                   </h3>
-                  {Object.entries(configProperties).map(([key, schema]: [string, any]) => (
-                    <div key={key} className="space-y-2">
-                      <Label htmlFor={key}>
-                        {schema.title || key}
-                        {isFieldRequired(key) && (
-                          <span className="text-destructive ml-1">*</span>
+                  {Object.entries(configProperties).map(
+                    ([key, schema]: [string, any]) => (
+                      <div key={key} className="space-y-2">
+                        <Label htmlFor={key}>
+                          {schema.title || key}
+                          {isFieldRequired(key) && (
+                            <span className="text-destructive ml-1">*</span>
+                          )}
+                        </Label>
+                        <Input
+                          id={key}
+                          type={
+                            schema.format === 'password' ? 'password' : 'text'
+                          }
+                          placeholder={schema.description || `Enter ${key}`}
+                          value={formData.config[key] || ''}
+                          onChange={(e) =>
+                            handleConfigChange(key, e.target.value)
+                          }
+                        />
+                        {schema.description && (
+                          <p className="text-xs text-muted-foreground">
+                            {schema.description}
+                          </p>
                         )}
-                      </Label>
-                      <Input
-                        id={key}
-                        type={schema.format === 'password' ? 'password' : 'text'}
-                        placeholder={schema.description || `Enter ${key}`}
-                        value={formData.config[key] || ''}
-                        onChange={(e) => handleConfigChange(key, e.target.value)}
-                      />
-                      {schema.description && (
-                        <p className="text-xs text-muted-foreground">{schema.description}</p>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    ),
+                  )}
                 </div>
               ) : (
                 <Alert>
@@ -219,7 +245,9 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
               <Alert>
                 <Shield className="h-4 w-4" />
                 <AlertDescription>
-                  Your credentials will be encrypted and stored securely. You can create multiple profiles for the same MCP server to handle different use cases.
+                  Your credentials will be encrypted and stored securely. You
+                  can create multiple profiles for the same MCP server to handle
+                  different use cases.
                 </AlertDescription>
               </Alert>
             </div>
@@ -230,9 +258,11 @@ const InlineCreateProfileDialog: React.FC<InlineCreateProfileDialogProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleSubmit}
-            disabled={!formData.profile_name.trim() || createProfileMutation.isPending}
+            disabled={
+              !formData.profile_name.trim() || createProfileMutation.isPending
+            }
           >
             {createProfileMutation.isPending ? (
               <>
@@ -257,21 +287,23 @@ export function CredentialProfileSelector({
   mcpDisplayName,
   selectedProfileId,
   onProfileSelect,
-  disabled = false
+  disabled = false,
 }: CredentialProfileSelectorProps) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  
-  const { 
-    data: profiles = [], 
+
+  const {
+    data: profiles = [],
     isLoading,
     error,
-    refetch
+    refetch,
   } = useCredentialProfilesForMcp(mcpQualifiedName);
-  
+
   const setDefaultMutation = useSetDefaultProfile();
-  
-  const selectedProfile = profiles.find(p => p.profile_id === selectedProfileId);
-  
+
+  const selectedProfile = profiles.find(
+    (p) => p.profile_id === selectedProfileId,
+  );
+
   const handleSetDefault = async (profileId: string) => {
     try {
       await setDefaultMutation.mutateAsync(profileId);
@@ -289,9 +321,9 @@ export function CredentialProfileSelector({
     refetch();
     // Auto-select the newly created profile
     onProfileSelect(newProfile.profile_id, newProfile);
-    toast.success(`Profile "${newProfile.profile_name}" created and selected!`);
+    toast.success(`配置文件“${newProfile.profile_name}”已创建并选择！`);
   };
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
@@ -299,7 +331,7 @@ export function CredentialProfileSelector({
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <Card className="border-destructive/50">
@@ -312,7 +344,7 @@ export function CredentialProfileSelector({
       </Card>
     );
   }
-  
+
   return (
     <>
       <div className="space-y-4">
@@ -328,7 +360,7 @@ export function CredentialProfileSelector({
             New Profile
           </Button> */}
         </div>
-        
+
         {profiles.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="p-6 text-center">
@@ -336,8 +368,8 @@ export function CredentialProfileSelector({
               <p className="text-sm text-muted-foreground mb-3">
                 No credential profiles found for {mcpDisplayName}
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={handleCreateNewProfile}
                 disabled={disabled}
@@ -353,12 +385,14 @@ export function CredentialProfileSelector({
               value={selectedProfileId || ''}
               onValueChange={(value) => {
                 if (value && value.trim() !== '') {
-                  const profile = profiles.find(p => p.profile_id === value);
+                  const profile = profiles.find((p) => p.profile_id === value);
                   if (profile) {
                     onProfileSelect(value, profile);
                   } else {
                     console.error('Selected profile not found:', value);
-                    toast.error('Selected profile not found. Please refresh and try again.');
+                    console.error(
+                      'Selected profile not found. Please refresh and try again.',
+                    );
                   }
                 } else {
                   onProfileSelect(null, null);
@@ -371,7 +405,10 @@ export function CredentialProfileSelector({
               </SelectTrigger>
               <SelectContent>
                 {profiles.map((profile) => (
-                  <SelectItem key={profile.profile_id} value={profile.profile_id}>
+                  <SelectItem
+                    key={profile.profile_id}
+                    value={profile.profile_id}
+                  >
                     <div className="flex items-center gap-2">
                       <span>{profile.profile_name}</span>
                       {profile.is_default && (
@@ -384,14 +421,16 @@ export function CredentialProfileSelector({
                 ))}
               </SelectContent>
             </Select>
-            
+
             {selectedProfile && (
               <Card className="bg-muted/30 py-0">
                 <CardContent className="p-3">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-medium">{selectedProfile.profile_name}</h4>
+                        <h4 className="text-sm font-medium">
+                          {selectedProfile.profile_name}
+                        </h4>
                         {selectedProfile.is_default && (
                           <Badge variant="outline" className="text-xs">
                             Default
@@ -406,7 +445,9 @@ export function CredentialProfileSelector({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleSetDefault(selectedProfile.profile_id)}
+                        onClick={() =>
+                          handleSetDefault(selectedProfile.profile_id)
+                        }
                         disabled={setDefaultMutation.isPending}
                       >
                         <Star className="h-3 w-3" />
@@ -429,4 +470,4 @@ export function CredentialProfileSelector({
       />
     </>
   );
-} 
+}

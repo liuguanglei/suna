@@ -5,14 +5,17 @@ import { toast } from 'sonner';
 import { getAgentAvatar } from '../_utils/get-agent-style';
 import {
   ChatInput,
-  ChatInputHandles
+  ChatInputHandles,
 } from '@/components/thread/chat-input/chat-input';
 import { ThreadContent } from '@/components/thread/content/ThreadContent';
 import { UnifiedMessage } from '@/components/thread/types';
 import { useInitiateAgentWithInvalidation } from '@/hooks/react-query/dashboard/use-initiate-agent';
 import { useAgentStream } from '@/hooks/useAgentStream';
 import { useAddUserMessageMutation } from '@/hooks/react-query/threads/use-messages';
-import { useStartAgentMutation, useStopAgentMutation } from '@/hooks/react-query/threads/use-agent-run';
+import {
+  useStartAgentMutation,
+  useStopAgentMutation,
+} from '@/hooks/react-query/threads/use-agent-run';
 import { BillingError } from '@/lib/api';
 import { normalizeFilenameToNFC } from '@/lib/utils/unicode';
 
@@ -21,7 +24,12 @@ interface Agent {
   name: string;
   description?: string;
   system_prompt: string;
-  configured_mcps: Array<{ name: string; qualifiedName: string; config: any; enabledTools?: string[] }>;
+  configured_mcps: Array<{
+    name: string;
+    qualifiedName: string;
+    config: any;
+    enabledTools?: string[];
+  }>;
   agentpress_tools: Record<string, { enabled: boolean; description: string }>;
   is_default: boolean;
   created_at?: string;
@@ -37,7 +45,9 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
   const [inputValue, setInputValue] = useState('');
   const [threadId, setThreadId] = useState<string | null>(null);
   const [agentRunId, setAgentRunId] = useState<string | null>(null);
-  const [agentStatus, setAgentStatus] = useState<'idle' | 'running' | 'connecting' | 'error'>('idle');
+  const [agentStatus, setAgentStatus] = useState<
+    'idle' | 'running' | 'connecting' | 'error'
+  >('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
 
@@ -71,12 +81,18 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
   }, [messages]);
 
   const handleNewMessageFromStream = useCallback((message: UnifiedMessage) => {
-    console.log(`[PREVIEW STREAM] Received message: ID=${message.message_id}, Type=${message.type}`);
+    console.log(
+      `[PREVIEW STREAM] Received message: ID=${message.message_id}, Type=${message.type}`,
+    );
 
     setMessages((prev) => {
-      const messageExists = prev.some((m) => m.message_id === message.message_id);
+      const messageExists = prev.some(
+        (m) => m.message_id === message.message_id,
+      );
       if (messageExists) {
-        return prev.map((m) => m.message_id === message.message_id ? message : m);
+        return prev.map((m) =>
+          m.message_id === message.message_id ? message : m,
+        );
       } else {
         return [...prev, message];
       }
@@ -106,9 +122,11 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
 
   const handleStreamError = useCallback((errorMessage: string) => {
     console.error(`[PREVIEW] Stream error: ${errorMessage}`);
-    if (!errorMessage.toLowerCase().includes('not found') &&
-      !errorMessage.toLowerCase().includes('agent run is not running')) {
-      toast.error(`Stream Error: ${errorMessage}`);
+    if (
+      !errorMessage.toLowerCase().includes('not found') &&
+      !errorMessage.toLowerCase().includes('agent run is not running')
+    ) {
+      console.error(`Stream Error: ${errorMessage}`);
     }
   }, []);
 
@@ -137,7 +155,9 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
 
   useEffect(() => {
     if (agentRunId && agentRunId !== currentHookRunId && threadId) {
-      console.log(`[PREVIEW] Starting stream for agentRunId: ${agentRunId}, threadId: ${threadId}`);
+      console.log(
+        `[PREVIEW] Starting stream for agentRunId: ${agentRunId}, threadId: ${threadId}`,
+      );
       startStreaming(agentRunId);
     }
   }, [agentRunId, startStreaming, currentHookRunId, threadId]);
@@ -150,9 +170,17 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
       agentStatus,
       streamHookStatus,
       messagesCount: messages.length,
-      hasStartedConversation
+      hasStartedConversation,
     });
-  }, [threadId, agentRunId, currentHookRunId, agentStatus, streamHookStatus, messages.length, hasStartedConversation]);
+  }, [
+    threadId,
+    agentRunId,
+    currentHookRunId,
+    agentStatus,
+    streamHookStatus,
+    messages.length,
+    hasStartedConversation,
+  ]);
 
   useEffect(() => {
     if (streamingTextContent) {
@@ -170,7 +198,8 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
       enable_context_manager?: boolean;
     },
   ) => {
-    if (!message.trim() && !chatInputRef.current?.getPendingFiles().length) return;
+    if (!message.trim() && !chatInputRef.current?.getPendingFiles().length)
+      return;
 
     setIsSubmitting(true);
     setHasStartedConversation(true);
@@ -187,11 +216,18 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
         formData.append('files', file, normalizedName);
       });
 
-      if (options?.model_name) formData.append('model_name', options.model_name);
-      formData.append('enable_thinking', String(options?.enable_thinking ?? false));
+      if (options?.model_name)
+        formData.append('model_name', options.model_name);
+      formData.append(
+        'enable_thinking',
+        String(options?.enable_thinking ?? false),
+      );
       formData.append('reasoning_effort', options?.reasoning_effort ?? 'low');
       formData.append('stream', String(options?.stream ?? true));
-      formData.append('enable_context_manager', String(options?.enable_context_manager ?? false));
+      formData.append(
+        'enable_context_manager',
+        String(options?.enable_context_manager ?? false),
+      );
 
       console.log('[PREVIEW] Initiating agent...');
       const result = await initiateAgentMutation.mutateAsync(formData);
@@ -203,17 +239,22 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
           console.log('[PREVIEW] Setting agent run ID:', result.agent_run_id);
           setAgentRunId(result.agent_run_id);
         } else {
-          console.log('[PREVIEW] No agent_run_id in result, starting agent manually...');
+          console.log(
+            '[PREVIEW] No agent_run_id in result, starting agent manually...',
+          );
           try {
             const agentResult = await startAgentMutation.mutateAsync({
               threadId: result.thread_id,
-              options
+              options,
             });
             console.log('[PREVIEW] Agent started manually:', agentResult);
             setAgentRunId(agentResult.agent_run_id);
           } catch (startError) {
-            console.error('[PREVIEW] Error starting agent manually:', startError);
-            toast.error('Failed to start agent');
+            console.error(
+              '[PREVIEW] Error starting agent manually:',
+              startError,
+            );
+            console.error('Failed to start agent');
           }
         }
         const userMessage: UnifiedMessage = {
@@ -234,9 +275,9 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
     } catch (error: any) {
       console.error('[PREVIEW] Error during initiation:', error);
       if (error instanceof BillingError) {
-        toast.error('Billing limit reached. Please upgrade your plan.');
+        console.error('Billing limit reached. Please upgrade your plan.');
       } else {
-        toast.error('Failed to start conversation');
+        console.error('Failed to start conversation');
       }
       setHasStartedConversation(false);
     } finally {
@@ -269,25 +310,34 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
       try {
         const messagePromise = addUserMessageMutation.mutateAsync({
           threadId,
-          message
+          message,
         });
 
         const agentPromise = startAgentMutation.mutateAsync({
           threadId,
-          options
+          options,
         });
 
-        const results = await Promise.allSettled([messagePromise, agentPromise]);
+        const results = await Promise.allSettled([
+          messagePromise,
+          agentPromise,
+        ]);
 
         if (results[0].status === 'rejected') {
-          throw new Error(`Failed to send message: ${results[0].reason?.message || results[0].reason}`);
+          throw new Error(
+            `Failed to send message: ${results[0].reason?.message || results[0].reason}`,
+          );
         }
 
         if (results[1].status === 'rejected') {
           const error = results[1].reason;
           if (error instanceof BillingError) {
-            toast.error('Billing limit reached. Please upgrade your plan.');
-            setMessages(prev => prev.filter(m => m.message_id !== optimisticUserMessage.message_id));
+            console.error('Billing limit reached. Please upgrade your plan.');
+            setMessages((prev) =>
+              prev.filter(
+                (m) => m.message_id !== optimisticUserMessage.message_id,
+              ),
+            );
             return;
           }
           throw new Error(`Failed to start agent: ${error?.message || error}`);
@@ -295,11 +345,12 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
 
         const agentResult = results[1].value;
         setAgentRunId(agentResult.agent_run_id);
-
       } catch (err) {
         console.error('[PREVIEW] Error sending message:', err);
-        toast.error(err instanceof Error ? err.message : 'Operation failed');
-        setMessages((prev) => prev.filter((m) => m.message_id !== optimisticUserMessage.message_id));
+        console.error(err instanceof Error ? err.message : 'Operation failed');
+        setMessages((prev) =>
+          prev.filter((m) => m.message_id !== optimisticUserMessage.message_id),
+        );
       } finally {
         setIsSubmitting(false);
       }
@@ -321,11 +372,15 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
     }
   }, [stopStreaming, agentRunId, stopAgentMutation]);
 
-  const handleToolClick = useCallback((assistantMessageId: string | null, toolName: string) => {
-    console.log('[PREVIEW] Tool clicked:', toolName);
-    toast.info(`Tool: ${toolName} (Preview mode - tool details not available)`);
-  }, []);
-
+  const handleToolClick = useCallback(
+    (assistantMessageId: string | null, toolName: string) => {
+      console.log('[PREVIEW] Tool clicked:', toolName);
+      toast.info(
+        `Tool: ${toolName} (Preview mode - tool details not available)`,
+      );
+    },
+    [],
+  );
 
   return (
     <div className="h-full flex flex-col bg-muted dark:bg-muted/30">
@@ -339,7 +394,9 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
         <div className="flex-1">
           <h3 className="font-semibold">{agent.name || 'Unnamed Agent'}</h3>
         </div>
-        <Badge variant="highlight" className="text-sm">Preview Mode</Badge>
+        <Badge variant="highlight" className="text-sm">
+          Preview Mode
+        </Badge>
       </div>
       <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto scrollbar-hide">
@@ -349,7 +406,7 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
             streamingToolCall={streamingToolCall}
             agentStatus={agentStatus}
             handleToolClick={handleToolClick}
-            handleOpenFileViewer={() => { }}
+            handleOpenFileViewer={() => {}}
             streamHookStatus={streamHookStatus}
             isPreviewMode={true}
             agentName={agent.name}
@@ -359,7 +416,12 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
                 <div className="flex w-20 aspect-square items-center justify-center rounded-2xl bg-muted-foreground/10 p-4 mb-4">
                   <div className="text-4xl">{avatar}</div>
                 </div>
-                <p className='w-[60%] text-2xl'>Start conversation with your new agent <span className='text-primary/80 font-semibold'>{agent.name}</span></p>
+                <p className="w-[60%] text-2xl">
+                  Start conversation with your new agent{' '}
+                  <span className="text-primary/80 font-semibold">
+                    {agent.name}
+                  </span>
+                </p>
               </div>
             }
           />
@@ -376,11 +438,13 @@ export const AgentPreview = ({ agent }: AgentPreviewProps) => {
             value={inputValue}
             onChange={setInputValue}
             disabled={isSubmitting}
-            isAgentRunning={agentStatus === 'running' || agentStatus === 'connecting'}
+            isAgentRunning={
+              agentStatus === 'running' || agentStatus === 'connecting'
+            }
             onStopAgent={handleStopAgent}
             agentName={agent.name}
             hideAttachments={false}
-            bgColor='bg-muted-foreground/10'
+            bgColor="bg-muted-foreground/10"
           />
         </div>
       </div>

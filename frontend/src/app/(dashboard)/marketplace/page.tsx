@@ -1,23 +1,60 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Download, Star, Calendar, User, Tags, TrendingUp, Shield, CheckCircle, Loader2, Settings, Wrench, AlertTriangle, GitBranch, Plus, ShoppingBag } from 'lucide-react';
+import {
+  Search,
+  Download,
+  Star,
+  Calendar,
+  User,
+  Tags,
+  TrendingUp,
+  Shield,
+  CheckCircle,
+  Loader2,
+  Settings,
+  Wrench,
+  AlertTriangle,
+  GitBranch,
+  Plus,
+  ShoppingBag,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { getAgentAvatar } from '../agents/_utils/get-agent-style';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CredentialProfileSelector } from '@/components/workflows/CredentialProfileSelector';
 
-import { 
-  useMarketplaceTemplates, 
-  useInstallTemplate
+import {
+  useMarketplaceTemplates,
+  useInstallTemplate,
 } from '@/hooks/react-query/secure-mcp/use-secure-mcp';
 import { useCredentialProfilesForMcp } from '@/hooks/react-query/mcp/use-credential-profiles';
 import { createClient } from '@/lib/supabase/client';
@@ -88,7 +125,12 @@ interface InstallDialogProps {
   item: MarketplaceTemplate | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onInstall: (item: MarketplaceTemplate, instanceName?: string, profileMappings?: Record<string, string>, customMcpConfigs?: Record<string, Record<string, any>>) => Promise<void>;
+  onInstall: (
+    item: MarketplaceTemplate,
+    instanceName?: string,
+    profileMappings?: Record<string, string>,
+    customMcpConfigs?: Record<string, Record<string, any>>,
+  ) => Promise<void>;
   isInstalling: boolean;
 }
 
@@ -97,19 +139,20 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
   open,
   onOpenChange,
   onInstall,
-  isInstalling
+  isInstalling,
 }) => {
   if (!item) return null;
 
-  const { avatar, color } = item.avatar && item.avatar_color 
-    ? { avatar: item.avatar, color: item.avatar_color }
-    : getAgentAvatar(item.id);
+  const { avatar, color } =
+    item.avatar && item.avatar_color
+      ? { avatar: item.avatar, color: item.avatar_color }
+      : getAgentAvatar(item.id);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -118,7 +161,7 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
       <SheetContent>
         <SheetHeader className="space-y-4">
           <div className="flex items-start gap-4">
-            <div 
+            <div
               className="h-16 w-16 flex items-center justify-center rounded-xl shrink-0"
               style={{ backgroundColor: color }}
             >
@@ -145,8 +188,8 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
           <Button
             onClick={() => onInstall(item)}
             disabled={isInstalling}
-            size='sm'
-            className='w-48'
+            size="sm"
+            className="w-48"
           >
             {isInstalling ? (
               <>
@@ -177,7 +220,7 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
                 Tags
               </h3>
               <div className="flex flex-wrap gap-2">
-                {item.tags.map(tag => (
+                {item.tags.map((tag) => (
                   <Badge key={tag} variant="outline" className="text-xs">
                     <Tags className="h-3 w-3 mr-1" />
                     {tag}
@@ -193,16 +236,22 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
               </h3>
               <div className="space-y-2">
                 {item.mcp_requirements.map((mcp, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted-foreground/10 border rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-muted-foreground/10 border rounded-lg"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                         <Wrench className="h-4 w-4 text-primary" />
                       </div>
                       <div>
-                        <div className="font-medium text-sm">{mcp.display_name}</div>
+                        <div className="font-medium text-sm">
+                          {mcp.display_name}
+                        </div>
                         {mcp.enabled_tools && mcp.enabled_tools.length > 0 && (
                           <div className="text-xs text-muted-foreground">
-                            {mcp.enabled_tools.length} tool{mcp.enabled_tools.length !== 1 ? 's' : ''}
+                            {mcp.enabled_tools.length} tool
+                            {mcp.enabled_tools.length !== 1 ? 's' : ''}
                           </div>
                         )}
                       </div>
@@ -224,7 +273,9 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
               </h3>
               <div className="flex items-center gap-2">
                 <GitBranch className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{item.metadata.source_version_name}</span>
+                <span className="text-sm">
+                  {item.metadata.source_version_name}
+                </span>
               </div>
             </div>
           )}
@@ -235,7 +286,9 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
               </h3>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{formatDate(item.marketplace_published_at)}</span>
+                <span className="text-sm">
+                  {formatDate(item.marketplace_published_at)}
+                </span>
               </div>
             </div>
           )}
@@ -245,17 +298,21 @@ const AgentPreviewSheet: React.FC<AgentPreviewSheetProps> = ({
   );
 };
 
-const InstallDialog: React.FC<InstallDialogProps> = ({ 
-  item, 
-  open, 
-  onOpenChange, 
-  onInstall, 
-  isInstalling
+const InstallDialog: React.FC<InstallDialogProps> = ({
+  item,
+  open,
+  onOpenChange,
+  onInstall,
+  isInstalling,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [instanceName, setInstanceName] = useState('');
-  const [setupData, setSetupData] = useState<Record<string, Record<string, string>>>({});
-  const [profileMappings, setProfileMappings] = useState<Record<string, string>>({});
+  const [setupData, setSetupData] = useState<
+    Record<string, Record<string, string>>
+  >({});
+  const [profileMappings, setProfileMappings] = useState<
+    Record<string, string>
+  >({});
   const [isCheckingRequirements, setIsCheckingRequirements] = useState(false);
   const [setupSteps, setSetupSteps] = useState<SetupStep[]>([]);
   const [missingProfiles, setMissingProfiles] = useState<MissingProfile[]>([]);
@@ -281,10 +338,14 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
 
   const checkRequirementsAndSetupSteps = async () => {
     if (!item?.mcp_requirements) return;
-    
+
     const steps: SetupStep[] = [];
-    const customServers = item.mcp_requirements.filter(req => req.custom_type);
-    const regularServices = item.mcp_requirements.filter(req => !req.custom_type);
+    const customServers = item.mcp_requirements.filter(
+      (req) => req.custom_type,
+    );
+    const regularServices = item.mcp_requirements.filter(
+      (req) => !req.custom_type,
+    );
     for (const req of regularServices) {
       steps.push({
         id: req.qualified_name,
@@ -306,13 +367,19 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
         service_name: req.display_name,
         qualified_name: req.qualified_name,
         custom_type: req.custom_type,
-        required_fields: req.required_config.map(key => ({
+        required_fields: req.required_config.map((key) => ({
           key,
           label: key === 'url' ? `${req.display_name} Server URL` : key,
           type: key === 'url' ? 'url' : 'text',
-          placeholder: key === 'url' ? `https://your-${req.display_name.toLowerCase()}-server.com` : `Enter your ${key}`,
-          description: key === 'url' ? `Your personal ${req.display_name} server endpoint` : undefined
-        }))
+          placeholder:
+            key === 'url'
+              ? `https://your-${req.display_name.toLowerCase()}-server.com`
+              : `Enter your ${key}`,
+          description:
+            key === 'url'
+              ? `Your personal ${req.display_name} server endpoint`
+              : undefined,
+        })),
       });
     }
 
@@ -321,39 +388,48 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
     setIsCheckingRequirements(false);
   };
 
-  const handleFieldChange = (stepId: string, fieldKey: string, value: string) => {
-    setSetupData(prev => ({
+  const handleFieldChange = (
+    stepId: string,
+    fieldKey: string,
+    value: string,
+  ) => {
+    setSetupData((prev) => ({
       ...prev,
       [stepId]: {
         ...prev[stepId],
-        [fieldKey]: value
-      }
+        [fieldKey]: value,
+      },
     }));
   };
 
-  const handleProfileSelect = (qualifiedName: string, profileId: string | null) => {
-    setProfileMappings(prev => ({
+  const handleProfileSelect = (
+    qualifiedName: string,
+    profileId: string | null,
+  ) => {
+    setProfileMappings((prev) => ({
       ...prev,
-      [qualifiedName]: profileId || ''
+      [qualifiedName]: profileId || '',
     }));
   };
 
   const isCurrentStepComplete = (): boolean => {
     if (setupSteps.length === 0) return true;
     if (currentStep >= setupSteps.length) return true;
-    
+
     const step = setupSteps[currentStep];
-    
+
     if (step.type === 'credential_profile') {
       return !!profileMappings[step.qualified_name];
     } else if (step.type === 'custom_server') {
       const stepData = setupData[step.id] || {};
-      return step.required_fields?.every(field => {
-        const value = stepData[field.key];
-        return value && value.trim().length > 0;
-      }) || false;
+      return (
+        step.required_fields?.every((field) => {
+          const value = stepData[field.key];
+          return value && value.trim().length > 0;
+        }) || false
+      );
     }
-    
+
     return false;
   };
 
@@ -375,24 +451,27 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
     if (!item) return;
 
     const customMcpConfigs: Record<string, Record<string, any>> = {};
-    setupSteps.forEach(step => {
+    setupSteps.forEach((step) => {
       if (step.type === 'custom_server') {
         customMcpConfigs[step.qualified_name] = setupData[step.id] || {};
       }
     });
-    
+
     await onInstall(item, instanceName, profileMappings, customMcpConfigs);
   };
 
   const canInstall = () => {
     if (!item) return false;
     if (!instanceName.trim()) return false;
-    
+
     // Check if all required profile mappings are selected
-    const regularRequirements = item.mcp_requirements?.filter(req => !req.custom_type) || [];
-    const missingProfileMappings = regularRequirements.filter(req => !profileMappings[req.qualified_name]);
+    const regularRequirements =
+      item.mcp_requirements?.filter((req) => !req.custom_type) || [];
+    const missingProfileMappings = regularRequirements.filter(
+      (req) => !profileMappings[req.qualified_name],
+    );
     if (missingProfileMappings.length > 0) return false;
-    
+
     if (setupSteps.length > 0 && currentStep < setupSteps.length) return false;
     return true;
   };
@@ -417,7 +496,9 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
           {isCheckingRequirements ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Checking requirements...</p>
+              <p className="text-sm text-muted-foreground">
+                Checking requirements...
+              </p>
             </div>
           ) : setupSteps.length === 0 ? (
             <div className="space-y-6">
@@ -429,7 +510,7 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
                   className="h-11"
                 />
               </div>
-              
+
               <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/50">
                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                 <AlertDescription className="text-green-800 dark:text-green-200">
@@ -446,9 +527,14 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
                         {currentStep + 1}
                       </div>
-                      <h3 className="font-semibold text-base">{currentStepData.title}</h3>
+                      <h3 className="font-semibold text-base">
+                        {currentStepData.title}
+                      </h3>
                       {currentStepData.custom_type && (
-                        <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800"
+                        >
                           {currentStepData.custom_type?.toUpperCase()}
                         </Badge>
                       )}
@@ -464,10 +550,18 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
                     <CredentialProfileSelector
                       mcpQualifiedName={currentStepData.qualified_name}
                       mcpDisplayName={currentStepData.service_name}
-                      selectedProfileId={profileMappings[currentStepData.qualified_name]}
+                      selectedProfileId={
+                        profileMappings[currentStepData.qualified_name]
+                      }
                       onProfileSelect={(profileId, profile) => {
-                        handleProfileSelect(currentStepData.qualified_name, profileId);
-                        if (profile && !profileMappings[currentStepData.qualified_name]) {
+                        handleProfileSelect(
+                          currentStepData.qualified_name,
+                          profileId,
+                        );
+                        if (
+                          profile &&
+                          !profileMappings[currentStepData.qualified_name]
+                        ) {
                           refreshRequirements();
                         }
                       }}
@@ -481,12 +575,22 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
                         <Input
                           type={field.type}
                           placeholder={field.placeholder}
-                          value={setupData[currentStepData.id]?.[field.key] || ''}
-                          onChange={(e) => handleFieldChange(currentStepData.id, field.key, e.target.value)}
+                          value={
+                            setupData[currentStepData.id]?.[field.key] || ''
+                          }
+                          onChange={(e) =>
+                            handleFieldChange(
+                              currentStepData.id,
+                              field.key,
+                              e.target.value,
+                            )
+                          }
                           className="h-11"
                         />
                         {field.description && (
-                          <p className="text-xs text-muted-foreground">{field.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {field.description}
+                          </p>
                         )}
                       </div>
                     ))
@@ -542,9 +646,9 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
                 Back
               </Button>
             )}
-            
+
             {setupSteps.length === 0 ? (
-              <Button 
+              <Button
                 onClick={handleInstall}
                 disabled={isInstalling || !canInstall()}
               >
@@ -561,14 +665,11 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
                 )}
               </Button>
             ) : currentStep < setupSteps.length ? (
-              <Button 
-                onClick={handleNext}
-                disabled={!isCurrentStepComplete()}
-              >
+              <Button onClick={handleNext} disabled={!isCurrentStepComplete()}>
                 Continue
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={handleInstall}
                 disabled={isInstalling || !canInstall()}
               >
@@ -593,11 +694,12 @@ const InstallDialog: React.FC<InstallDialogProps> = ({
 };
 
 export default function MarketplacePage() {
-  const { enabled: agentMarketplaceEnabled, loading: flagLoading } = useFeatureFlag("agent_marketplace");
+  const { enabled: agentMarketplaceEnabled, loading: flagLoading } =
+    useFeatureFlag('agent_marketplace');
   const router = useRouter();
   useEffect(() => {
     if (!flagLoading && !agentMarketplaceEnabled) {
-      router.replace("/dashboard");
+      router.replace('/dashboard');
     }
   }, [flagLoading, agentMarketplaceEnabled, router]);
 
@@ -606,19 +708,25 @@ export default function MarketplacePage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [installingItemId, setInstallingItemId] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<MarketplaceTemplate | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MarketplaceTemplate | null>(
+    null,
+  );
   const [showInstallDialog, setShowInstallDialog] = useState(false);
   const [showPreviewSheet, setShowPreviewSheet] = useState(false);
 
   // Secure marketplace data (all templates are now secure)
-  const secureQueryParams = useMemo(() => ({
-    limit: 20,
-    offset: (page - 1) * 20,
-    search: searchQuery || undefined,
-    tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
-  }), [page, searchQuery, selectedTags]);
+  const secureQueryParams = useMemo(
+    () => ({
+      limit: 20,
+      offset: (page - 1) * 20,
+      search: searchQuery || undefined,
+      tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined,
+    }),
+    [page, searchQuery, selectedTags],
+  );
 
-  const { data: secureTemplates, isLoading } = useMarketplaceTemplates(secureQueryParams);
+  const { data: secureTemplates, isLoading } =
+    useMarketplaceTemplates(secureQueryParams);
   const installTemplateMutation = useInstallTemplate();
 
   // Transform secure templates data
@@ -628,7 +736,7 @@ export default function MarketplacePage() {
 
     // Add secure templates (all items are now secure)
     if (secureTemplates) {
-      secureTemplates.forEach(template => {
+      secureTemplates.forEach((template) => {
         const item: MarketplaceTemplate = {
           id: template.template_id,
           name: template.name,
@@ -659,8 +767,10 @@ export default function MarketplacePage() {
       return items.sort((a, b) => {
         switch (sortBy) {
           case 'newest':
-            return new Date(b.marketplace_published_at || b.created_at).getTime() - 
-                   new Date(a.marketplace_published_at || a.created_at).getTime();
+            return (
+              new Date(b.marketplace_published_at || b.created_at).getTime() -
+              new Date(a.marketplace_published_at || a.created_at).getTime()
+            );
           case 'popular':
           case 'most_downloaded':
             return b.download_count - a.download_count;
@@ -674,7 +784,7 @@ export default function MarketplacePage() {
 
     return {
       kortixTeamItems: sortItems(kortixItems),
-      communityItems: sortItems(communityItems)
+      communityItems: sortItems(communityItems),
     };
   }, [secureTemplates, sortBy]);
 
@@ -697,7 +807,10 @@ export default function MarketplacePage() {
     setShowInstallDialog(true);
   };
 
-  const handleInstallClick = (item: MarketplaceTemplate, e?: React.MouseEvent) => {
+  const handleInstallClick = (
+    item: MarketplaceTemplate,
+    e?: React.MouseEvent,
+  ) => {
     if (e) {
       e.stopPropagation();
     }
@@ -706,39 +819,54 @@ export default function MarketplacePage() {
   };
 
   const handleInstall = async (
-    item: MarketplaceTemplate, 
-    instanceName?: string, 
-    profileMappings?: Record<string, string>, 
-    customMcpConfigs?: Record<string, Record<string, any>>
+    item: MarketplaceTemplate,
+    instanceName?: string,
+    profileMappings?: Record<string, string>,
+    customMcpConfigs?: Record<string, Record<string, any>>,
   ) => {
     setInstallingItemId(item.id);
-    
+
     try {
       if (!instanceName || instanceName.trim() === '') {
-        toast.error('Please provide a name for the agent');
+        console.error('Please provide a name for the agent');
         return;
       }
 
-      const regularRequirements = item.mcp_requirements?.filter(req => !req.custom_type) || [];
-      const missingProfiles = regularRequirements.filter(req => 
-        !profileMappings || !profileMappings[req.qualified_name] || profileMappings[req.qualified_name].trim() === ''
+      const regularRequirements =
+        item.mcp_requirements?.filter((req) => !req.custom_type) || [];
+      const missingProfiles = regularRequirements.filter(
+        (req) =>
+          !profileMappings ||
+          !profileMappings[req.qualified_name] ||
+          profileMappings[req.qualified_name].trim() === '',
       );
-      
+
       if (missingProfiles.length > 0) {
-        const missingNames = missingProfiles.map(req => req.display_name).join(', ');
-        toast.error(`Please select credential profiles for: ${missingNames}`);
+        const missingNames = missingProfiles
+          .map((req) => req.display_name)
+          .join(', ');
+        console.error(`Please select credential profiles for: ${missingNames}`);
         return;
       }
 
-      const customRequirements = item.mcp_requirements?.filter(req => req.custom_type) || [];
-      const missingCustomConfigs = customRequirements.filter(req => 
-        !customMcpConfigs || !customMcpConfigs[req.qualified_name] || 
-        req.required_config.some(field => !customMcpConfigs[req.qualified_name][field]?.trim())
+      const customRequirements =
+        item.mcp_requirements?.filter((req) => req.custom_type) || [];
+      const missingCustomConfigs = customRequirements.filter(
+        (req) =>
+          !customMcpConfigs ||
+          !customMcpConfigs[req.qualified_name] ||
+          req.required_config.some(
+            (field) => !customMcpConfigs[req.qualified_name][field]?.trim(),
+          ),
       );
-      
+
       if (missingCustomConfigs.length > 0) {
-        const missingNames = missingCustomConfigs.map(req => req.display_name).join(', ');
-        toast.error(`Please provide all required configuration for: ${missingNames}`);
+        const missingNames = missingCustomConfigs
+          .map((req) => req.display_name)
+          .join(', ');
+        console.error(
+          `Please provide all required configuration for: ${missingNames}`,
+        );
         return;
       }
 
@@ -746,39 +874,49 @@ export default function MarketplacePage() {
         template_id: item.template_id,
         instance_name: instanceName,
         profile_mappings: profileMappings,
-        custom_mcp_configs: customMcpConfigs
+        custom_mcp_configs: customMcpConfigs,
       });
 
       if (result.status === 'installed') {
         toast.success(`Agent "${instanceName}" installed successfully!`);
         setShowInstallDialog(false);
       } else if (result.status === 'configs_required') {
-        toast.error('Please provide all required configurations');
+        console.error('Please provide all required configurations');
         return;
       } else {
-        toast.error('Unexpected response from server. Please try again.');
+        console.error('Unexpected response from server. Please try again.');
         return;
       }
     } catch (error: any) {
       console.error('Installation error:', error);
-      
+
       // Handle specific error types
       if (error.message?.includes('already in your library')) {
-        toast.error('This agent is already in your library');
+        console.error('This agent is already in your library');
       } else if (error.message?.includes('Credential profile not found')) {
-        toast.error('One or more selected credential profiles could not be found. Please refresh and try again.');
+        console.error(
+          'One or more selected credential profiles could not be found. Please refresh and try again.',
+        );
       } else if (error.message?.includes('Missing credential profile')) {
-        toast.error('Please select credential profiles for all required services');
+        console.error(
+          'Please select credential profiles for all required services',
+        );
       } else if (error.message?.includes('Invalid credential profile')) {
-        toast.error('One or more selected credential profiles are invalid. Please select valid profiles.');
+        console.error(
+          'One or more selected credential profiles are invalid. Please select valid profiles.',
+        );
       } else if (error.message?.includes('inactive')) {
-        toast.error('One or more selected credential profiles are inactive. Please select active profiles.');
+        console.error(
+          'One or more selected credential profiles are inactive. Please select active profiles.',
+        );
       } else if (error.message?.includes('Template not found')) {
-        toast.error('This agent template is no longer available');
+        console.error('This agent template is no longer available');
       } else if (error.message?.includes('Access denied')) {
-        toast.error('You do not have permission to install this agent');
+        console.error('You do not have permission to install this agent');
       } else {
-        toast.error(error.message || 'Failed to install agent. Please try again.');
+        console.error(
+          error.message || 'Failed to install agent. Please try again.',
+        );
       }
     } finally {
       setInstallingItemId(null);
@@ -786,10 +924,8 @@ export default function MarketplacePage() {
   };
 
   const handleTagFilter = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
@@ -805,8 +941,8 @@ export default function MarketplacePage() {
 
   const allTags = React.useMemo(() => {
     const tags = new Set<string>();
-    allMarketplaceItems.forEach(item => {
-      item.tags?.forEach(tag => tags.add(tag));
+    allMarketplaceItems.forEach((item) => {
+      item.tags?.forEach((tag) => tags.add(tag));
     });
     return Array.from(tags);
   }, [allMarketplaceItems]);
@@ -820,13 +956,17 @@ export default function MarketplacePage() {
               Agent Marketplace
             </h1>
             <p className="text-md text-muted-foreground max-w-2xl">
-              Discover and install secure AI agent templates created by the community
+              Discover and install secure AI agent templates created by the
+              community
             </p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="p-2 bg-neutral-100 dark:bg-sidebar rounded-2xl overflow-hidden group">
+            <div
+              key={index}
+              className="p-2 bg-neutral-100 dark:bg-sidebar rounded-2xl overflow-hidden group"
+            >
               <div className="h-24 flex items-center justify-center relative bg-gradient-to-br from-opacity-90 to-opacity-100">
                 <Skeleton className="h-24 w-full rounded-xl" />
               </div>
@@ -848,11 +988,11 @@ export default function MarketplacePage() {
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="space-y-8">
-        <div className='w-full space-y-4 bg-gradient-to-b from-primary/10 to-primary/5 border rounded-xl h-60 flex items-center justify-center'>
+        <div className="w-full space-y-4 bg-gradient-to-b from-primary/10 to-primary/5 border rounded-xl h-60 flex items-center justify-center">
           <div className="space-y-4">
             <div className="space-y-2 text-center">
-              <div className='flex items-center justify-center gap-2'>
-                <ShoppingBag className='h-6 w-6 text-primary' />
+              <div className="flex items-center justify-center gap-2">
+                <ShoppingBag className="h-6 w-6 text-primary" />
                 <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                   Marketplace
                 </h1>
@@ -901,12 +1041,14 @@ export default function MarketplacePage() {
         </div>
         {allTags.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Filter by tags:</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Filter by tags:
+            </p>
             <div className="flex flex-wrap gap-2">
-              {allTags.map(tag => (
+              {allTags.map((tag) => (
                 <Badge
                   key={tag}
-                  variant={selectedTags.includes(tag) ? "default" : "outline"}
+                  variant={selectedTags.includes(tag) ? 'default' : 'outline'}
                   className="cursor-pointer hover:bg-primary/80"
                   onClick={() => handleTagFilter(tag)}
                 >
@@ -919,17 +1061,18 @@ export default function MarketplacePage() {
         )}
 
         <div className="text-sm text-muted-foreground">
-          {isLoading ? (
-            "Loading marketplace..."
-          ) : (
-            `${allMarketplaceItems.length} template${allMarketplaceItems.length !== 1 ? 's' : ''} found`
-          )}
+          {isLoading
+            ? 'Loading marketplace...'
+            : `${allMarketplaceItems.length} template${allMarketplaceItems.length !== 1 ? 's' : ''} found`}
         </div>
 
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden">
+              <div
+                key={i}
+                className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden"
+              >
                 <Skeleton className="h-50" />
                 <div className="p-4 space-y-3">
                   <Skeleton className="h-5 rounded" />
@@ -946,8 +1089,8 @@ export default function MarketplacePage() {
           <div className="text-center py-12">
             <p className="text-muted-foreground">
               {searchQuery || selectedTags.length > 0
-                ? "No templates found matching your criteria. Try adjusting your search or filters."
-                : "No agent templates are currently available in the marketplace."}
+                ? 'No templates found matching your criteria. Try adjusting your search or filters.'
+                : 'No agent templates are currently available in the marketplace.'}
             </p>
           </div>
         ) : (
@@ -959,23 +1102,26 @@ export default function MarketplacePage() {
                     <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">Agents from Kortix Team</h2>
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Agents from Kortix Team
+                    </h2>
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {kortixTeamItems.map((item) => {
                     const { avatar, color } = getItemStyling(item);
                     return (
-                      <div 
-                        key={item.id} 
+                      <div
+                        key={item.id}
                         className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden hover:bg-muted/50 transition-all duration-200 cursor-pointer group flex flex-col h-full"
                         onClick={() => handleItemClick(item)}
                       >
-                        <div className='p-4'>
-                          <div className={`h-12 w-12 flex items-center justify-center rounded-lg`} style={{ backgroundColor: color }}>
-                            <div className="text-2xl">
-                              {avatar}
-                            </div>
+                        <div className="p-4">
+                          <div
+                            className={`h-12 w-12 flex items-center justify-center rounded-lg`}
+                            style={{ backgroundColor: color }}
+                          >
+                            <div className="text-2xl">{avatar}</div>
                           </div>
                         </div>
                         <div className="p-4 -mt-4 flex flex-col flex-1">
@@ -984,7 +1130,10 @@ export default function MarketplacePage() {
                               {item.name}
                             </h3>
                             {item.metadata?.source_version_name && (
-                              <Badge variant="secondary" className="text-xs shrink-0">
+                              <Badge
+                                variant="secondary"
+                                className="text-xs shrink-0"
+                              >
                                 <GitBranch className="h-3 w-3" />
                                 {item.metadata.source_version_name}
                               </Badge>
@@ -995,8 +1144,12 @@ export default function MarketplacePage() {
                           </p>
                           {item.tags && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-3">
-                              {item.tags.slice(0, 2).map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs">
+                              {item.tags.slice(0, 2).map((tag) => (
+                                <Badge
+                                  key={tag}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
                                   {tag}
                                 </Badge>
                               ))}
@@ -1008,7 +1161,7 @@ export default function MarketplacePage() {
                             </div>
                           )}
                           <div className="mb-4 w-full flex justify-between">
-                            <div className='space-y-1'>
+                            <div className="space-y-1">
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <User className="h-3 w-3" />
                                 <span>By {item.creator_name}</span>
@@ -1016,16 +1169,22 @@ export default function MarketplacePage() {
                               {item.marketplace_published_at && (
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <Calendar className="h-3 w-3" />
-                                  <span>{new Date(item.marketplace_published_at).toLocaleDateString()}</span>
+                                  <span>
+                                    {new Date(
+                                      item.marketplace_published_at,
+                                    ).toLocaleDateString()}
+                                  </span>
                                 </div>
                               )}
                             </div>
                             <div className="flex items-center gap-1">
                               <Download className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-muted-foreground text-xs font-medium">{item.download_count}</span>
+                              <span className="text-muted-foreground text-xs font-medium">
+                                {item.download_count}
+                              </span>
                             </div>
                           </div>
-                          <Button 
+                          <Button
                             onClick={(e) => handleInstallClick(item, e)}
                             disabled={installingItemId === item.id}
                             className="w-full transition-opacity mt-auto"
@@ -1057,23 +1216,26 @@ export default function MarketplacePage() {
                     <User className="h-4 w-4 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">Agents from Community</h2>
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Agents from Community
+                    </h2>
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {communityItems.map((item) => {
                     const { avatar, color } = getItemStyling(item);
                     return (
-                      <div 
-                        key={item.id} 
+                      <div
+                        key={item.id}
                         className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden hover:bg-muted/50 transition-all duration-200 cursor-pointer group flex flex-col h-full"
                         onClick={() => handleItemClick(item)}
                       >
-                        <div className='p-4'>
-                          <div className={`h-12 w-12 flex items-center justify-center rounded-lg`} style={{ backgroundColor: color }}>
-                            <div className="text-2xl">
-                              {avatar}
-                            </div>
+                        <div className="p-4">
+                          <div
+                            className={`h-12 w-12 flex items-center justify-center rounded-lg`}
+                            style={{ backgroundColor: color }}
+                          >
+                            <div className="text-2xl">{avatar}</div>
                           </div>
                         </div>
                         <div className="p-4 -mt-4 flex flex-col flex-1">
@@ -1082,7 +1244,10 @@ export default function MarketplacePage() {
                               {item.name}
                             </h3>
                             {item.metadata?.source_version_name && (
-                              <Badge variant="secondary" className="text-xs shrink-0">
+                              <Badge
+                                variant="secondary"
+                                className="text-xs shrink-0"
+                              >
                                 <GitBranch className="h-3 w-3" />
                                 {item.metadata.source_version_name}
                               </Badge>
@@ -1093,8 +1258,12 @@ export default function MarketplacePage() {
                           </p>
                           {item.tags && item.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1 mb-3">
-                              {item.tags.slice(0, 2).map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs">
+                              {item.tags.slice(0, 2).map((tag) => (
+                                <Badge
+                                  key={tag}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
                                   {tag}
                                 </Badge>
                               ))}
@@ -1106,7 +1275,7 @@ export default function MarketplacePage() {
                             </div>
                           )}
                           <div className="mb-4 w-full flex justify-between">
-                            <div className='space-y-1'>
+                            <div className="space-y-1">
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <User className="h-3 w-3" />
                                 <span>By {item.creator_name}</span>
@@ -1114,16 +1283,22 @@ export default function MarketplacePage() {
                               {item.marketplace_published_at && (
                                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                   <Calendar className="h-3 w-3" />
-                                  <span>{new Date(item.marketplace_published_at).toLocaleDateString()}</span>
+                                  <span>
+                                    {new Date(
+                                      item.marketplace_published_at,
+                                    ).toLocaleDateString()}
+                                  </span>
                                 </div>
                               )}
                             </div>
                             <div className="flex items-center gap-1">
                               <Download className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-muted-foreground text-xs font-medium">{item.download_count}</span>
+                              <span className="text-muted-foreground text-xs font-medium">
+                                {item.download_count}
+                              </span>
                             </div>
                           </div>
-                          <Button 
+                          <Button
                             onClick={(e) => handleInstallClick(item, e)}
                             disabled={installingItemId === item.id}
                             className="w-full transition-opacity mt-auto"

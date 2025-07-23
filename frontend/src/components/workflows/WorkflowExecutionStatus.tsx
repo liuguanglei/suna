@@ -1,29 +1,37 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Play, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import {
+  Play,
+  CheckCircle,
+  XCircle,
+  Clock,
   Loader2,
   RefreshCw,
-  X
-} from "lucide-react";
-import { getExecutionStatus, cancelExecution, type WorkflowExecution, type WorkflowExecutionLog } from "@/lib/api";
-import { toast } from "sonner";
+  X,
+} from 'lucide-react';
+import {
+  getExecutionStatus,
+  cancelExecution,
+  type WorkflowExecution,
+  type WorkflowExecutionLog,
+} from '@/lib/api';
+import { toast } from 'sonner';
 
 interface WorkflowExecutionStatusProps {
   executionId: string;
   onClose: () => void;
 }
 
-export default function WorkflowExecutionStatus({ executionId, onClose }: WorkflowExecutionStatusProps) {
+export default function WorkflowExecutionStatus({
+  executionId,
+  onClose,
+}: WorkflowExecutionStatusProps) {
   const [execution, setExecution] = useState<WorkflowExecution | null>(null);
   const [logs, setLogs] = useState<WorkflowExecutionLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,8 +43,8 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
       setExecution(response.execution);
       setLogs(response.logs);
     } catch (error) {
-      console.error("Error fetching execution status:", error);
-      toast.error("Failed to fetch execution status");
+      console.error('Error fetching execution status:', error);
+      console.error('Failed to fetch execution status');
     } finally {
       setLoading(false);
     }
@@ -44,7 +52,7 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
 
   useEffect(() => {
     fetchStatus();
-    
+
     // Poll for updates if execution is running
     const interval = setInterval(() => {
       if (execution?.status === 'running' || execution?.status === 'pending') {
@@ -57,15 +65,15 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
 
   const handleCancel = async () => {
     if (!execution || cancelling) return;
-    
+
     setCancelling(true);
     try {
       await cancelExecution(executionId);
-      toast.success("Execution cancelled");
+      toast.success('执行已取消');
       await fetchStatus();
     } catch (error) {
-      console.error("Error cancelling execution:", error);
-      toast.error("Failed to cancel execution");
+      console.error('Error cancelling execution:', error);
+      console.error('Failed to cancel execution');
     } finally {
       setCancelling(false);
     }
@@ -139,8 +147,12 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
               <Play className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">{execution.workflow_name}</CardTitle>
-              <p className="text-sm text-muted-foreground">Execution ID: {execution.id}</p>
+              <CardTitle className="text-lg">
+                {execution.workflow_name}
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Execution ID: {execution.id}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -163,16 +175,20 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
               {execution.status.toUpperCase()}
             </Badge>
           </div>
-          
+
           {execution.status === 'running' && (
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleCancel}
               disabled={cancelling}
             >
-              {cancelling ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
-              {cancelling ? "Cancelling..." : "Cancel"}
+              {cancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <X className="h-4 w-4" />
+              )}
+              {cancelling ? 'Cancelling...' : 'Cancel'}
             </Button>
           )}
         </div>
@@ -182,13 +198,17 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
           <div>
             <span className="text-muted-foreground">Started:</span>
             <div className="font-medium">
-              {execution.started_at ? new Date(execution.started_at).toLocaleString() : 'Not started'}
+              {execution.started_at
+                ? new Date(execution.started_at).toLocaleString()
+                : 'Not started'}
             </div>
           </div>
           <div>
             <span className="text-muted-foreground">Completed:</span>
             <div className="font-medium">
-              {execution.completed_at ? new Date(execution.completed_at).toLocaleString() : 'In progress'}
+              {execution.completed_at
+                ? new Date(execution.completed_at).toLocaleString()
+                : 'In progress'}
             </div>
           </div>
         </div>
@@ -196,8 +216,12 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
         {/* Error Message */}
         {execution.error && (
           <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg">
-            <div className="text-sm font-medium text-red-800 dark:text-red-200">Error</div>
-            <div className="text-sm text-red-700 dark:text-red-300 mt-1">{execution.error}</div>
+            <div className="text-sm font-medium text-red-800 dark:text-red-200">
+              Error
+            </div>
+            <div className="text-sm text-red-700 dark:text-red-300 mt-1">
+              {execution.error}
+            </div>
           </div>
         )}
 
@@ -227,16 +251,18 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
                         {new Date(log.started_at).toLocaleTimeString()}
                       </div>
                     </div>
-                    
+
                     {log.error && (
                       <div className="text-sm text-red-600 dark:text-red-400 mt-2">
                         Error: {log.error}
                       </div>
                     )}
-                    
+
                     {log.output_data && (
                       <div className="mt-2">
-                        <div className="text-xs text-muted-foreground mb-1">Output:</div>
+                        <div className="text-xs text-muted-foreground mb-1">
+                          Output:
+                        </div>
                         <pre className="text-xs bg-muted/50 p-2 rounded overflow-x-auto">
                           {JSON.stringify(log.output_data, null, 2)}
                         </pre>
@@ -251,4 +277,4 @@ export default function WorkflowExecutionStatus({ executionId, onClose }: Workfl
       </CardContent>
     </Card>
   );
-} 
+}

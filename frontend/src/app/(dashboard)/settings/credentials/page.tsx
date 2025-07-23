@@ -1,36 +1,48 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { 
-  Plus, 
-  Key, 
-  Shield, 
-  Trash2, 
-  Loader2, 
-  AlertTriangle, 
-  Star, 
-  Settings2, 
+import {
+  Plus,
+  Key,
+  Shield,
+  Trash2,
+  Loader2,
+  AlertTriangle,
+  Star,
+  Settings2,
   Users,
   Sparkles,
   Clock,
   Server,
   Globe,
   Zap,
-  MoreHorizontal
+  MoreHorizontal,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { 
+import {
   useCredentialProfiles,
   useDeleteCredentialProfile,
   useSetDefaultProfile,
-  type CredentialProfile
+  type CredentialProfile,
 } from '@/hooks/react-query/mcp/use-credential-profiles';
 import { EnhancedAddCredentialDialog } from './_components/enhanced-add-credential-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -45,17 +57,17 @@ interface CredentialProfileCardProps {
   isSettingDefaultId?: string;
 }
 
-const CredentialProfileCard: React.FC<CredentialProfileCardProps> = ({ 
-  profile, 
-  onDelete, 
+const CredentialProfileCard: React.FC<CredentialProfileCardProps> = ({
+  profile,
+  onDelete,
   onSetDefault,
-  isDeletingId, 
-  isSettingDefaultId 
+  isDeletingId,
+  isSettingDefaultId,
 }) => {
   const isDeleting = isDeletingId === profile.profile_id;
   const isSettingDefault = isSettingDefaultId === profile.profile_id;
   const isCustomServer = profile.mcp_qualified_name.startsWith('custom_');
-  
+
   const getCustomServerType = () => {
     if (profile.mcp_qualified_name.startsWith('custom_sse_')) return 'SSE';
     if (profile.mcp_qualified_name.startsWith('custom_http_')) return 'HTTP';
@@ -74,25 +86,33 @@ const CredentialProfileCard: React.FC<CredentialProfileCardProps> = ({
   };
 
   return (
-    <Card className={`group transition-all bg-sidebar duration-200 py-0 border-border/60 ${
-      profile.is_default 
-        ? 'ring-1 ring-primary/10 border-primary/10 bg-primary/5' 
-        : 'hover:border-border hover:bg-accent/20'
-    }`}>
+    <Card
+      className={`group transition-all bg-sidebar duration-200 py-0 border-border/60 ${
+        profile.is_default
+          ? 'ring-1 ring-primary/10 border-primary/10 bg-primary/5'
+          : 'hover:border-border hover:bg-accent/20'
+      }`}
+    >
       <CardContent className="p-3">
         <div className="space-y-2">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className={`p-1.5 rounded-md transition-colors ${
-                profile.is_default 
-                  ? 'bg-primary/20 text-primary' 
-                  : 'bg-muted/70 text-muted-foreground group-hover:bg-muted'
-              }`}>
+              <div
+                className={`p-1.5 rounded-md transition-colors ${
+                  profile.is_default
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-muted/70 text-muted-foreground group-hover:bg-muted'
+                }`}
+              >
                 {getServerIcon()}
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-medium text-foreground truncate">{profile.profile_name}</h3>
-                <p className="text-xs text-muted-foreground truncate">{profile.display_name}</p>
+                <h3 className="text-sm font-medium text-foreground truncate">
+                  {profile.profile_name}
+                </h3>
+                <p className="text-xs text-muted-foreground truncate">
+                  {profile.display_name}
+                </p>
               </div>
             </div>
             <DropdownMenu>
@@ -137,19 +157,29 @@ const CredentialProfileCard: React.FC<CredentialProfileCardProps> = ({
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             {profile.is_default && (
-              <Badge variant="default" className="text-xs h-5 bg-primary/15 text-primary border-primary/30">
+              <Badge
+                variant="default"
+                className="text-xs h-5 bg-primary/15 text-primary border-primary/30"
+              >
                 <Star className="h-2.5 w-2.5 mr-1" />
                 Default
               </Badge>
             )}
             {isCustomServer && (
-              <Badge variant="outline" className="text-xs h-5 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
+              <Badge
+                variant="outline"
+                className="text-xs h-5 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800"
+              >
                 <Sparkles className="h-2.5 w-2.5 mr-1" />
                 {getCustomServerType()}
               </Badge>
             )}
-            <Badge variant="secondary" className="text-xs h-5 bg-muted/50 text-muted-foreground">
-              {profile.config_keys.length} key{profile.config_keys.length !== 1 ? 's' : ''}
+            <Badge
+              variant="secondary"
+              className="text-xs h-5 bg-muted/50 text-muted-foreground"
+            >
+              {profile.config_keys.length} key
+              {profile.config_keys.length !== 1 ? 's' : ''}
             </Badge>
           </div>
 
@@ -179,7 +209,7 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   onOpenChange,
   profileToDelete,
   onConfirm,
-  isDeleting
+  isDeleting,
 }) => {
   if (!profileToDelete) return null;
 
@@ -194,16 +224,30 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
             Delete Profile
           </DialogTitle>
           <DialogDescription className="text-left">
-            Delete <span className="font-medium">"{profileToDelete.profile_name}"</span> for {profileToDelete.display_name}?
+            Delete{' '}
+            <span className="font-medium">
+              "{profileToDelete.profile_name}"
+            </span>{' '}
+            for {profileToDelete.display_name}?
             <br />
-            <span className="text-destructive text-sm">This action cannot be undone.</span>
+            <span className="text-destructive text-sm">
+              This action cannot be undone.
+            </span>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isDeleting}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isDeleting}
+          >
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isDeleting}
+          >
             {isDeleting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -220,19 +264,20 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
 };
 
 export default function CredentialsPage() {
-  const { enabled: customAgentsEnabled, loading: flagLoading } = useFeatureFlag("custom_agents");
+  const { enabled: customAgentsEnabled, loading: flagLoading } =
+    useFeatureFlag('custom_agents');
   const router = useRouter();
   useEffect(() => {
     if (!flagLoading && !customAgentsEnabled) {
-      router.replace("/dashboard");
+      router.replace('/dashboard');
     }
   }, [flagLoading, customAgentsEnabled, router]);
 
-  
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
-  const [profileToDelete, setProfileToDelete] = useState<CredentialProfile | null>(null);
+  const [profileToDelete, setProfileToDelete] =
+    useState<CredentialProfile | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: profiles, isLoading, error, refetch } = useCredentialProfiles();
@@ -240,7 +285,7 @@ export default function CredentialsPage() {
   const setDefaultProfileMutation = useSetDefaultProfile();
 
   const handleDelete = (profileId: string) => {
-    const profile = profiles?.find(p => p.profile_id === profileId);
+    const profile = profiles?.find((p) => p.profile_id === profileId);
     if (profile) {
       setProfileToDelete(profile);
       setShowDeleteDialog(true);
@@ -249,16 +294,16 @@ export default function CredentialsPage() {
 
   const confirmDelete = async () => {
     if (!profileToDelete) return;
-    
+
     setDeletingId(profileToDelete.profile_id);
     try {
       await deleteProfileMutation.mutateAsync(profileToDelete.profile_id);
-      toast.success('Profile deleted successfully');
+      toast.success('个人资料删除成功');
       setShowDeleteDialog(false);
       setProfileToDelete(null);
       refetch();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete profile');
+      console.error(error.message || 'Failed to delete profile');
     } finally {
       setDeletingId(null);
     }
@@ -270,24 +315,34 @@ export default function CredentialsPage() {
       await setDefaultProfileMutation.mutateAsync(profileId);
       refetch();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to set default profile');
+      console.error(error.message || 'Failed to set default profile');
     } finally {
       setSettingDefaultId(null);
     }
   };
 
-  const groupedProfiles = profiles?.reduce((acc, profile) => {
-    const key = profile.mcp_qualified_name;
-    if (!acc[key]) {
-      acc[key] = {
-        serverName: profile.display_name,
-        qualifiedName: profile.mcp_qualified_name,
-        profiles: []
-      };
-    }
-    acc[key].profiles.push(profile);
-    return acc;
-  }, {} as Record<string, { serverName: string; qualifiedName: string; profiles: CredentialProfile[] }>);
+  const groupedProfiles = profiles?.reduce(
+    (acc, profile) => {
+      const key = profile.mcp_qualified_name;
+      if (!acc[key]) {
+        acc[key] = {
+          serverName: profile.display_name,
+          qualifiedName: profile.mcp_qualified_name,
+          profiles: [],
+        };
+      }
+      acc[key].profiles.push(profile);
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        serverName: string;
+        qualifiedName: string;
+        profiles: CredentialProfile[];
+      }
+    >,
+  );
 
   if (flagLoading) {
     return (
@@ -298,13 +353,18 @@ export default function CredentialsPage() {
               <Shield className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">MCP Credential Profiles</h1>
+              <h1 className="text-xl font-semibold text-foreground">
+                MCP Credential Profiles
+              </h1>
             </div>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="p-2 bg-neutral-100 dark:bg-sidebar rounded-2xl overflow-hidden group">
+            <div
+              key={index}
+              className="p-2 bg-neutral-100 dark:bg-sidebar rounded-2xl overflow-hidden group"
+            >
               <div className="h-24 flex items-center justify-center relative bg-gradient-to-br from-opacity-90 to-opacity-100">
                 <Skeleton className="h-24 w-full rounded-xl" />
               </div>
@@ -326,7 +386,10 @@ export default function CredentialsPage() {
   if (error) {
     return (
       <div className="container mx-auto max-w-6xl px-6 py-6">
-        <Alert variant="destructive" className="border-destructive/30 bg-destructive/5">
+        <Alert
+          variant="destructive"
+          className="border-destructive/30 bg-destructive/5"
+        >
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             Failed to load credential profiles. Please try again later.
@@ -345,10 +408,12 @@ export default function CredentialsPage() {
               <Shield className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-foreground">MCP Credential Profiles</h1>
+              <h1 className="text-xl font-semibold text-foreground">
+                MCP Credential Profiles
+              </h1>
             </div>
           </div>
-          
+
           <Button onClick={() => setShowAddDialog(true)} className="h-9">
             <Plus className="h-4 w-4" />
             Add Profile
@@ -358,7 +423,8 @@ export default function CredentialsPage() {
         <Alert className="border-primary/30 bg-primary/5">
           <Zap className="h-4 w-4 text-primary" />
           <AlertDescription className="text-sm">
-            Create multiple profiles per MCP server for different use cases (teams, organizations, environments).
+            Create multiple profiles per MCP server for different use cases
+            (teams, organizations, environments).
           </AlertDescription>
         </Alert>
 
@@ -405,7 +471,9 @@ export default function CredentialsPage() {
                   <Users className="h-6 w-6 text-muted-foreground" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-semibold text-foreground">No profiles yet</h3>
+                  <h3 className="font-semibold text-foreground">
+                    No profiles yet
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     Create your first credential profile to get started
                   </p>
@@ -419,37 +487,44 @@ export default function CredentialsPage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {Object.entries(groupedProfiles || {}).map(([qualifiedName, serverGroup]) => (
-              <div key={qualifiedName} className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-primary/10">
-                    <Settings2 className="h-4 w-4 text-primary" />
+            {Object.entries(groupedProfiles || {}).map(
+              ([qualifiedName, serverGroup]) => (
+                <div key={qualifiedName} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <Settings2 className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">
+                        {serverGroup.serverName}
+                      </h3>
+                      <p className="text-xs text-muted-foreground font-mono truncate">
+                        {serverGroup.qualifiedName}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-xs shrink-0">
+                      {serverGroup.profiles.length}
+                    </Badge>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">{serverGroup.serverName}</h3>
-                    <p className="text-xs text-muted-foreground font-mono truncate">{serverGroup.qualifiedName}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {serverGroup.profiles.map((profile) => (
+                      <CredentialProfileCard
+                        key={profile.profile_id}
+                        profile={profile}
+                        onDelete={handleDelete}
+                        onSetDefault={handleSetDefault}
+                        isDeletingId={deletingId}
+                        isSettingDefaultId={settingDefaultId}
+                      />
+                    ))}
                   </div>
-                  <Badge variant="outline" className="text-xs shrink-0">
-                    {serverGroup.profiles.length}
-                  </Badge>
+                  {Object.keys(groupedProfiles || {}).indexOf(qualifiedName) <
+                    Object.keys(groupedProfiles || {}).length - 1 && (
+                    <Separator className="my-6" />
+                  )}
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                  {serverGroup.profiles.map((profile) => (
-                    <CredentialProfileCard
-                      key={profile.profile_id}
-                      profile={profile}
-                      onDelete={handleDelete}
-                      onSetDefault={handleSetDefault}
-                      isDeletingId={deletingId}
-                      isSettingDefaultId={settingDefaultId}
-                    />
-                  ))}
-                </div>
-                {Object.keys(groupedProfiles || {}).indexOf(qualifiedName) < Object.keys(groupedProfiles || {}).length - 1 && (
-                  <Separator className="my-6" />
-                )}
-              </div>
-            ))}
+              ),
+            )}
           </div>
         )}
         <EnhancedAddCredentialDialog
@@ -468,4 +543,4 @@ export default function CredentialsPage() {
       </div>
     </div>
   );
-} 
+}

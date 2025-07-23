@@ -6,23 +6,23 @@ import { toast } from 'sonner';
 // Import the normalizePath function from use-file-queries
 function normalizePath(path: string): string {
   if (!path) return '/';
-  
+
   // Remove any leading/trailing whitespace
   path = path.trim();
-  
+
   // Ensure path starts with /
   if (!path.startsWith('/')) {
     path = '/' + path;
   }
-  
+
   // Remove duplicate slashes and normalize
   path = path.replace(/\/+/g, '/');
-  
+
   // Remove trailing slash unless it's the root
   if (path.length > 1 && path.endsWith('/')) {
     path = path.slice(0, -1);
   }
-  
+
   return path;
 }
 
@@ -70,7 +70,10 @@ export function useFileUpload() {
     },
     onSuccess: (_, variables) => {
       // Invalidate directory listing for the target directory
-      const directoryPath = variables.targetPath.substring(0, variables.targetPath.lastIndexOf('/'));
+      const directoryPath = variables.targetPath.substring(
+        0,
+        variables.targetPath.lastIndexOf('/'),
+      );
       queryClient.invalidateQueries({
         queryKey: fileQueryKeys.directory(variables.sandboxId, directoryPath),
       });
@@ -84,7 +87,7 @@ export function useFileUpload() {
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : String(error);
-      toast.error(`Upload failed: ${message}`);
+      console.error(`Upload failed: ${message}`);
     },
   });
 }
@@ -115,7 +118,7 @@ export function useFileDelete() {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -127,7 +130,10 @@ export function useFileDelete() {
     },
     onSuccess: (_, variables) => {
       // Invalidate directory listing for the parent directory
-      const directoryPath = variables.filePath.substring(0, variables.filePath.lastIndexOf('/'));
+      const directoryPath = variables.filePath.substring(
+        0,
+        variables.filePath.lastIndexOf('/'),
+      );
       queryClient.invalidateQueries({
         queryKey: fileQueryKeys.directory(variables.sandboxId, directoryPath),
       });
@@ -154,8 +160,12 @@ export function useFileDelete() {
       });
 
       // Also remove the specific queries from cache completely
-      ['text', 'blob', 'json'].forEach(contentType => {
-        const queryKey = fileQueryKeys.content(variables.sandboxId, variables.filePath, contentType);
+      ['text', 'blob', 'json'].forEach((contentType) => {
+        const queryKey = fileQueryKeys.content(
+          variables.sandboxId,
+          variables.filePath,
+          contentType,
+        );
         queryClient.removeQueries({ queryKey });
       });
 
@@ -173,12 +183,18 @@ export function useFileDelete() {
         `${variables.sandboxId}:${normalizedPath.substring(1)}`,
       ];
 
-      legacyCacheKeys.forEach(key => {
+      legacyCacheKeys.forEach((key) => {
         const cachedEntry = (FileCache as any).cache?.get(key);
         if (cachedEntry) {
           // If it's a blob URL, revoke it before deleting
-          if (cachedEntry.type === 'url' && typeof cachedEntry.content === 'string' && cachedEntry.content.startsWith('blob:')) {
-            console.log(`[FILE DELETE] Revoking blob URL for deleted file: ${cachedEntry.content}`);
+          if (
+            cachedEntry.type === 'url' &&
+            typeof cachedEntry.content === 'string' &&
+            cachedEntry.content.startsWith('blob:')
+          ) {
+            console.log(
+              `[FILE DELETE] Revoking blob URL for deleted file: ${cachedEntry.content}`,
+            );
             URL.revokeObjectURL(cachedEntry.content);
           }
           FileCache.delete(key);
@@ -187,7 +203,7 @@ export function useFileDelete() {
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : String(error);
-      toast.error(`Delete failed: ${message}`);
+      console.error(`Delete failed: ${message}`);
     },
   });
 }
@@ -216,7 +232,7 @@ export function useFileCreate() {
       const response = await fetch(`${API_URL}/sandboxes/${sandboxId}/files`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -234,7 +250,10 @@ export function useFileCreate() {
     },
     onSuccess: (_, variables) => {
       // Invalidate directory listing for the parent directory
-      const directoryPath = variables.filePath.substring(0, variables.filePath.lastIndexOf('/'));
+      const directoryPath = variables.filePath.substring(
+        0,
+        variables.filePath.lastIndexOf('/'),
+      );
       queryClient.invalidateQueries({
         queryKey: fileQueryKeys.directory(variables.sandboxId, directoryPath),
       });
@@ -243,7 +262,7 @@ export function useFileCreate() {
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : String(error);
-      toast.error(`Create failed: ${message}`);
+      console.error(`Create failed: ${message}`);
     },
   });
-} 
+}

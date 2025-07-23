@@ -25,7 +25,7 @@ const handleLocalFiles = (
 ) => {
   const filteredFiles = files.filter((file) => {
     if (file.size > 200 * 1024 * 1024) {
-      toast.error(`File size exceeds 50MB limit: ${file.name}`);
+      console.error(`File size exceeds 50MB limit: ${file.name}`);
       return false;
     }
     return true;
@@ -49,7 +49,7 @@ const handleLocalFiles = (
   setUploadedFiles((prev) => [...prev, ...newUploadedFiles]);
   filteredFiles.forEach((file) => {
     const normalizedName = normalizeFilenameToNFC(file.name);
-    toast.success(`File attached: ${normalizedName}`);
+    toast.success(`文件已附加: ${normalizedName}`);
   });
 };
 
@@ -68,7 +68,7 @@ const uploadFiles = async (
 
     for (const file of files) {
       if (file.size > 200 * 1024 * 1024) {
-        toast.error(`File size exceeds 200MB limit: ${file.name}`);
+        console.error(`File size exceeds 200MB limit: ${file.name}`);
         continue;
       }
 
@@ -141,13 +141,13 @@ const uploadFiles = async (
         type: file.type || 'application/octet-stream',
       });
 
-      toast.success(`File uploaded: ${normalizedName}`);
+      toast.success(`文件已上传: ${normalizedName}`);
     }
 
     setUploadedFiles((prev) => [...prev, ...newUploadedFiles]);
   } catch (error) {
     console.error('File upload failed:', error);
-    toast.error(
+    console.error(
       typeof error === 'string'
         ? error
         : error instanceof Error

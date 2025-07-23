@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  getAgentVersions, 
-  createAgentVersion, 
+import {
+  getAgentVersions,
+  createAgentVersion,
   activateAgentVersion,
   getAgentVersion,
   AgentVersion,
-  AgentVersionCreateRequest
+  AgentVersionCreateRequest,
 } from './utils';
 import { toast } from 'sonner';
 
@@ -29,15 +29,20 @@ export const useCreateAgentVersion = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ agentId, data }: { agentId: string; data: AgentVersionCreateRequest }) =>
-      createAgentVersion(agentId, data),
+    mutationFn: ({
+      agentId,
+      data,
+    }: {
+      agentId: string;
+      data: AgentVersionCreateRequest;
+    }) => createAgentVersion(agentId, data),
     onSuccess: (newVersion, { agentId }) => {
       queryClient.invalidateQueries({ queryKey: ['agent-versions', agentId] });
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       toast.success(`Created version ${newVersion.version_name}`);
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to create version');
+      console.error(error.message || 'Failed to create version');
     },
   });
 };
@@ -46,15 +51,20 @@ export const useActivateAgentVersion = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ agentId, versionId }: { agentId: string; versionId: string }) =>
-      activateAgentVersion(agentId, versionId),
+    mutationFn: ({
+      agentId,
+      versionId,
+    }: {
+      agentId: string;
+      versionId: string;
+    }) => activateAgentVersion(agentId, versionId),
     onSuccess: (_, { agentId }) => {
       queryClient.invalidateQueries({ queryKey: ['agent', agentId] });
       queryClient.invalidateQueries({ queryKey: ['agent-versions', agentId] });
       toast.success('Version activated successfully');
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to activate version');
+      console.error(error.message || 'Failed to activate version');
     },
   });
-}; 
+};
