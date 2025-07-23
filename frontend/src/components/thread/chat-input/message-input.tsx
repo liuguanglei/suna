@@ -159,7 +159,7 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
             )}
           </div>
 
-          {subscriptionStatus === 'no_subscription' && !isLocalMode() && (
+          {/* {subscriptionStatus === 'no_subscription' && !isLocalMode() && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -179,7 +179,7 @@ export const MessageInput = forwardRef<HTMLTextAreaElement, MessageInputProps>(
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          )}
+          )} */}
 
           <div className="flex items-center gap-2">
             {/* Show model selector inline if custom agents are disabled, otherwise show settings dropdown */}

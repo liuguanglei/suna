@@ -18,7 +18,7 @@ export function KortixLogo({ size = 24 }: KortixLogoProps) {
 
   return (
     <Image
-      src="/ic_kongming_logo.png"
+      src={`${process.env.NEXT_PUBLIC_BASE_PATH}/ic_kongming_logo.png`}
       alt="Kortix"
       width={size}
       height={size}

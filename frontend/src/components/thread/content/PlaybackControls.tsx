@@ -424,7 +424,7 @@ export const PlaybackControls = ({
               <div className="flex items-center justify-center w-6 h-6 rounded-md overflow-hidden bg-primary/10">
                 <Link href="/dashboard">
                   <img
-                    src="/ic_kongming_logo.png"
+                    src={`${process.env.NEXT_PUBLIC_BASE_PATH}/ic_kongming_logo.png`}
                     alt="Kortix"
                     width={16}
                     height={16}

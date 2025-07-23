@@ -771,15 +771,15 @@ export const ThreadContent: React.FC<ThreadContentProps> = ({
                             </div>
                             <p className="ml-2 text-sm text-muted-foreground">
                               {(() => {
-                                const firstAssistantWithAgent =
-                                  group.messages.find(
-                                    (msg) =>
-                                      msg.type === 'assistant' &&
-                                      msg.agents?.name,
-                                  );
-                                if (firstAssistantWithAgent?.agents?.name) {
-                                  return firstAssistantWithAgent.agents.name;
-                                }
+                                // const firstAssistantWithAgent =
+                                //   group.messages.find(
+                                //     (msg) =>
+                                //       msg.type === 'assistant' &&
+                                //       msg.agents?.name,
+                                //   );
+                                // if (firstAssistantWithAgent?.agents?.name) {
+                                //   return firstAssistantWithAgent.agents.name;
+                                // }
                                 return '奇智孔明';
                               })()}
                             </p>
@@ -1163,7 +1163,8 @@ export const ThreadContent: React.FC<ThreadContentProps> = ({
                           {agentAvatar}
                         </div>
                         <p className="ml-2 text-sm text-muted-foreground">
-                          {agentName || '奇智孔明'}
+                          {/* {agentName || '奇智孔明'} */}
+                          奇智孔明
                         </p>
                       </div>
 
@@ -1185,7 +1186,8 @@ export const ThreadContent: React.FC<ThreadContentProps> = ({
                         {agentAvatar}
                       </div>
                       <p className="ml-2 text-sm text-muted-foreground">
-                        {agentName || '奇智孔明'}
+                        {/* {agentName || '奇智孔明'} */}
+                        奇智孔明
                       </p>
                     </div>
 
@@ -1215,7 +1217,8 @@ export const ThreadContent: React.FC<ThreadContentProps> = ({
                           {agentAvatar}
                         </div>
                         <p className="ml-2 text-sm text-muted-foreground">
-                          {agentName || '奇智孔明'}
+                          {/* {agentName || '奇智孔明'} */}
+                          奇智孔明
                         </p>
                       </div>
 
