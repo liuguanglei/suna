@@ -31,9 +31,9 @@ services:
   backend:
     image: registry.ainnovation.com/bg_cto/newagent-backend
     platform: linux/amd64
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+#    build:
+#      context: ./backend
+#      dockerfile: Dockerfile
     ports:
       - "3457:8000"
     volumes:
