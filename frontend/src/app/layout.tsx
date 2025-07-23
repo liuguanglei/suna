@@ -98,8 +98,10 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    icon: [{ url: '/favicon.png', sizes: 'any' }],
-    shortcut: '/favicon.png',
+    icon: [
+      { url: `${process.env.NEXT_PUBLIC_BASE_PATH}/favicon.png`, sizes: 'any' },
+    ],
+    shortcut: `${process.env.NEXT_PUBLIC_BASE_PATH}/favicon.png`,
   },
   // manifest: "/manifest.json",
   alternates: {
@@ -123,7 +125,11 @@ export default function RootLayout({
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-PCHSN4M2');`}
         </Script>
-        <Script async src="https://cdn.tolt.io/tolt.js" data-tolt={process.env.NEXT_PUBLIC_TOLT_REFERRAL_ID}></Script>
+        <Script
+          async
+          src="https://cdn.tolt.io/tolt.js"
+          data-tolt={process.env.NEXT_PUBLIC_TOLT_REFERRAL_ID}
+        ></Script>
       </head>
 
       <body

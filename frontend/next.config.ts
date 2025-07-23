@@ -1,10 +1,15 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 
-
 let nextConfig: NextConfig = {
-  allowedDevOrigins: ['127.0.0.1', 'localhost', '192.168.10.81', '10.18.144.205'],
-
+  allowedDevOrigins: [
+    '127.0.0.1',
+    'localhost',
+    '192.168.10.81',
+    '10.18.144.205',
+  ],
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH,
+  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH,
   webpack: (config) => {
     // This rule prevents issues with pdf.js and canvas
     config.externals = [...(config.externals || []), { canvas: 'canvas' }];

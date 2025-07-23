@@ -110,7 +110,10 @@ function LoginContent() {
     if (returnUrl) {
       formData.append('returnUrl', returnUrl);
     } else {
-      formData.append('returnUrl', '/dashboard');
+      formData.append(
+        'returnUrl',
+        `${process.env.NEXT_PUBLIC_BASE_PATH}/dashboard`,
+      );
     }
     const result = await signIn(prevState, formData);
 
@@ -302,8 +305,7 @@ function LoginContent() {
     <main
       className="flex flex-col items-center justify-center min-h-screen w-full"
       style={{
-        backgroundImage:
-          'url(/home_page_background_image_and_login_screen.png)',
+        backgroundImage: `url(${process.env.NEXT_PUBLIC_BASE_PATH}/home_page_background_image_and_login_screen.png)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
