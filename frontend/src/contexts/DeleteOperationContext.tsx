@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import { useRouter } from 'next/navigation';
 
 type DeleteState = {
   isDeleting: boolean;
@@ -77,6 +78,7 @@ export function DeleteOperationProvider({
 }) {
   const [state, dispatch] = useReducer(deleteReducer, initialState);
   const isOperationInProgress = useRef(false);
+  const router = useRouter();
 
   // Listen for state changes to handle navigation
   useEffect(() => {
@@ -85,7 +87,7 @@ export function DeleteOperationProvider({
       const timer = setTimeout(() => {
         try {
           // Use window.location for reliable navigation
-          window.location.pathname = '/dashboard';
+          router.replace('/dashboard');
         } catch (error) {
           console.error('Navigation error:', error);
         }

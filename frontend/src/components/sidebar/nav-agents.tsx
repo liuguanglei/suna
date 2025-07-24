@@ -303,7 +303,7 @@ export function NavAgents() {
       );
 
       // Show initial toast
-      toast.info(`Deleting ${threadIdsToDelete.length} conversations...`);
+      toast.info(`删除 ${threadIdsToDelete.length} 对话。。。`);
 
       try {
         // If the active thread is included, handle navigation first
