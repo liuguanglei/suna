@@ -1,10 +1,11 @@
 services:
   redis:
     image: registry.ainnovation.com/bg_cto/newagent-redis
+    restart: always
     ports:
       - "9339:6379"
     volumes:
-      - redis_data:/data
+      - ../data/redis_data:/data
       - ./backend/services/docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
     command: redis-server /usr/local/etc/redis/redis.conf --save 60 1 --loglevel warning
     healthcheck:
@@ -19,8 +20,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    restart: unless-stopped
+      - ../data/rabbitmq_data:/var/lib/rabbitmq
+    restart: always
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
@@ -30,6 +31,7 @@ services:
 
   backend:
     image: registry.ainnovation.com/bg_cto/newagent-backend
+    restart: always
     platform: linux/amd64
 #    build:
 #      context: ./backend
@@ -38,7 +40,7 @@ services:
       - "3457:8000"
     volumes:
       - ./backend/.env:/app/.env:ro
-      - ./backend/logs:/app/logs
+      - ../data/logs:/app/logs
     env_file:
       - ./backend/.env
     environment:
@@ -59,6 +61,7 @@ services:
   worker:
     image: registry.ainnovation.com/bg_cto/newagent-backend
     platform: linux/amd64
+    restart: always
 #    build:
 #      context: ./backend
 #      dockerfile: Dockerfile
@@ -83,6 +86,7 @@ services:
   frontend:
     image: registry.ainnovation.com/bg_cto/newagent-frontend
     init: true
+    restart: always
 #    build:
 #      context: ./frontend
 #      dockerfile: Dockerfile
@@ -99,6 +103,7 @@ services:
   frontend_ori:
     image: registry.ainnovation.com/bg_cto/newagent-frontend-ori
     init: true
+    restart: always
     # build:
     #   context: ./frontend
     #   dockerfile: Dockerfile
