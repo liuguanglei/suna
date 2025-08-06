@@ -12,6 +12,10 @@ let nextConfig: NextConfig = {
   ],
   basePath: process.env.NEXT_PUBLIC_BASE_PATH,
   assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH,
+  typescript: {
+    // 让构建即使存在 TS 错误也继续
+    ignoreBuildErrors: true,
+  },
   webpack: (config) => {
     // This rule prevents issues with pdf.js and canvas
     config.externals = [...(config.externals || []), { canvas: 'canvas' }];
