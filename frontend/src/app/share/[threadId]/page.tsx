@@ -184,7 +184,7 @@ export default function ThreadPage({
 
   const handleStreamError = useCallback((errorMessage: string) => {
     console.error(`[PAGE] Stream hook error: ${errorMessage}`);
-    toast.error(errorMessage, { duration: 15000 });
+    console.error(errorMessage, { duration: 15000 });
   }, []);
 
   const handleStreamClose = useCallback(() => {
@@ -560,7 +560,7 @@ export default function ThreadPage({
           const errorMessage =
             err instanceof Error ? err.message : 'Failed to load thread';
           setError(errorMessage);
-          toast.error(errorMessage);
+          console.error(errorMessage);
         }
       } finally {
         if (isMounted) setIsLoading(false);

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -15,12 +15,12 @@ import {
   BackgroundVariant,
   ConnectionLineType,
   MarkerType,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-import { Button } from "@/components/ui/button";
-import { 
-  Play, 
-  Save, 
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { Button } from '@/components/ui/button';
+import {
+  Play,
+  Save,
   Workflow,
   Settings,
   Cloud,
@@ -28,20 +28,31 @@ import {
   Power,
   PowerOff,
   Loader2,
-} from "lucide-react";
-import NodePalette from "./NodePalette";
-import WorkflowSettings from "./WorkflowSettings";
-import AgentNode from "./nodes/AgentNode";
-import ToolConnectionNode from "./nodes/ToolConnectionNode";
-import InputNode from "./nodes/InputNode";
-import MCPNode from "./nodes/MCPNode";
-import { getProjects, createWorkflow, updateWorkflow, getWorkflow, executeWorkflow, type WorkflowNode, type WorkflowEdge } from "@/lib/api";
-import { useAutoSaveWorkflowFlow, useUpdateWorkflowStatus } from "@/hooks/react-query/workflows/use-workflows";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { validateWorkflow, type ValidationResult } from "./WorkflowValidator";
-import { WorkflowProvider } from "./WorkflowContext";
-import { useSidebar } from "../ui/sidebar";
+} from 'lucide-react';
+import NodePalette from './NodePalette';
+import WorkflowSettings from './WorkflowSettings';
+import AgentNode from './nodes/AgentNode';
+import ToolConnectionNode from './nodes/ToolConnectionNode';
+import InputNode from './nodes/InputNode';
+import MCPNode from './nodes/MCPNode';
+import {
+  getProjects,
+  createWorkflow,
+  updateWorkflow,
+  getWorkflow,
+  executeWorkflow,
+  type WorkflowNode,
+  type WorkflowEdge,
+} from '@/lib/api';
+import {
+  useAutoSaveWorkflowFlow,
+  useUpdateWorkflowStatus,
+} from '@/hooks/react-query/workflows/use-workflows';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { validateWorkflow, type ValidationResult } from './WorkflowValidator';
+import { WorkflowProvider } from './WorkflowContext';
+import { useSidebar } from '../ui/sidebar';
 
 const nodeTypes = {
   inputNode: InputNode,
@@ -55,32 +66,32 @@ const initialNodes: Node[] = [
     id: 'agent-1',
     type: 'agentNode',
     position: { x: 400, y: 200 },
-    data: { 
-      label: 'Test Agent', 
+    data: {
+      label: 'Test Agent',
       nodeId: 'agent',
       connectedTools: [
         {
           id: 'tool-1',
           name: 'Web Search',
-          type: 'web_search_tool'
-        }
+          type: 'web_search_tool',
+        },
       ],
       inputConnections: [
         {
           id: 'tool-1',
           name: 'Web Search',
           type: 'tool',
-          handleId: 'tools'
-        }
-      ]
-    }
+          handleId: 'tools',
+        },
+      ],
+    },
   },
   {
     id: 'tool-1',
     type: 'toolConnectionNode',
     position: { x: 100, y: 200 },
-    data: { 
-      label: 'Web Search', 
+    data: {
+      label: 'Web Search',
       nodeId: 'web_search_tool',
       instructions: '',
       outputConnections: [
@@ -88,11 +99,11 @@ const initialNodes: Node[] = [
           id: 'agent-1',
           name: 'Test Agent',
           type: 'agent',
-          handleId: 'tool-connection'
-        }
-      ]
-    }
-  }
+          handleId: 'tool-connection',
+        },
+      ],
+    },
+  },
 ];
 
 const initialEdges: Edge[] = [
@@ -111,14 +122,14 @@ const initialEdges: Edge[] = [
       height: 20,
       color: '#6366f1',
     },
-  }
+  },
 ];
 
 // Default edge style
 const defaultEdgeOptions = {
   animated: true,
-  style: { 
-    strokeWidth: 2, 
+  style: {
+    strokeWidth: 2,
     stroke: '#6366f1',
   },
   type: 'smoothstep',
@@ -134,21 +145,28 @@ interface WorkflowBuilderProps {
   workflowId?: string;
 }
 
-export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {}) {
+export default function WorkflowBuilder({
+  workflowId,
+}: WorkflowBuilderProps = {}) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showSettings, setShowSettings] = useState(false);
   const [showNodePalette, setShowNodePalette] = useState(true);
   const [isNodePaletteCollapsed, setIsNodePaletteCollapsed] = useState(false);
-  const [workflowName, setWorkflowName] = useState("Untitled Workflow");
-  const [workflowDescription, setWorkflowDescription] = useState("");
+  const [workflowName, setWorkflowName] = useState('Untitled Workflow');
+  const [workflowDescription, setWorkflowDescription] = useState('');
   const [saving, setSaving] = useState(false);
   const [running, setRunning] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
-  const [validationResult, setValidationResult] = useState<ValidationResult>({ valid: true, errors: [] });
+  const [validationResult, setValidationResult] = useState<ValidationResult>({
+    valid: true,
+    errors: [],
+  });
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [workflowStatus, setWorkflowStatus] = useState<'draft' | 'active' | 'paused' | 'disabled' | 'archived'>('draft');
+  const [workflowStatus, setWorkflowStatus] = useState<
+    'draft' | 'active' | 'paused' | 'disabled' | 'archived'
+  >('draft');
   const [togglingStatus, setTogglingStatus] = useState(false);
   const [lastSavedState, setLastSavedState] = useState<{
     nodes: any[];
@@ -176,7 +194,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
       try {
         const projects = await getProjects();
         if (projects.length === 0) {
-          toast.error("No projects found. Please create a project first.");
+          console.error('No projects found. Please create a project first.');
           return;
         }
 
@@ -185,15 +203,17 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
         if (workflowId) {
           const workflow = await getWorkflow(workflowId);
           console.log('Loaded workflow:', workflow);
-          
-          const displayName = workflow.name || workflow.definition.name || "Untitled Workflow";
-          const displayDescription = workflow.description || workflow.definition.description || "";
-          
+
+          const displayName =
+            workflow.name || workflow.definition.name || 'Untitled Workflow';
+          const displayDescription =
+            workflow.description || workflow.definition.description || '';
+
           console.log('Setting workflow name to:', displayName);
           setWorkflowName(displayName);
           setWorkflowDescription(displayDescription);
           setWorkflowStatus(workflow.status);
-          
+
           if (workflow.definition.nodes && workflow.definition.edges) {
             setNodes(workflow.definition.nodes);
             setEdges(workflow.definition.edges);
@@ -204,12 +224,14 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
             nodes: workflow.definition.nodes || [],
             edges: workflow.definition.edges || [],
             name: displayName,
-            description: displayDescription
+            description: displayDescription,
           });
         }
       } catch (err) {
         console.error('Error loading workflow data:', err);
-        toast.error(err instanceof Error ? err.message : 'Failed to load workflow data');
+        console.error(
+          err instanceof Error ? err.message : 'Failed to load workflow data',
+        );
       }
     };
 
@@ -221,71 +243,83 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
     setValidationResult(result);
   }, [nodes, edges]);
 
-  const updateNodeData = useCallback((nodeId: string, updates: any) => {
-    setNodes((nds) =>
-      nds.map((node) =>
-        node.id === nodeId
-          ? { ...node, data: { ...node.data, ...updates } }
-          : node
-      )
-    );
-  }, [setNodes]);
+  const updateNodeData = useCallback(
+    (nodeId: string, updates: any) => {
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, ...updates } }
+            : node,
+        ),
+      );
+    },
+    [setNodes],
+  );
 
   // Function to check if current state differs from last saved state
   const hasChanges = useCallback(() => {
     if (!lastSavedState) return false;
-    
+
     // Compare nodes (deep comparison of relevant properties)
-    const currentNodesSimplified = nodes.map(node => ({
+    const currentNodesSimplified = nodes.map((node) => ({
       id: node.id,
       type: node.type,
       position: node.position,
-      data: node.data
+      data: node.data,
     }));
-    
-    const savedNodesSimplified = lastSavedState.nodes.map(node => ({
+
+    const savedNodesSimplified = lastSavedState.nodes.map((node) => ({
       id: node.id,
       type: node.type,
       position: node.position,
-      data: node.data
+      data: node.data,
     }));
-    
-    if (JSON.stringify(currentNodesSimplified) !== JSON.stringify(savedNodesSimplified)) {
+
+    if (
+      JSON.stringify(currentNodesSimplified) !==
+      JSON.stringify(savedNodesSimplified)
+    ) {
       return true;
     }
-    
+
     // Compare edges
-    const currentEdgesSimplified = edges.map(edge => ({
+    const currentEdgesSimplified = edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
       sourceHandle: edge.sourceHandle,
-      targetHandle: edge.targetHandle
+      targetHandle: edge.targetHandle,
     }));
-    
-    const savedEdgesSimplified = lastSavedState.edges.map(edge => ({
+
+    const savedEdgesSimplified = lastSavedState.edges.map((edge) => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
       sourceHandle: edge.sourceHandle,
-      targetHandle: edge.targetHandle
+      targetHandle: edge.targetHandle,
     }));
-    
-    if (JSON.stringify(currentEdgesSimplified) !== JSON.stringify(savedEdgesSimplified)) {
+
+    if (
+      JSON.stringify(currentEdgesSimplified) !==
+      JSON.stringify(savedEdgesSimplified)
+    ) {
       return true;
     }
-    
+
     // Compare name and description
-    if (workflowName !== lastSavedState.name || workflowDescription !== lastSavedState.description) {
+    if (
+      workflowName !== lastSavedState.name ||
+      workflowDescription !== lastSavedState.description
+    ) {
       return true;
     }
-    
+
     return false;
   }, [nodes, edges, workflowName, workflowDescription, lastSavedState]);
 
   const debouncedAutoSave = useCallback(() => {
     if (!workflowId || !projectId || !hasChanges()) return;
-    
+
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
@@ -293,22 +327,22 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
     autoSaveTimeoutRef.current = setTimeout(async () => {
       try {
         setAutoSaving(true);
-        
-        const nodesToSave = nodes.map(node => ({
+
+        const nodesToSave = nodes.map((node) => ({
           id: node.id,
           type: node.type || 'default',
           position: node.position,
-          data: node.data
+          data: node.data,
         })) as WorkflowNode[];
 
-        const edgesToSave = edges.map(edge => ({
+        const edgesToSave = edges.map((edge) => ({
           id: edge.id,
           source: edge.source,
           target: edge.target,
           sourceHandle: edge.sourceHandle,
-          targetHandle: edge.targetHandle
+          targetHandle: edge.targetHandle,
         })) as WorkflowEdge[];
-        
+
         await autoSaveMutation.mutateAsync({
           id: workflowId,
           nodes: nodesToSave,
@@ -318,8 +352,8 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
             description: workflowDescription,
             max_execution_time: 300,
             max_retries: 3,
-            is_template: false
-          }
+            is_template: false,
+          },
         });
 
         // Update the last saved state
@@ -327,7 +361,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
           nodes: nodesToSave,
           edges: edgesToSave,
           name: workflowName,
-          description: workflowDescription
+          description: workflowDescription,
         });
 
         setLastSaved(new Date());
@@ -337,13 +371,30 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
         setAutoSaving(false);
       }
     }, 2000);
-  }, [workflowId, projectId, nodes, edges, workflowName, workflowDescription, autoSaveMutation, hasChanges]);
+  }, [
+    workflowId,
+    projectId,
+    nodes,
+    edges,
+    workflowName,
+    workflowDescription,
+    autoSaveMutation,
+    hasChanges,
+  ]);
 
   useEffect(() => {
     if (workflowId && lastSavedState) {
       debouncedAutoSave();
     }
-  }, [nodes, edges, workflowName, workflowDescription, debouncedAutoSave, workflowId, lastSavedState]);
+  }, [
+    nodes,
+    edges,
+    workflowName,
+    workflowDescription,
+    debouncedAutoSave,
+    workflowId,
+    lastSavedState,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -355,16 +406,16 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
 
   const handleSaveWorkflow = async () => {
     if (!projectId) {
-      toast.error("No project selected");
+      console.error('No project selected');
       return;
     }
     const validation = validateWorkflow(nodes, edges);
     if (!validation.valid) {
       const errorMessages = validation.errors
-        .filter(e => e.type === 'error')
-        .map(e => e.message)
+        .filter((e) => e.type === 'error')
+        .map((e) => e.message)
         .join(', ');
-      toast.error(`Cannot save workflow: ${errorMessages}`);
+      console.error(`Cannot save workflow: ${errorMessages}`);
       return;
     }
 
@@ -374,40 +425,42 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
         name: workflowName,
         description: workflowDescription,
         project_id: projectId,
-        nodes: nodes.map(node => ({
+        nodes: nodes.map((node) => ({
           id: node.id,
           type: node.type || 'default',
           position: node.position,
-          data: node.data
+          data: node.data,
         })) as WorkflowNode[],
-        edges: edges.map(edge => ({
+        edges: edges.map((edge) => ({
           id: edge.id,
           source: edge.source,
           target: edge.target,
           sourceHandle: edge.sourceHandle,
-          targetHandle: edge.targetHandle
+          targetHandle: edge.targetHandle,
         })) as WorkflowEdge[],
-        variables: {}
+        variables: {},
       };
 
       if (workflowId) {
         await updateWorkflow(workflowId, workflowData);
-        toast.success("Workflow updated successfully!");
+        ss('Workflow updated successfully!');
         setLastSavedState({
           nodes: workflowData.nodes,
           edges: workflowData.edges,
           name: workflowName,
-          description: workflowDescription
+          description: workflowDescription,
         });
         setLastSaved(new Date());
       } else {
         const newWorkflow = await createWorkflow(workflowData);
-        toast.success("Workflow created successfully!");
+        ss('Workflow created successfully!');
         router.push(`/workflows/builder/${newWorkflow.id}`);
       }
     } catch (err) {
       console.error('Error saving workflow:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to save workflow');
+      console.error(
+        err instanceof Error ? err.message : 'Failed to save workflow',
+      );
     } finally {
       setSaving(false);
     }
@@ -415,28 +468,30 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
 
   const handleRunWorkflow = async () => {
     if (!workflowId) {
-      toast.error("Please save the workflow first");
+      console.error('Please save the workflow first');
       return;
     }
 
     if (!projectId) {
-      toast.error("No project selected");
+      console.error('No project selected');
       return;
     }
 
     try {
       setRunning(true);
       const result = await executeWorkflow(workflowId);
-      toast.success("Workflow execution started! Redirecting to chat...");
+      ss('Workflow execution started! Redirecting to chat...');
       console.log('Workflow execution started:', result);
-      
+
       // Redirect to the thread page
       if (result.thread_id) {
         router.push(`/projects/${projectId}/thread/${result.thread_id}`);
       }
     } catch (err) {
       console.error('Error running workflow:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to run workflow');
+      console.error(
+        err instanceof Error ? err.message : 'Failed to run workflow',
+      );
     } finally {
       setRunning(false);
     }
@@ -447,10 +502,10 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
       const newEdge: Edge = {
         ...params,
         id: `e-${params.source}-${params.target}-${Date.now()}`,
-        type: "smoothstep",
+        type: 'smoothstep',
         animated: true,
-        style: { 
-          strokeWidth: 2, 
+        style: {
+          strokeWidth: 2,
           stroke: '#6366f1',
         },
         markerEnd: {
@@ -461,195 +516,247 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
         },
       } as Edge;
       setEdges((eds) => addEdge(newEdge, eds));
-      
+
       // Update both source and target nodes with connection information
-      setNodes((nds) => 
+      setNodes((nds) =>
         nds.map((node) => {
           // Update target node (receiving the connection)
           if (node.id === params.target) {
-            const sourceNode = nds.find(n => n.id === params.source);
+            const sourceNode = nds.find((n) => n.id === params.source);
             if (sourceNode) {
-              const inputConnections = (node.data.inputConnections as any[]) || [];
+              const inputConnections =
+                (node.data.inputConnections as any[]) || [];
               const connectedTools = (node.data.connectedTools as any[]) || [];
-              
+
               const newInputConnection = {
                 id: sourceNode.id,
                 name: sourceNode.data.label,
-                type: sourceNode.type === 'toolConnectionNode' ? 'tool' : sourceNode.type || 'unknown',
-                handleId: params.targetHandle || 'input'
+                type:
+                  sourceNode.type === 'toolConnectionNode'
+                    ? 'tool'
+                    : sourceNode.type || 'unknown',
+                handleId: params.targetHandle || 'input',
               };
-              
+
               // Check if connection already exists
-              const isInputAlreadyConnected = inputConnections.some((conn: any) => 
-                conn.id === newInputConnection.id && conn.handleId === newInputConnection.handleId
+              const isInputAlreadyConnected = inputConnections.some(
+                (conn: any) =>
+                  conn.id === newInputConnection.id &&
+                  conn.handleId === newInputConnection.handleId,
               );
-              
-              let updatedData = { ...node.data };
-              
+
+              const updatedData = { ...node.data };
+
               if (!isInputAlreadyConnected) {
-                updatedData.inputConnections = [...inputConnections, newInputConnection];
+                updatedData.inputConnections = [
+                  ...inputConnections,
+                  newInputConnection,
+                ];
               }
-              
+
               // If it's a tool connection to an agent, also update connectedTools
-              if (params.targetHandle === "tools" && params.sourceHandle === "tool-connection") {
+              if (
+                params.targetHandle === 'tools' &&
+                params.sourceHandle === 'tool-connection'
+              ) {
                 const newTool = {
                   id: sourceNode.id,
                   name: sourceNode.data.label,
-                  type: sourceNode.data.nodeId || "unknown"
+                  type: sourceNode.data.nodeId || 'unknown',
                 };
-                
-                const isToolAlreadyConnected = connectedTools.some((tool: any) => tool.id === newTool.id);
+
+                const isToolAlreadyConnected = connectedTools.some(
+                  (tool: any) => tool.id === newTool.id,
+                );
                 if (!isToolAlreadyConnected) {
                   updatedData.connectedTools = [...connectedTools, newTool];
                 }
               }
-              
+
               return {
                 ...node,
-                data: updatedData
+                data: updatedData,
               };
             }
           }
-          
+
           // Update source node (sending the connection)
           if (node.id === params.source) {
-            const targetNode = nds.find(n => n.id === params.target);
+            const targetNode = nds.find((n) => n.id === params.target);
             if (targetNode) {
-              const outputConnections = (node.data.outputConnections as any[]) || [];
-              
+              const outputConnections =
+                (node.data.outputConnections as any[]) || [];
+
               const newOutputConnection = {
                 id: targetNode.id,
                 name: targetNode.data.label,
-                type: targetNode.type === 'agentNode' ? 'agent' : targetNode.type || 'unknown',
-                handleId: params.sourceHandle || 'output'
+                type:
+                  targetNode.type === 'agentNode'
+                    ? 'agent'
+                    : targetNode.type || 'unknown',
+                handleId: params.sourceHandle || 'output',
               };
-              
+
               // Check if connection already exists
-              const isOutputAlreadyConnected = outputConnections.some((conn: any) => 
-                conn.id === newOutputConnection.id && conn.handleId === newOutputConnection.handleId
+              const isOutputAlreadyConnected = outputConnections.some(
+                (conn: any) =>
+                  conn.id === newOutputConnection.id &&
+                  conn.handleId === newOutputConnection.handleId,
               );
-              
+
               if (!isOutputAlreadyConnected) {
                 return {
                   ...node,
                   data: {
                     ...node.data,
-                    outputConnections: [...outputConnections, newOutputConnection]
-                  }
+                    outputConnections: [
+                      ...outputConnections,
+                      newOutputConnection,
+                    ],
+                  },
                 };
               }
             }
           }
-          
+
           return node;
-        })
+        }),
       );
     },
-    [setEdges, setNodes]
+    [setEdges, setNodes],
   );
 
   // Handle edge removal to update connected tools
   const handleEdgesChange = useCallback(
     (changes: any[]) => {
-      const removedEdges = changes.filter((change: any) => change.type === 'remove');
-      
+      const removedEdges = changes.filter(
+        (change: any) => change.type === 'remove',
+      );
+
       if (removedEdges.length > 0) {
         // Get the current edges before removal
         const currentEdges = edges;
-        
-        setNodes((nds) => 
+
+        setNodes((nds) =>
           nds.map((node) => {
-            let updatedData = { ...node.data };
+            const updatedData = { ...node.data };
             let hasChanges = false;
-            
+
             // Handle agent nodes
             if (node.type === 'agentNode') {
               const connectedTools = (node.data.connectedTools as any[]) || [];
-              const inputConnections = (node.data.inputConnections as any[]) || [];
-              
+              const inputConnections =
+                (node.data.inputConnections as any[]) || [];
+
               // Update connected tools
               const updatedTools = connectedTools.filter((tool: any) => {
                 const isBeingRemoved = removedEdges.some((removedEdge: any) => {
                   if (!removedEdge.id) return false;
-                  const edgeToRemove = currentEdges.find(e => e.id === removedEdge.id);
-                  return edgeToRemove && 
-                         edgeToRemove.source === tool.id && 
-                         edgeToRemove.target === node.id &&
-                         edgeToRemove.targetHandle === 'tools' &&
-                         edgeToRemove.sourceHandle === 'tool-connection';
+                  const edgeToRemove = currentEdges.find(
+                    (e) => e.id === removedEdge.id,
+                  );
+                  return (
+                    edgeToRemove &&
+                    edgeToRemove.source === tool.id &&
+                    edgeToRemove.target === node.id &&
+                    edgeToRemove.targetHandle === 'tools' &&
+                    edgeToRemove.sourceHandle === 'tool-connection'
+                  );
                 });
                 return !isBeingRemoved;
               });
-              
+
               // Update input connections
-              const updatedInputConnections = inputConnections.filter((conn: any) => {
-                const isBeingRemoved = removedEdges.some((removedEdge: any) => {
-                  if (!removedEdge.id) return false;
-                  const edgeToRemove = currentEdges.find(e => e.id === removedEdge.id);
-                  return edgeToRemove && 
-                         edgeToRemove.source === conn.id && 
-                         edgeToRemove.target === node.id &&
-                         edgeToRemove.targetHandle === conn.handleId;
-                });
-                return !isBeingRemoved;
-              });
-              
+              const updatedInputConnections = inputConnections.filter(
+                (conn: any) => {
+                  const isBeingRemoved = removedEdges.some(
+                    (removedEdge: any) => {
+                      if (!removedEdge.id) return false;
+                      const edgeToRemove = currentEdges.find(
+                        (e) => e.id === removedEdge.id,
+                      );
+                      return (
+                        edgeToRemove &&
+                        edgeToRemove.source === conn.id &&
+                        edgeToRemove.target === node.id &&
+                        edgeToRemove.targetHandle === conn.handleId
+                      );
+                    },
+                  );
+                  return !isBeingRemoved;
+                },
+              );
+
               if (updatedTools.length !== connectedTools.length) {
                 updatedData.connectedTools = updatedTools;
                 hasChanges = true;
               }
-              
+
               if (updatedInputConnections.length !== inputConnections.length) {
                 updatedData.inputConnections = updatedInputConnections;
                 hasChanges = true;
               }
             }
-            
+
             // Handle tool nodes and other nodes with output connections
-            if (node.type === 'toolConnectionNode' || node.data.outputConnections) {
-              const outputConnections = (node.data.outputConnections as any[]) || [];
-              
-              const updatedOutputConnections = outputConnections.filter((conn: any) => {
-                const isBeingRemoved = removedEdges.some((removedEdge: any) => {
-                  if (!removedEdge.id) return false;
-                  const edgeToRemove = currentEdges.find(e => e.id === removedEdge.id);
-                  return edgeToRemove && 
-                         edgeToRemove.source === node.id && 
-                         edgeToRemove.target === conn.id &&
-                         edgeToRemove.sourceHandle === conn.handleId;
-                });
-                return !isBeingRemoved;
-              });
-              
-              if (updatedOutputConnections.length !== outputConnections.length) {
+            if (
+              node.type === 'toolConnectionNode' ||
+              node.data.outputConnections
+            ) {
+              const outputConnections =
+                (node.data.outputConnections as any[]) || [];
+
+              const updatedOutputConnections = outputConnections.filter(
+                (conn: any) => {
+                  const isBeingRemoved = removedEdges.some(
+                    (removedEdge: any) => {
+                      if (!removedEdge.id) return false;
+                      const edgeToRemove = currentEdges.find(
+                        (e) => e.id === removedEdge.id,
+                      );
+                      return (
+                        edgeToRemove &&
+                        edgeToRemove.source === node.id &&
+                        edgeToRemove.target === conn.id &&
+                        edgeToRemove.sourceHandle === conn.handleId
+                      );
+                    },
+                  );
+                  return !isBeingRemoved;
+                },
+              );
+
+              if (
+                updatedOutputConnections.length !== outputConnections.length
+              ) {
                 updatedData.outputConnections = updatedOutputConnections;
                 hasChanges = true;
               }
             }
-            
+
             return hasChanges ? { ...node, data: updatedData } : node;
-          })
+          }),
         );
       }
-      
+
       onEdgesChange(changes);
     },
-    [edges, setNodes, onEdgesChange]
+    [edges, setNodes, onEdgesChange],
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
+    event.dataTransfer.dropEffect = 'move';
   }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
 
-      const type = event.dataTransfer.getData("application/reactflow");
-      const nodeDataString = event.dataTransfer.getData("nodeData");
+      const type = event.dataTransfer.getData('application/reactflow');
+      const nodeDataString = event.dataTransfer.getData('nodeData');
 
-      if (typeof type === "undefined" || !type || !nodeDataString) {
+      if (typeof type === 'undefined' || !type || !nodeDataString) {
         return;
       }
 
@@ -659,13 +766,13 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
         y: event.clientY - 100,
       };
 
-      let nodeType = "toolConnectionNode";
-      if (nodeData.nodeId === "agent") {
-        nodeType = "agentNode";
-      } else if (type === "inputNode" || nodeData.nodeId === "inputNode") {
-        nodeType = "inputNode";
-      } else if (type === "mcpNode" || nodeData.mcpType) {
-        nodeType = "mcpNode";
+      let nodeType = 'toolConnectionNode';
+      if (nodeData.nodeId === 'agent') {
+        nodeType = 'agentNode';
+      } else if (type === 'inputNode' || nodeData.nodeId === 'inputNode') {
+        nodeType = 'inputNode';
+      } else if (type === 'mcpNode' || nodeData.mcpType) {
+        nodeType = 'mcpNode';
       }
 
       const newNode: Node = {
@@ -680,25 +787,27 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [setNodes]
+    [setNodes],
   );
 
   const handleToggleWorkflowStatus = async () => {
     if (!workflowId) return;
-    
+
     try {
       setTogglingStatus(true);
       const newStatus = workflowStatus === 'active' ? 'draft' : 'active';
-      
+
       await updateStatusMutation.mutateAsync({
         id: workflowId,
-        status: newStatus
+        status: newStatus,
       });
 
       setWorkflowStatus(newStatus);
     } catch (err) {
       console.error('Error updating workflow status:', err);
-      toast.error(err instanceof Error ? err.message : 'Failed to update workflow status');
+      console.error(
+        err instanceof Error ? err.message : 'Failed to update workflow status',
+      );
     } finally {
       setTogglingStatus(false);
     }
@@ -711,36 +820,38 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
           stroke: #6366f1 !important;
           stroke-width: 2 !important;
         }
-        
+
         .react-flow__edge.animated .react-flow__edge-path {
           stroke-dasharray: 5;
           animation: dashdraw 0.5s linear infinite;
         }
-        
+
         @keyframes dashdraw {
           to {
             stroke-dashoffset: -10;
           }
         }
-        
+
         .react-flow__connection-path {
           stroke: #6366f1 !important;
           stroke-width: 2 !important;
         }
-        
+
         .react-flow__edge-text {
           fill: #6366f1 !important;
         }
-        
+
         .react-flow__edge.selected .react-flow__edge-path {
           stroke: #818cf8 !important;
           stroke-width: 3 !important;
         }
       `}</style>
-      
+
       <div className="flex h-full bg-background">
         {showNodePalette && (
-          <div className={`${isNodePaletteCollapsed ? 'w-17' : 'w-80'} border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out`}>
+          <div
+            className={`${isNodePaletteCollapsed ? 'w-17' : 'w-80'} border-r border-border bg-card/50 backdrop-blur-sm transition-all duration-300 ease-in-out`}
+          >
             <NodePalette onCollapseChange={setIsNodePaletteCollapsed} />
           </div>
         )}
@@ -776,15 +887,21 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {workflowId && (
                   <Button
-                    variant={workflowStatus === 'active' ? "default" : "outline"}
+                    variant={
+                      workflowStatus === 'active' ? 'default' : 'outline'
+                    }
                     size="sm"
                     onClick={handleToggleWorkflowStatus}
                     disabled={togglingStatus}
-                    className={workflowStatus === 'active' ? "bg-green-600 hover:bg-green-700" : ""}
+                    className={
+                      workflowStatus === 'active'
+                        ? 'bg-green-600 hover:bg-green-700'
+                        : ''
+                    }
                   >
                     {togglingStatus ? (
                       <Loader2 className="animate-spin rounded-full h-4 w-4" />
@@ -796,7 +913,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
                     {workflowStatus === 'active' ? 'Deactivate' : 'Activate'}
                   </Button>
                 )}
-                <Button 
+                <Button
                   variant="outline"
                   onClick={handleSaveWorkflow}
                   disabled={saving}
@@ -806,7 +923,7 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  {saving ? "Saving..." : "Save"}
+                  {saving ? 'Saving...' : 'Save'}
                 </Button>
                 <Button
                   onClick={handleRunWorkflow}
@@ -817,13 +934,12 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
                   ) : (
                     <Play className="h-4 w-4" />
                   )}
-                  {running ? "Running..." : "Run Workflow"}
+                  {running ? 'Running...' : 'Run Workflow'}
                 </Button>
               </div>
             </div>
           </div>
 
-          
           {/* {validationResult.errors.length > 0 && (
             <Card className="mx-4 mt-4 border-l-4 border-l-red-500">
               <CardContent className="p-4">
@@ -859,7 +975,10 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
           )} */}
 
           <div className="flex-1 border border-border/50 bg-background backdrop-blur-sm overflow-hidden">
-            <WorkflowProvider updateNodeData={updateNodeData} workflowId={workflowId}>
+            <WorkflowProvider
+              updateNodeData={updateNodeData}
+              workflowId={workflowId}
+            >
               <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -871,8 +990,8 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
                 nodeTypes={nodeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
                 connectionLineType={ConnectionLineType.SmoothStep}
-                connectionLineStyle={{ 
-                  strokeWidth: 2, 
+                connectionLineStyle={{
+                  strokeWidth: 2,
                   stroke: '#6366f1',
                 }}
                 fitView
@@ -924,9 +1043,9 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
           </Card> */}
         </div>
 
-        <WorkflowSettings 
-          open={showSettings} 
-          onOpenChange={setShowSettings} 
+        <WorkflowSettings
+          open={showSettings}
+          onOpenChange={setShowSettings}
           nodes={nodes}
           edges={edges}
           workflowName={workflowName}
@@ -938,4 +1057,4 @@ export default function WorkflowBuilder({ workflowId }: WorkflowBuilderProps = {
       </div>
     </>
   );
-} 
+}

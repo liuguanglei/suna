@@ -26,7 +26,10 @@ interface UseThreadDataReturn {
   agentRunsQuery: ReturnType<typeof useAgentRunsQuery>;
 }
 
-export function useThreadData(threadId: string, projectId: string): UseThreadDataReturn {
+export function useThreadData(
+  threadId: string,
+  projectId: string,
+): UseThreadDataReturn {
   const [messages, setMessages] = useState<UnifiedMessage[]>([]);
   const [project, setProject] = useState<Project | null>(null);
   const [sandboxId, setSandboxId] = useState<string | null>(null);
@@ -35,7 +38,7 @@ export function useThreadData(threadId: string, projectId: string): UseThreadDat
   const [agentStatus, setAgentStatus] = useState<AgentStatus>('idle');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const initialLoadCompleted = useRef<boolean>(false);
   const messagesLoadedRef = useRef(false);
   const agentRunsCheckedRef = useRef(false);
@@ -86,7 +89,10 @@ export function useThreadData(threadId: string, projectId: string): UseThreadDat
             }));
 
           setMessages(unifiedMessages);
-          console.log('[PAGE] Loaded Messages (excluding status, keeping browser_state):', unifiedMessages.length);
+          console.log(
+            '[PAGE] Loaded Messages (excluding status, keeping browser_state):',
+            unifiedMessages.length,
+          );
           messagesLoadedRef.current = true;
 
           if (!hasInitiallyScrolled.current) {
@@ -98,7 +104,9 @@ export function useThreadData(threadId: string, projectId: string): UseThreadDat
           console.log('[PAGE] Checking for active agent runs...');
           agentRunsCheckedRef.current = true;
 
-          const activeRun = agentRunsQuery.data.find((run) => run.status === 'running');
+          const activeRun = agentRunsQuery.data.find(
+            (run) => run.status === 'running',
+          );
           if (activeRun && isMounted) {
             console.log('[PAGE] Found active run on load:', activeRun.id);
             setAgentRunId(activeRun.id);
@@ -112,14 +120,13 @@ export function useThreadData(threadId: string, projectId: string): UseThreadDat
           initialLoadCompleted.current = true;
           setIsLoading(false);
         }
-
       } catch (err) {
         console.error('Error loading thread data:', err);
         if (isMounted) {
           const errorMessage =
             err instanceof Error ? err.message : 'Failed to load thread';
           setError(errorMessage);
-          toast.error(errorMessage);
+          console.error(errorMessage);
           setIsLoading(false);
         }
       }
@@ -139,12 +146,16 @@ export function useThreadData(threadId: string, projectId: string): UseThreadDat
     threadQuery.error,
     projectQuery.data,
     messagesQuery.data,
-    agentRunsQuery.data
+    agentRunsQuery.data,
   ]);
 
   useEffect(() => {
     if (messagesQuery.data && messagesQuery.status === 'success') {
-      if (!isLoading && agentStatus !== 'running' && agentStatus !== 'connecting') {
+      if (
+        !isLoading &&
+        agentStatus !== 'running' &&
+        agentStatus !== 'connecting'
+      ) {
         const unifiedMessages = (messagesQuery.data || [])
           .filter((msg) => msg.type !== 'status')
           .map((msg: ApiMessageType) => ({
@@ -163,7 +174,13 @@ export function useThreadData(threadId: string, projectId: string): UseThreadDat
         setMessages(unifiedMessages);
       }
     }
-  }, [messagesQuery.data, messagesQuery.status, isLoading, agentStatus, threadId]);
+  }, [
+    messagesQuery.data,
+    messagesQuery.status,
+    isLoading,
+    agentStatus,
+    threadId,
+  ]);
 
   return {
     messages,
@@ -183,4 +200,4 @@ export function useThreadData(threadId: string, projectId: string): UseThreadDat
     projectQuery,
     agentRunsQuery,
   };
-} 
+}

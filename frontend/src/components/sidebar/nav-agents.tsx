@@ -280,7 +280,7 @@ export function NavAgents() {
               onSuccess: () => {
                 // Invalidate queries to refresh the list
                 queryClient.invalidateQueries({ queryKey: threadKeys.lists() });
-                toast.success('Conversation deleted successfully');
+                toast.success('对话删除成功');
               },
               onSettled: () => {
                 setThreadToDelete(null);
@@ -303,7 +303,7 @@ export function NavAgents() {
       );
 
       // Show initial toast
-      toast.info(`Deleting ${threadIdsToDelete.length} conversations...`);
+      toast.info(`删除 ${threadIdsToDelete.length} 对话。。。`);
 
       try {
         // If the active thread is included, handle navigation first
@@ -342,15 +342,11 @@ export function NavAgents() {
               queryClient.invalidateQueries({ queryKey: threadKeys.lists() });
 
               // Show success message
-              toast.success(
-                `Successfully deleted ${data.successful.length} conversations`,
-              );
+              toast.success(`成功删除 ${data.successful.length} 对话`);
 
               // If some deletions failed, show warning
               if (data.failed.length > 0) {
-                toast.warning(
-                  `Failed to delete ${data.failed.length} conversations`,
-                );
+                toast.warning(`删除对话 ${data.failed.length} 失败`);
               }
 
               // Reset states
@@ -360,7 +356,7 @@ export function NavAgents() {
             },
             onError: (error) => {
               console.error('Error in bulk deletion:', error);
-              toast.error('Error deleting conversations');
+              console.error('Error deleting conversations');
             },
             onSettled: () => {
               setThreadToDelete(null);
@@ -372,7 +368,7 @@ export function NavAgents() {
         );
       } catch (err) {
         console.error('Error initiating bulk deletion:', err);
-        toast.error('Error initiating deletion process');
+        console.error('Error initiating deletion process');
 
         // Reset states
         setSelectedThreads(new Set());

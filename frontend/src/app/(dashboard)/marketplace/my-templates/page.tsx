@@ -1,11 +1,25 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Globe, GlobeLock, Download, Calendar, User, Tags, Loader2, AlertTriangle, Plus, GitBranch } from 'lucide-react';
+import {
+  Globe,
+  GlobeLock,
+  Download,
+  Calendar,
+  User,
+  Tags,
+  Loader2,
+  AlertTriangle,
+  Plus,
+  GitBranch,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useMyTemplates, useUnpublishTemplate } from '@/hooks/react-query/secure-mcp/use-secure-mcp';
+import {
+  useMyTemplates,
+  useUnpublishTemplate,
+} from '@/hooks/react-query/secure-mcp/use-secure-mcp';
 import { toast } from 'sonner';
 import { getAgentAvatar } from '../../agents/_utils/get-agent-style';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,7 +27,7 @@ import Link from 'next/link';
 
 export default function MyTemplatesPage() {
   const [unpublishingId, setUnpublishingId] = useState<string | null>(null);
-  
+
   const { data: templates, isLoading, error } = useMyTemplates();
   const unpublishMutation = useUnpublishTemplate();
 
@@ -21,9 +35,11 @@ export default function MyTemplatesPage() {
     try {
       setUnpublishingId(templateId);
       await unpublishMutation.mutateAsync(templateId);
-      toast.success(`${templateName} has been unpublished from the marketplace`);
+      toast.success(
+        `${templateName} has been unpublished from the marketplace`,
+      );
     } catch (error: any) {
-      toast.error(error.message || 'Failed to unpublish template');
+      console.error(error.message || 'Failed to unpublish template');
     } finally {
       setUnpublishingId(null);
     }
@@ -71,7 +87,10 @@ export default function MyTemplatesPage() {
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden">
+              <div
+                key={i}
+                className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden"
+              >
                 <Skeleton className="h-32 w-full" />
                 <div className="p-4 space-y-3">
                   <Skeleton className="h-4 w-3/4" />
@@ -89,7 +108,8 @@ export default function MyTemplatesPage() {
             </div>
             <h3 className="text-lg font-medium mb-2">No templates yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Create your first secure agent template to share with the community while keeping your credentials safe.
+              Create your first secure agent template to share with the
+              community while keeping your credentials safe.
             </p>
             <Link href="/agents">
               <Button>
@@ -103,16 +123,17 @@ export default function MyTemplatesPage() {
             {templates?.map((template) => {
               const { avatar, color } = getTemplateStyling(template);
               const isUnpublishing = unpublishingId === template.template_id;
-              
+
               return (
-                <div 
-                  key={template.template_id} 
+                <div
+                  key={template.template_id}
                   className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden hover:bg-muted/50 transition-all duration-200 flex flex-col h-full"
                 >
-                  <div className={`h-32 flex items-center justify-center relative`} style={{ backgroundColor: color }}>
-                    <div className="text-4xl">
-                      {avatar}
-                    </div>
+                  <div
+                    className={`h-32 flex items-center justify-center relative`}
+                    style={{ backgroundColor: color }}
+                  >
+                    <div className="text-4xl">{avatar}</div>
                   </div>
                   <div className="p-4 flex flex-col flex-1">
                     <div className="flex items-center gap-2 mb-1">
@@ -129,11 +150,15 @@ export default function MyTemplatesPage() {
                     <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                       {template.description || 'No description available'}
                     </p>
-                    
+
                     {template.tags && template.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
-                        {template.tags.slice(0, 2).map(tag => (
-                          <Badge key={tag} variant="outline" className="text-xs">
+                        {template.tags.slice(0, 2).map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {tag}
                           </Badge>
                         ))}
@@ -148,14 +173,19 @@ export default function MyTemplatesPage() {
                     <div className="space-y-1 mb-4">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        <span>Created {new Date(template.created_at).toLocaleDateString()}</span>
+                        <span>
+                          Created{' '}
+                          {new Date(template.created_at).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
 
                     <div className="mt-auto">
                       {template.is_public ? (
                         <Button
-                          onClick={() => handleUnpublish(template.template_id, template.name)}
+                          onClick={() =>
+                            handleUnpublish(template.template_id, template.name)
+                          }
                           disabled={isUnpublishing}
                           variant="outline"
                           className="w-full"
@@ -188,4 +218,4 @@ export default function MyTemplatesPage() {
       </div>
     </div>
   );
-} 
+}

@@ -208,7 +208,7 @@ export function useAgentStream(
               err,
             );
             // Optionally notify the user via toast or callback
-            toast.error(`Failed to refresh messages: ${err.message}`);
+            console.error(`Failed to refresh messages: ${err.message}`);
           });
       } else {
         console.log(
@@ -272,10 +272,13 @@ export function useAgentStream(
       try {
         const jsonData = JSON.parse(processedData);
         if (jsonData.status === 'error') {
-          console.error('[useAgentStream] Received error status message:', jsonData);
+          console.error(
+            '[useAgentStream] Received error status message:',
+            jsonData,
+          );
           const errorMessage = jsonData.message || 'Unknown error occurred';
           setError(errorMessage);
-          toast.error(errorMessage, { duration: 15000 });
+          console.error(errorMessage, { duration: 15000 });
           callbacks.onError?.(errorMessage);
           return;
         }
@@ -417,9 +420,9 @@ export function useAgentStream(
 
       console.error('[useAgentStream] Streaming error:', errorMessage, err);
       setError(errorMessage);
-      
+
       // Show error toast with longer duration
-      toast.error(errorMessage, { duration: 15000 });
+      console.error(errorMessage, { duration: 15000 });
 
       const runId = currentRunIdRef.current;
       if (!runId) {
@@ -429,7 +432,6 @@ export function useAgentStream(
         finalizeStream('error'); // Finalize with generic error if no runId
         return;
       }
-
     },
     [finalizeStream],
   );
@@ -633,7 +635,7 @@ export function useAgentStream(
       console.error(
         `[useAgentStream] Error sending stop request for ${runIdToStop}: ${errorMessage}`,
       );
-      toast.error(`Failed to stop agent: ${errorMessage}`);
+      console.error(`Failed to stop agent: ${errorMessage}`);
     }
   }, [agentRunId, finalizeStream]); // Add dependencies
 

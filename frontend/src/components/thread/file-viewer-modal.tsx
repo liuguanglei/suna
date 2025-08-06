@@ -225,7 +225,7 @@ export function FileViewerModal({
             `[DOWNLOAD ALL] Error exploring directory ${dirPath}:`,
             error,
           );
-          toast.error(`Failed to read directory: ${dirPath}`);
+          console.error(`读取目录失败: ${dirPath}`);
         }
       };
 
@@ -255,7 +255,7 @@ export function FileViewerModal({
       const { files } = await discoverAllFiles();
 
       if (files.length === 0) {
-        toast.error('No files found to download');
+        console.error('没有找到可下载的文件');
         return;
       }
 
@@ -394,14 +394,14 @@ export function FileViewerModal({
       // Clean up
       setTimeout(() => URL.revokeObjectURL(url), 10000);
 
-      toast.success(`Downloaded ${files.length} files as zip archive`);
+      toast.success(`下载 ${files.length} 文件为zip存档`);
       console.log(
         `[DOWNLOAD ALL] Successfully created zip with ${files.length} files`,
       );
     } catch (error) {
       console.error('[DOWNLOAD ALL] Error creating zip:', error);
-      toast.error(
-        `Failed to create zip archive: ${error instanceof Error ? error.message : String(error)}`,
+      console.error(
+        `创建zip归档文件失败: ${error instanceof Error ? error.message : String(error)}`,
       );
     } finally {
       setIsDownloadingAll(false);
@@ -547,7 +547,7 @@ export function FileViewerModal({
     // Handle any loading errors
     if (filesError) {
       console.error('Failed to load files:', filesError);
-      toast.error('Failed to load files');
+      console.error('加载文件失败');
     }
   }, [open, sandboxId, currentPath, isInitialLoad, isLoadingFiles, filesError]);
 
@@ -1165,11 +1165,11 @@ export function FileViewerModal({
         printWindow.document.write(htmlContent);
         printWindow.document.close();
 
-        toast.success('PDF export initiated. Check your print dialog.');
+        toast.success('导出PDF成功');
       } catch (error) {
         console.error('PDF export failed:', error);
-        toast.error(
-          `Failed to export PDF: ${error instanceof Error ? error.message : String(error)}`,
+        console.error(
+          `导出PDF失败: ${error instanceof Error ? error.message : String(error)}`,
         );
       } finally {
         setIsExportingPdf(false);
@@ -1203,8 +1203,7 @@ export function FileViewerModal({
               { headers: { Authorization: `Bearer ${session?.access_token}` } },
             );
 
-            if (!response.ok)
-              throw new Error(`Server error: ${response.status}`);
+            if (!response.ok) throw new Error(`服务器错误: ${response.status}`);
             blob = await response.blob();
           } else {
             // Text content
@@ -1235,15 +1234,15 @@ export function FileViewerModal({
         { headers: { Authorization: `Bearer ${session?.access_token}` } },
       );
 
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      if (!response.ok) throw new Error(`服务器错误: ${response.status}`);
 
       const blob = await response.blob();
       const finalBlob = new Blob([blob], { type: mimeType });
       downloadBlob(finalBlob, fileName);
     } catch (error) {
       console.error('[FILE VIEWER] Download error:', error);
-      toast.error(
-        `Failed to download file: ${error instanceof Error ? error.message : String(error)}`,
+      console.error(
+        `下载文件失败: ${error instanceof Error ? error.message : String(error)}`,
       );
     } finally {
       setIsDownloading(false);
@@ -1267,7 +1266,7 @@ export function FileViewerModal({
       activeDownloadUrls.current.delete(url);
     }, 10000);
 
-    toast.success('Download started');
+    toast.success('开始下载');
   };
 
   // Handle file upload - Define after helpers
@@ -1324,11 +1323,11 @@ export function FileViewerModal({
         // Reload the file list using React Query
         await refetchFiles();
 
-        toast.success(`Uploaded: ${normalizedName}`);
+        toast.success(`上传: ${normalizedName}`);
       } catch (error) {
         console.error('Upload failed:', error);
-        toast.error(
-          `Upload failed: ${error instanceof Error ? error.message : String(error)}`,
+        console.error(
+          `上传失败: ${error instanceof Error ? error.message : String(error)}`,
         );
       } finally {
         setIsUploading(false);

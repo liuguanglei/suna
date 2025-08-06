@@ -1,13 +1,47 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, Star, MessageCircle, Wrench, Globe, GlobeLock, Download, Shield, AlertTriangle, GitBranch } from 'lucide-react';
+import {
+  Settings,
+  Trash2,
+  Star,
+  MessageCircle,
+  Wrench,
+  Globe,
+  GlobeLock,
+  Download,
+  Shield,
+  AlertTriangle,
+  GitBranch,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogDescription } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogHeader,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { getAgentAvatar } from '../_utils/get-agent-style';
-import { usePublishAgent, useUnpublishAgent } from '@/hooks/react-query/marketplace/use-marketplace';
-import { useCreateTemplate, useUnpublishTemplate } from '@/hooks/react-query/secure-mcp/use-secure-mcp';
+import {
+  usePublishAgent,
+  useUnpublishAgent,
+} from '@/hooks/react-query/marketplace/use-marketplace';
+import {
+  useCreateTemplate,
+  useUnpublishTemplate,
+} from '@/hooks/react-query/secure-mcp/use-secure-mcp';
 import { toast } from 'sonner';
 
 interface Agent {
@@ -43,7 +77,17 @@ interface AgentsGridProps {
   deleteAgentMutation: { isPending: boolean };
 }
 
-const AgentModal = ({ agent, isOpen, onClose, onCustomize, onChat, onPublish, onUnpublish, isPublishing, isUnpublishing }) => {
+const AgentModal = ({
+  agent,
+  isOpen,
+  onClose,
+  onCustomize,
+  onChat,
+  onPublish,
+  onUnpublish,
+  isPublishing,
+  isUnpublishing,
+}) => {
   const getAgentStyling = (agent: Agent) => {
     if (agent.avatar && agent.avatar_color) {
       return {
@@ -55,7 +99,7 @@ const AgentModal = ({ agent, isOpen, onClose, onCustomize, onChat, onPublish, on
   };
 
   const { avatar, color } = getAgentStyling(agent);
-  
+
   const truncateDescription = (text, maxLength = 120) => {
     if (!text || text.length <= maxLength) return text || 'Try out this agent';
     return text.substring(0, maxLength) + '...';
@@ -66,10 +110,11 @@ const AgentModal = ({ agent, isOpen, onClose, onCustomize, onChat, onPublish, on
       <DialogContent className="max-w-md p-0 overflow-hidden border-none">
         <DialogTitle className="sr-only">Agent actions</DialogTitle>
         <div className="relative">
-          <div className={`h-32 flex items-center justify-center relative bg-gradient-to-br from-opacity-90 to-opacity-100`} style={{ backgroundColor: color }}>
-            <div className="text-6xl drop-shadow-sm">
-              {avatar}
-            </div>
+          <div
+            className={`h-32 flex items-center justify-center relative bg-gradient-to-br from-opacity-90 to-opacity-100`}
+            style={{ backgroundColor: color }}
+          >
+            <div className="text-6xl drop-shadow-sm">{avatar}</div>
             <div className="absolute top-4 right-4 flex gap-2">
               {agent.is_default && (
                 <Star className="h-5 w-5 text-white fill-white drop-shadow-sm" />
@@ -175,18 +220,18 @@ const AgentModal = ({ agent, isOpen, onClose, onCustomize, onChat, onPublish, on
   );
 };
 
-export const AgentsGrid = ({ 
-  agents, 
-  onEditAgent, 
-  onDeleteAgent, 
+export const AgentsGrid = ({
+  agents,
+  onEditAgent,
+  onDeleteAgent,
   onToggleDefault,
-  deleteAgentMutation 
+  deleteAgentMutation,
 }: AgentsGridProps) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [publishingId, setPublishingId] = useState<string | null>(null);
   const [unpublishingId, setUnpublishingId] = useState<string | null>(null);
   const router = useRouter();
-  
+
   const publishAgentMutation = usePublishAgent();
   const unpublishAgentMutation = useUnpublishAgent();
   const createTemplateMutation = useCreateTemplate();
@@ -209,15 +254,15 @@ export const AgentsGrid = ({
   const handlePublish = async (agentId: string) => {
     try {
       setPublishingId(agentId);
-      const result = await createTemplateMutation.mutateAsync({ 
-        agent_id: agentId, 
+      const result = await createTemplateMutation.mutateAsync({
+        agent_id: agentId,
         make_public: true,
-        tags: [] 
+        tags: [],
       });
       toast.success('Agent published!');
       setSelectedAgent(null);
     } catch (error: any) {
-      toast.error('Failed to create secure template');
+      console.error('Failed to create secure template');
     } finally {
       setPublishingId(null);
     }
@@ -230,18 +275,24 @@ export const AgentsGrid = ({
       toast.success('Agent made private');
       setSelectedAgent(null);
     } catch (error: any) {
-      toast.error('Failed to make agent private');
+      console.error('Failed to make agent private');
     } finally {
       setUnpublishingId(null);
     }
   };
 
-  const handleQuickPublish = async (agentId: string, event: React.MouseEvent) => {
+  const handleQuickPublish = async (
+    agentId: string,
+    event: React.MouseEvent,
+  ) => {
     event.stopPropagation();
     await handlePublish(agentId);
   };
 
-  const handleQuickUnpublish = async (agentId: string, event: React.MouseEvent) => {
+  const handleQuickUnpublish = async (
+    agentId: string,
+    event: React.MouseEvent,
+  ) => {
     event.stopPropagation();
     await handleUnpublish(agentId);
   };
@@ -264,16 +315,17 @@ export const AgentsGrid = ({
           const isPublishing = publishingId === agent.agent_id;
           const isUnpublishing = unpublishingId === agent.agent_id;
           return (
-            <div 
-              key={agent.agent_id} 
+            <div
+              key={agent.agent_id}
               className="bg-neutral-100 dark:bg-sidebar border border-border rounded-2xl overflow-hidden hover:bg-muted/50 transition-all duration-200 cursor-pointer group"
               onClick={() => handleAgentClick(agent)}
             >
-              <div className='p-4'>
-                <div className={`h-12 w-12 flex items-center justify-center rounded-lg`} style={{ backgroundColor: color }}>
-                  <div className="text-2xl">
-                    {avatar}
-                  </div>
+              <div className="p-4">
+                <div
+                  className={`h-12 w-12 flex items-center justify-center rounded-lg`}
+                  style={{ backgroundColor: color }}
+                >
+                  <div className="text-2xl">{avatar}</div>
                 </div>
               </div>
               <div className="p-4 -mt-4 flex flex-col flex-1">
@@ -297,18 +349,16 @@ export const AgentsGrid = ({
                 <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                   {agent.description || 'Try out this agent'}
                 </p>
-                
+
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-xs">
-                    By me
-                  </span>
-                  
+                  <span className="text-muted-foreground text-xs">By me</span>
+
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     {!agent.is_default && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive text-muted-foreground"
                             disabled={deleteAgentMutation.isPending}
@@ -320,18 +370,25 @@ export const AgentsGrid = ({
                         </AlertDialogTrigger>
                         <AlertDialogContent className="max-w-md">
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-xl">Delete Agent</AlertDialogTitle>
+                            <AlertDialogTitle className="text-xl">
+                              Delete Agent
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Are you sure you want to delete &quot;{agent.name}&quot;? This action cannot be undone.
+                              Are you sure you want to delete &quot;{agent.name}
+                              &quot;? This action cannot be undone.
                               {agent.is_public && (
                                 <span className="block mt-2 text-amber-600 dark:text-amber-400">
-                                  Note: This agent is currently published to the marketplace and will be removed from there as well.
+                                  Note: This agent is currently published to the
+                                  marketplace and will be removed from there as
+                                  well.
                                 </span>
                               )}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+                            <AlertDialogCancel
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
@@ -342,7 +399,9 @@ export const AgentsGrid = ({
                               disabled={deleteAgentMutation.isPending}
                               className="bg-destructive hover:bg-destructive/90 text-white"
                             >
-                              {deleteAgentMutation.isPending ? 'Deleting...' : 'Delete'}
+                              {deleteAgentMutation.isPending
+                                ? 'Deleting...'
+                                : 'Delete'}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

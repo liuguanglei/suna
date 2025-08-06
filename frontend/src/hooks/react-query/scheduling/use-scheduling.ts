@@ -12,12 +12,10 @@ import {
   resumeSchedule,
   getScheduleTemplates,
   validateCronExpression,
-  getScheduleLogs
+  getScheduleLogs,
 } from './utils';
 import { schedulingKeys } from './keys';
-import { 
-  ScheduleUpdateRequest 
-} from '@/components/workflows/scheduling/types';
+import { ScheduleUpdateRequest } from '@/components/workflows/scheduling/types';
 
 export function useWorkflowSchedules(workflowId: string) {
   return useQuery({
@@ -70,16 +68,16 @@ export function useCreateSchedule() {
     mutationFn: createSchedule,
     onSuccess: (newSchedule) => {
       queryClient.invalidateQueries({
-        queryKey: schedulingKeys.workflowSchedules(newSchedule.workflow_id)
+        queryKey: schedulingKeys.workflowSchedules(newSchedule.workflow_id),
       });
       queryClient.setQueryData(
         schedulingKeys.schedule(newSchedule.id!),
-        newSchedule
+        newSchedule,
       );
       toast.success('Schedule created successfully');
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to create schedule');
+      console.error(error?.message || 'Failed to create schedule');
     },
   });
 }
@@ -88,20 +86,25 @@ export function useUpdateSchedule() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ scheduleId, request }: { scheduleId: string; request: ScheduleUpdateRequest }) =>
-      updateSchedule(scheduleId, request),
+    mutationFn: ({
+      scheduleId,
+      request,
+    }: {
+      scheduleId: string;
+      request: ScheduleUpdateRequest;
+    }) => updateSchedule(scheduleId, request),
     onSuccess: (updatedSchedule) => {
       queryClient.setQueryData(
         schedulingKeys.schedule(updatedSchedule.id!),
-        updatedSchedule
+        updatedSchedule,
       );
       queryClient.invalidateQueries({
-        queryKey: schedulingKeys.workflowSchedules(updatedSchedule.workflow_id)
+        queryKey: schedulingKeys.workflowSchedules(updatedSchedule.workflow_id),
       });
       toast.success('Schedule updated successfully');
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to update schedule');
+      console.error(error?.message || 'Failed to update schedule');
     },
   });
 }
@@ -113,15 +116,15 @@ export function useDeleteSchedule() {
     mutationFn: deleteSchedule,
     onSuccess: (_, scheduleId) => {
       queryClient.removeQueries({
-        queryKey: schedulingKeys.schedule(scheduleId)
+        queryKey: schedulingKeys.schedule(scheduleId),
       });
       queryClient.invalidateQueries({
-        queryKey: schedulingKeys.schedules()
+        queryKey: schedulingKeys.schedules(),
       });
       toast.success('Schedule deleted successfully');
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to delete schedule');
+      console.error(error?.message || 'Failed to delete schedule');
     },
   });
 }
@@ -133,15 +136,15 @@ export function usePauseSchedule() {
     mutationFn: pauseSchedule,
     onSuccess: (_, scheduleId) => {
       queryClient.invalidateQueries({
-        queryKey: schedulingKeys.schedule(scheduleId)
+        queryKey: schedulingKeys.schedule(scheduleId),
       });
       queryClient.invalidateQueries({
-        queryKey: schedulingKeys.schedules()
+        queryKey: schedulingKeys.schedules(),
       });
       toast.success('Schedule paused successfully');
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to pause schedule');
+      console.error(error?.message || 'Failed to pause schedule');
     },
   });
 }
@@ -153,15 +156,15 @@ export function useResumeSchedule() {
     mutationFn: resumeSchedule,
     onSuccess: (_, scheduleId) => {
       queryClient.invalidateQueries({
-        queryKey: schedulingKeys.schedule(scheduleId)
+        queryKey: schedulingKeys.schedule(scheduleId),
       });
       queryClient.invalidateQueries({
-        queryKey: schedulingKeys.schedules()
+        queryKey: schedulingKeys.schedules(),
       });
       toast.success('Schedule resumed successfully');
     },
     onError: (error: any) => {
-      toast.error(error?.message || 'Failed to resume schedule');
+      console.error(error?.message || 'Failed to resume schedule');
     },
   });
-} 
+}
