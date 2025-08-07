@@ -22,12 +22,7 @@ services:
     ports:
       - "3457:8000"
     volumes:
-<<<<<<< HEAD
-      - ./backend/.env:/app/.env:ro
-      - ./backend/logs:/app/logs
-=======
       - ./backend/.env:/app/.env
->>>>>>> github_main
     env_file:
       - ./backend/.env
     environment:
