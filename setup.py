@@ -129,6 +129,8 @@ def load_existing_env_vars():
             "OPENAI_API_KEY": backend_env.get("OPENAI_API_KEY", ""),
             "ANTHROPIC_API_KEY": backend_env.get("ANTHROPIC_API_KEY", ""),
             "OPENROUTER_API_KEY": backend_env.get("OPENROUTER_API_KEY", ""),
+            "MORPH_API_KEY": backend_env.get("MORPH_API_KEY", ""),
+            "GEMINI_API_KEY": backend_env.get("GEMINI_API_KEY", ""),
             "MODEL_TO_USE": backend_env.get("MODEL_TO_USE", ""),
         },
         "search": {
@@ -139,9 +141,6 @@ def load_existing_env_vars():
         "rapidapi": {
             "RAPID_API_KEY": backend_env.get("RAPID_API_KEY", ""),
         },
-        "smithery": {
-            "SMITHERY_API_KEY": backend_env.get("SMITHERY_API_KEY", ""),
-        },
         "qstash": {
             "QSTASH_URL": backend_env.get("QSTASH_URL", ""),
             "QSTASH_TOKEN": backend_env.get("QSTASH_TOKEN", ""),
@@ -149,12 +148,25 @@ def load_existing_env_vars():
                 "QSTASH_CURRENT_SIGNING_KEY", ""
             ),
             "QSTASH_NEXT_SIGNING_KEY": backend_env.get("QSTASH_NEXT_SIGNING_KEY", ""),
+        },
+        "webhook": {
             "WEBHOOK_BASE_URL": backend_env.get("WEBHOOK_BASE_URL", ""),
+        },
+        "slack": {
+            "SLACK_CLIENT_ID": backend_env.get("SLACK_CLIENT_ID", ""),
+            "SLACK_CLIENT_SECRET": backend_env.get("SLACK_CLIENT_SECRET", ""),
+            "SLACK_REDIRECT_URI": backend_env.get("SLACK_REDIRECT_URI", ""),
         },
         "mcp": {
             "MCP_CREDENTIAL_ENCRYPTION_KEY": backend_env.get(
                 "MCP_CREDENTIAL_ENCRYPTION_KEY", ""
             ),
+        },
+        "pipedream": {
+            "PIPEDREAM_PROJECT_ID": backend_env.get("PIPEDREAM_PROJECT_ID", ""),
+            "PIPEDREAM_CLIENT_ID": backend_env.get("PIPEDREAM_CLIENT_ID", ""),
+            "PIPEDREAM_CLIENT_SECRET": backend_env.get("PIPEDREAM_CLIENT_SECRET", ""),
+            "PIPEDREAM_X_PD_ENVIRONMENT": backend_env.get("PIPEDREAM_X_PD_ENVIRONMENT", ""),
         },
         "frontend": {
             "NEXT_PUBLIC_SUPABASE_URL": frontend_env.get(
@@ -246,9 +258,11 @@ class SetupWizard:
             "llm": existing_env_vars["llm"],
             "search": existing_env_vars["search"],
             "rapidapi": existing_env_vars["rapidapi"],
-            "smithery": existing_env_vars["smithery"],
             "qstash": existing_env_vars["qstash"],
+            "slack": existing_env_vars["slack"],
+            "webhook": existing_env_vars["webhook"],
             "mcp": existing_env_vars["mcp"],
+            "pipedream": existing_env_vars["pipedream"],
         }
 
         # Override with any progress data (in case user is resuming)
@@ -259,7 +273,7 @@ class SetupWizard:
             else:
                 self.env_vars[key] = value
 
-        self.total_steps = 14
+        self.total_steps = 18
 
     def show_current_config(self):
         """Shows the current configuration status."""
@@ -281,7 +295,7 @@ class SetupWizard:
         llm_keys = [
             k
             for k in self.env_vars["llm"]
-            if k != "MODEL_TO_USE" and self.env_vars["llm"][k]
+            if k != "MODEL_TO_USE" and self.env_vars["llm"][k] and k != "MORPH_API_KEY"
         ]
         if llm_keys:
             providers = [k.split("_")[0].capitalize() for k in llm_keys]
@@ -307,12 +321,6 @@ class SetupWizard:
         else:
             config_items.append(f"{Colors.CYAN}○{Colors.ENDC} RapidAPI (optional)")
 
-        # Check Smithery (optional)
-        if self.env_vars["smithery"]["SMITHERY_API_KEY"]:
-            config_items.append(f"{Colors.GREEN}✓{Colors.ENDC} Smithery (optional)")
-        else:
-            config_items.append(f"{Colors.CYAN}○{Colors.ENDC} Smithery (optional)")
-
         # Check QStash (required)
         if self.env_vars["qstash"]["QSTASH_TOKEN"]:
             config_items.append(f"{Colors.GREEN}✓{Colors.ENDC} QStash & Webhooks")
@@ -324,6 +332,32 @@ class SetupWizard:
             config_items.append(f"{Colors.GREEN}✓{Colors.ENDC} MCP encryption key")
         else:
             config_items.append(f"{Colors.YELLOW}○{Colors.ENDC} MCP encryption key")
+
+        # Check Pipedream configuration
+        if self.env_vars["pipedream"]["PIPEDREAM_PROJECT_ID"]:
+            config_items.append(f"{Colors.GREEN}✓{Colors.ENDC} Pipedream (optional)")
+        else:
+            config_items.append(f"{Colors.CYAN}○{Colors.ENDC} Pipedream (optional)")
+
+        # Check Slack configuration
+        if self.env_vars["slack"]["SLACK_CLIENT_ID"]:
+            config_items.append(f"{Colors.GREEN}✓{Colors.ENDC} Slack (optional)")
+        else:
+            config_items.append(f"{Colors.CYAN}○{Colors.ENDC} Slack (optional)")
+
+        # Check Webhook configuration
+        if self.env_vars["webhook"]["WEBHOOK_BASE_URL"]:
+            config_items.append(f"{Colors.GREEN}✓{Colors.ENDC} Webhook")
+        else:
+            config_items.append(f"{Colors.YELLOW}○{Colors.ENDC} Webhook")
+
+        # Check Morph (optional but recommended)
+        if self.env_vars["llm"].get("MORPH_API_KEY"):
+            config_items.append(f"{Colors.GREEN}✓{Colors.ENDC} Morph (Code Editing)")
+        elif self.env_vars["llm"].get("OPENROUTER_API_KEY"):
+            config_items.append(f"{Colors.CYAN}○{Colors.ENDC} Morph (fallback to OpenRouter)")
+        else:
+            config_items.append(f"{Colors.YELLOW}○{Colors.ENDC} Morph (recommended)")
 
         if any("✓" in item for item in config_items):
             print_info("Current configuration status:")
@@ -347,15 +381,18 @@ class SetupWizard:
             self.run_step(3, self.collect_supabase_info)
             self.run_step(4, self.collect_daytona_info)
             self.run_step(5, self.collect_llm_api_keys)
-            self.run_step(6, self.collect_search_api_keys)
-            self.run_step(7, self.collect_rapidapi_keys)
-            self.run_step(8, self.collect_smithery_keys)
-            self.run_step(9, self.collect_qstash_keys)
-            self.run_step(10, self.collect_mcp_keys)
-            self.run_step(11, self.configure_env_files)
-            self.run_step(12, self.setup_supabase_database)
-            self.run_step(13, self.install_dependencies)
-            self.run_step(14, self.start_suna)
+            self.run_step(6, self.collect_morph_api_key)
+            self.run_step(7, self.collect_search_api_keys)
+            self.run_step(8, self.collect_rapidapi_keys)
+            self.run_step(10, self.collect_qstash_keys)
+            self.run_step(11, self.collect_mcp_keys)
+            self.run_step(12, self.collect_pipedream_keys)
+            self.run_step(13, self.collect_slack_keys)
+            self.run_step(14, self.collect_webhook_keys)
+            self.run_step(15, self.configure_env_files)
+            self.run_step(16, self.setup_supabase_database)
+            self.run_step(17, self.install_dependencies)
+            self.run_step(18, self.start_suna)
 
             self.final_instructions()
 
@@ -427,7 +464,7 @@ class SetupWizard:
                 "uv": "https://github.com/astral-sh/uv#installation",
                 "node": "https://nodejs.org/en/download/",
                 "npm": "https://docs.npmjs.com/downloading-and-installing-node-js-and-npm",
-                "docker": "https://docs.docker.com/get-docker/",  # For Redis/RabbitMQ
+                "docker": "https://docs.docker.com/get-docker/",  # For Redis
             }
 
         missing = []
@@ -612,7 +649,7 @@ class SetupWizard:
         )
         print_info("Create a snapshot with these exact settings:")
         print_info(f"   - Name:\t\t{Colors.GREEN}kortix/suna:0.1.3{Colors.ENDC}")
-        print_info(f"   - Image name:\t{Colors.GREEN}kortix/suna:0.1.3{Colors.ENDC}")
+        print_info(f"   - Snapshot name:\t{Colors.GREEN}kortix/suna:0.1.3{Colors.ENDC}")
         print_info(
             f"   - Entrypoint:\t{Colors.GREEN}/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf{Colors.ENDC}"
         )
@@ -638,7 +675,7 @@ class SetupWizard:
             )
         else:
             print_info(
-                "Suna requires at least one LLM provider. Supported: OpenAI, Anthropic, OpenRouter."
+                "Suna requires at least one LLM provider. Supported: OpenAI, Anthropic, Google Gemini, OpenRouter."
             )
 
         # Don't clear existing keys if we're updating
@@ -653,7 +690,8 @@ class SetupWizard:
             providers = {
                 "1": ("OpenAI", "OPENAI_API_KEY"),
                 "2": ("Anthropic", "ANTHROPIC_API_KEY"),
-                "3": ("OpenRouter", "OPENROUTER_API_KEY"),
+                "3": ("Google Gemini", "GEMINI_API_KEY"),
+                "4": ("OpenRouter", "OPENROUTER_API_KEY"),
             }
             print(
                 f"\n{Colors.CYAN}Select LLM providers to configure (e.g., 1,3):{Colors.ENDC}"
@@ -701,18 +739,71 @@ class SetupWizard:
                 self.env_vars["llm"][
                     "MODEL_TO_USE"
                 ] = "anthropic/claude-sonnet-4-20250514"
+            elif self.env_vars["llm"].get("GEMINI_API_KEY"):
+                self.env_vars["llm"][
+                    "MODEL_TO_USE"
+                ] = "gemini/gemini-2.5-pro"
             elif self.env_vars["llm"].get("OPENROUTER_API_KEY"):
                 self.env_vars["llm"][
                     "MODEL_TO_USE"
-                ] = "openrouter/google/gemini-flash-1.5"
+                ] = "openrouter/google/gemini-2.5-pro"
 
         print_success(
             f"LLM keys saved. Default model: {self.env_vars['llm'].get('MODEL_TO_USE', 'Not set')}"
         )
 
+    def collect_morph_api_key(self):
+        """Collects the optional MorphLLM API key for code editing."""
+        print_step(6, self.total_steps, "Configure AI-Powered Code Editing (Optional)")
+
+        existing_key = self.env_vars["llm"].get("MORPH_API_KEY", "")
+        openrouter_key = self.env_vars["llm"].get("OPENROUTER_API_KEY", "")
+
+        if existing_key:
+            print_info(f"Found existing Morph API key: {mask_sensitive_value(existing_key)}")
+            print_info("AI-powered code editing is enabled using Morph.")
+            return
+
+        print_info("Suna uses Morph for fast, intelligent code editing.")
+        print_info("This is optional but highly recommended for the best experience.")
+
+        if openrouter_key:
+            print_info(
+                f"An OpenRouter API key is already configured. It can be used as a fallback for code editing if you don't provide a Morph key."
+            )
+        
+        while True:
+            choice = input("Do you want to add a Morph API key now? (y/n): ").lower().strip()
+            if choice in ['y', 'n', '']:
+                break
+            print_error("Invalid input. Please enter 'y' or 'n'.")
+        
+        if choice == 'y':
+            print_info("Great! Please get your API key from: https://morphllm.com/api-keys")
+            morph_api_key = self._get_input(
+                "Enter your Morph API key (or press Enter to skip): ",
+                validate_api_key,
+                "The key seems invalid, but continuing. You can edit it later in backend/.env",
+                allow_empty=True,
+                default_value="",
+            )
+            if morph_api_key:
+                self.env_vars["llm"]["MORPH_API_KEY"] = morph_api_key
+                print_success("Morph API key saved. AI-powered code editing is enabled.")
+            else:
+                if openrouter_key:
+                    print_info("Skipping Morph key. OpenRouter will be used for code editing.")
+                else:
+                    print_warning("Skipping Morph key. Code editing will use a less capable model.")
+        else:
+            if openrouter_key:
+                print_info("Okay, OpenRouter will be used as a fallback for code editing.")
+            else:
+                print_warning("Okay, code editing will use a less capable model without a Morph or OpenRouter key.")
+
     def collect_search_api_keys(self):
         """Collects API keys for search and web scraping tools."""
-        print_step(6, self.total_steps, "Collecting Search and Scraping API Keys")
+        print_step(7, self.total_steps, "Collecting Search and Scraping API Keys")
 
         # Check if we already have values configured
         has_existing = any(self.env_vars["search"].values())
@@ -774,7 +865,7 @@ class SetupWizard:
 
     def collect_rapidapi_keys(self):
         """Collects the optional RapidAPI key."""
-        print_step(7, self.total_steps, "Collecting RapidAPI Key (Optional)")
+        print_step(8, self.total_steps, "Collecting RapidAPI Key (Optional)")
 
         # Check if we already have a value configured
         existing_key = self.env_vars["rapidapi"]["RAPID_API_KEY"]
@@ -802,49 +893,16 @@ class SetupWizard:
         else:
             print_info("Skipping RapidAPI key.")
 
-    def collect_smithery_keys(self):
-        """Collects the optional Smithery API key."""
-        print_step(8, self.total_steps, "Collecting Smithery API Key (Optional)")
-
-        # Check if we already have a value configured
-        existing_key = self.env_vars["smithery"]["SMITHERY_API_KEY"]
-        if existing_key:
-            print_info(
-                f"Found existing Smithery API key: {mask_sensitive_value(existing_key)}"
-            )
-            print_info("Press Enter to keep current value or type a new one.")
-        else:
-            print_info(
-                "A Smithery API key is only required for custom agents and workflows."
-            )
-            print_info(
-                "Get a key at https://smithery.ai/. You can skip this and add it later."
-            )
-
-        smithery_api_key = self._get_input(
-            "Enter your Smithery API key (or press Enter to skip): ",
-            validate_api_key,
-            "The key seems invalid, but continuing. You can edit it later in backend/.env",
-            allow_empty=True,
-            default_value=existing_key,
-        )
-        self.env_vars["smithery"]["SMITHERY_API_KEY"] = smithery_api_key
-        if smithery_api_key:
-            print_success("Smithery API key saved.")
-        else:
-            print_info("Skipping Smithery API key.")
-
     def collect_qstash_keys(self):
-        """Collects the required QStash and webhook configuration."""
+        """Collects the required QStash configuration."""
         print_step(
-            9,
+            10,
             self.total_steps,
-            "Collecting QStash & Webhook Configuration",
+            "Collecting QStash Configuration",
         )
 
         # Check if we already have values configured
         existing_token = self.env_vars["qstash"]["QSTASH_TOKEN"]
-        existing_webhook_url = self.env_vars["qstash"]["WEBHOOK_BASE_URL"]
         if existing_token:
             print_info(
                 f"Found existing QStash token: {mask_sensitive_value(existing_token)}"
@@ -889,23 +947,11 @@ class SetupWizard:
         )
         self.env_vars["qstash"]["QSTASH_NEXT_SIGNING_KEY"] = next_signing_key
 
-        # Collect webhook base URL
-        print_info(
-            "Webhook base URL must be publicly accessible for workflows to receive callbacks."
-        )
-        webhook_url = self._get_input(
-            "Enter your webhook base URL (e.g., https://yourdomain.com): ",
-            validate_url,
-            "Invalid URL format. Please enter a valid publicly accessible URL.",
-            default_value=existing_webhook_url,
-        )
-        self.env_vars["qstash"]["WEBHOOK_BASE_URL"] = webhook_url
-
-        print_success("QStash and webhook configuration saved.")
+        print_success("QStash configuration saved.")
 
     def collect_mcp_keys(self):
         """Collects the MCP configuration."""
-        print_step(10, self.total_steps, "Collecting MCP Configuration")
+        print_step(11, self.total_steps, "Collecting MCP Configuration")
 
         # Check if we already have an encryption key configured
         existing_key = self.env_vars["mcp"]["MCP_CREDENTIAL_ENCRYPTION_KEY"]
@@ -923,28 +969,165 @@ class SetupWizard:
 
         print_success("MCP configuration saved.")
 
+    def collect_pipedream_keys(self):
+        """Collects the optional Pipedream configuration."""
+        print_step(12, self.total_steps, "Collecting Pipedream Configuration (Optional)")
+
+        # Check if we already have values configured
+        has_existing = any(self.env_vars["pipedream"].values())
+        if has_existing:
+            print_info(
+                "Found existing Pipedream configuration. Press Enter to keep current values or type new ones."
+            )
+        else:
+            print_info("Pipedream enables workflow automation and MCP integrations.")
+            print_info("Create a Pipedream Connect project at https://pipedream.com/connect to get your credentials.")
+            print_info("You can skip this step and configure Pipedream later.")
+
+        # Ask if user wants to configure Pipedream
+        if not has_existing:
+            configure_pipedream = input("Do you want to configure Pipedream integration? (y/N): ").lower().strip()
+            if configure_pipedream != 'y':
+                print_info("Skipping Pipedream configuration.")
+                return
+
+        self.env_vars["pipedream"]["PIPEDREAM_PROJECT_ID"] = self._get_input(
+            "Enter your Pipedream Project ID (or press Enter to skip): ",
+            validate_api_key,
+            "Invalid Pipedream Project ID format. It should be a valid project ID.",
+            allow_empty=True,
+            default_value=self.env_vars["pipedream"]["PIPEDREAM_PROJECT_ID"],
+        )
+        
+        if self.env_vars["pipedream"]["PIPEDREAM_PROJECT_ID"]:
+            self.env_vars["pipedream"]["PIPEDREAM_CLIENT_ID"] = self._get_input(
+                "Enter your Pipedream Client ID: ",
+                validate_api_key,
+                "Invalid Pipedream Client ID format. It should be a valid client ID.",
+                default_value=self.env_vars["pipedream"]["PIPEDREAM_CLIENT_ID"],
+            )
+            
+            self.env_vars["pipedream"]["PIPEDREAM_CLIENT_SECRET"] = self._get_input(
+                "Enter your Pipedream Client Secret: ",
+                validate_api_key,
+                "Invalid Pipedream Client Secret format. It should be a valid client secret.",
+                default_value=self.env_vars["pipedream"]["PIPEDREAM_CLIENT_SECRET"],
+            )
+            
+            # Set default environment if not already configured
+            if not self.env_vars["pipedream"]["PIPEDREAM_X_PD_ENVIRONMENT"]:
+                self.env_vars["pipedream"]["PIPEDREAM_X_PD_ENVIRONMENT"] = "development"
+            
+            self.env_vars["pipedream"]["PIPEDREAM_X_PD_ENVIRONMENT"] = self._get_input(
+                "Enter your Pipedream Environment (development/production): ",
+                lambda x, allow_empty=False: x.lower() in ["development", "production"] or allow_empty,
+                "Invalid environment. Please enter 'development' or 'production'.",
+                default_value=self.env_vars["pipedream"]["PIPEDREAM_X_PD_ENVIRONMENT"],
+            )
+            
+            print_success("Pipedream configuration saved.")
+        else:
+            print_info("Skipping Pipedream configuration.")
+
+    def collect_slack_keys(self):
+        """Collects the optional Slack configuration."""
+        print_step(13, self.total_steps, "Collecting Slack Configuration (Optional)")
+
+        # Check if we already have values configured
+        has_existing = any(self.env_vars["slack"].values())
+        if has_existing:
+            print_info(
+                "Found existing Slack configuration. Press Enter to keep current values or type new ones."
+            )
+        else:
+            print_info("Slack integration enables communication and notifications.")
+            print_info("Create a Slack app at https://api.slack.com/apps to get your credentials.")
+            print_info("You can skip this step and configure Slack later.")
+
+        # Ask if user wants to configure Slack
+        if not has_existing:
+            configure_slack = input("Do you want to configure Slack integration? (y/N): ").lower().strip()
+            if configure_slack != 'y':
+                print_info("Skipping Slack configuration.")
+                return
+
+        self.env_vars["slack"]["SLACK_CLIENT_ID"] = self._get_input(
+            "Enter your Slack Client ID (or press Enter to skip): ",
+            validate_api_key,
+            "Invalid Slack Client ID format. It should be a valid API key.",
+            allow_empty=True,
+            default_value=self.env_vars["slack"]["SLACK_CLIENT_ID"],
+        )
+        
+        if self.env_vars["slack"]["SLACK_CLIENT_ID"]:
+            self.env_vars["slack"]["SLACK_CLIENT_SECRET"] = self._get_input(
+                "Enter your Slack Client Secret: ",
+                validate_api_key,
+                "Invalid Slack Client Secret format. It should be a valid API key.",
+                default_value=self.env_vars["slack"]["SLACK_CLIENT_SECRET"],
+            )
+            
+            # Set default redirect URI if not already configured
+            if not self.env_vars["slack"]["SLACK_REDIRECT_URI"]:
+                self.env_vars["slack"]["SLACK_REDIRECT_URI"] = "http://localhost:3000/api/integrations/slack/callback"
+            
+            self.env_vars["slack"]["SLACK_REDIRECT_URI"] = self._get_input(
+                "Enter your Slack Redirect URI: ",
+                validate_url,
+                "Invalid Slack Redirect URI format. It should be a valid URL.",
+                default_value=self.env_vars["slack"]["SLACK_REDIRECT_URI"],
+            )
+            
+            print_success("Slack configuration saved.")
+        else:
+            print_info("Skipping Slack configuration.")
+
+    def collect_webhook_keys(self):
+        """Collects the webhook configuration."""
+        print_step(14, self.total_steps, "Collecting Webhook Configuration")
+
+        # Check if we already have values configured
+        has_existing = bool(self.env_vars["webhook"]["WEBHOOK_BASE_URL"])
+        if has_existing:
+            print_info(
+                f"Found existing webhook URL: {self.env_vars['webhook']['WEBHOOK_BASE_URL']}"
+            )
+            print_info("Press Enter to keep current value or type a new one.")
+        else:
+            print_info("Webhook base URL is required for workflows to receive callbacks.")
+            print_info("This must be a publicly accessible URL where Suna can receive webhooks.")
+            print_info("For local development, you can use services like ngrok or localtunnel.")
+
+        self.env_vars["webhook"]["WEBHOOK_BASE_URL"] = self._get_input(
+            "Enter your webhook base URL (e.g., https://yourdomain.com): ",
+            validate_url,
+            "Invalid webhook base URL format. It should be a valid publicly accessible URL.",
+            default_value=self.env_vars["webhook"]["WEBHOOK_BASE_URL"],
+        )
+
+        print_success("Webhook configuration saved.")
+
     def configure_env_files(self):
         """Configures and writes the .env files for frontend and backend."""
-        print_step(11, self.total_steps, "Configuring Environment Files")
+        print_step(15, self.total_steps, "Configuring Environment Files")
 
         # --- Backend .env ---
         is_docker = self.env_vars["setup_method"] == "docker"
         redis_host = "redis" if is_docker else "localhost"
-        rabbitmq_host = "rabbitmq" if is_docker else "localhost"
 
         backend_env = {
             "ENV_MODE": "local",
             **self.env_vars["supabase"],
             "REDIS_HOST": redis_host,
             "REDIS_PORT": "6379",
-            "RABBITMQ_HOST": rabbitmq_host,
-            "RABBITMQ_PORT": "5672",
             **self.env_vars["llm"],
             **self.env_vars["search"],
             **self.env_vars["rapidapi"],
-            **self.env_vars["smithery"],
             **self.env_vars["qstash"],
+            **self.env_vars["slack"],
+            **self.env_vars["webhook"],
             **self.env_vars["mcp"],
+            **self.env_vars["pipedream"],
             **self.env_vars["daytona"],
             "NEXT_PUBLIC_URL": "http://localhost:3000",
         }
@@ -978,7 +1161,7 @@ class SetupWizard:
 
     def setup_supabase_database(self):
         """Links the project to Supabase and pushes database migrations."""
-        print_step(12, self.total_steps, "Setting up Supabase Database")
+        print_step(16, self.total_steps, "Setting up Supabase Database")
 
         print_info(
             "This step will link your project to Supabase and push database migrations."
@@ -1077,7 +1260,7 @@ class SetupWizard:
 
     def install_dependencies(self):
         """Installs frontend and backend dependencies for manual setup."""
-        print_step(13, self.total_steps, "Installing Dependencies")
+        print_step(17, self.total_steps, "Installing Dependencies")
         if self.env_vars["setup_method"] == "docker":
             print_info(
                 "Skipping dependency installation for Docker setup (will be handled by Docker Compose)."
@@ -1119,7 +1302,7 @@ class SetupWizard:
 
     def start_suna(self):
         """Starts Suna using Docker Compose or shows instructions for manual startup."""
-        print_step(14, self.total_steps, "Starting Suna")
+        print_step(18, self.total_steps, "Starting Suna")
         if self.env_vars["setup_method"] == "docker":
             print_info("Starting Suna with Docker Compose...")
             try:
@@ -1186,13 +1369,13 @@ class SetupWizard:
             print(
                 f"\n{Colors.BOLD}1. Start Infrastructure (in project root):{Colors.ENDC}"
             )
-            print(f"{Colors.CYAN}   docker compose up redis rabbitmq -d{Colors.ENDC}")
+            print(f"{Colors.CYAN}   docker compose up redis -d{Colors.ENDC}")
 
             print(f"\n{Colors.BOLD}2. Start Frontend (in a new terminal):{Colors.ENDC}")
             print(f"{Colors.CYAN}   cd frontend && npm run dev{Colors.ENDC}")
 
             print(f"\n{Colors.BOLD}3. Start Backend (in a new terminal):{Colors.ENDC}")
-            print(f"{Colors.CYAN}   cd backend && python run api.py{Colors.ENDC}")
+            print(f"{Colors.CYAN}   cd backend && uv run api.py{Colors.ENDC}")
 
             print(
                 f"\n{Colors.BOLD}4. Start Background Worker (in a new terminal):{Colors.ENDC}"

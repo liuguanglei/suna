@@ -1,9 +1,8 @@
 import React from 'react';
-import Image from 'next/image';
 import {
-    FileText, FileImage, FileCode, FilePlus, FileSpreadsheet, FileVideo,
+    FileText, FileImage, FileCode, FileSpreadsheet, FileVideo,
     FileAudio, FileType, Database, Archive, File, ExternalLink,
-    Download, Loader2
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AttachmentGroup } from './attachment-group';
@@ -159,8 +158,9 @@ interface FileAttachmentProps {
 }
 
 // Cache fetched content between mounts to avoid duplicate fetches
-const contentCache = new Map<string, string>();
-const errorCache = new Set<string>();
+// Content caches for file attachment optimization
+// const contentCache = new Map<string, string>();
+// const errorCache = new Set<string>();
 
 export function FileAttachment({
     filepath,
@@ -234,7 +234,7 @@ export function FileAttachment({
     if (isImage && showPreview) {
         // Use custom height for images if provided through CSS variable
         const imageHeight = isGridLayout
-            ? customStyle['--attachment-height'] as string
+            ? (customStyle as any)['--attachment-height'] as string
             : '54px';
 
         // Show loading state for images
@@ -294,7 +294,7 @@ export function FileAttachment({
             <button
                 onClick={handleClick}
                 className={cn(
-                    "group relative min-h-[54px] rounded-xl cursor-pointer",
+                    "group relative min-h-[54px] rounded-2xl cursor-pointer",
                     "border border-black/10 dark:border-white/10",
                     "bg-black/5 dark:bg-black/20",
                     "p-0 overflow-hidden", // No padding, content touches borders
@@ -310,7 +310,7 @@ export function FileAttachment({
                 title={filename}
             >
                 <img
-                    src={sandboxId && session?.access_token ? imageUrl : fileUrl}
+                    src={sandboxId && session?.access_token ? imageUrl : (fileUrl || '')}
                     alt={filename}
                     className={cn(
                         "max-h-full", // Respect parent height constraint
@@ -387,8 +387,8 @@ export function FileAttachment({
             <div
                 className={cn(
                     "group relative rounded-xl w-full",
-                    "border border-black/10 dark:border-white/10",
-                    "bg-black/5 dark:bg-black/20",
+                    "border",
+                    "bg-card",
                     "overflow-hidden",
                     "h-[300px]", // Fixed height for previews
                     "pt-10", // Room for header
@@ -462,12 +462,12 @@ export function FileAttachment({
                 </div>
 
                 {/* Header with filename */}
-                <div className="absolute top-0 left-0 right-0 bg-black/5 dark:bg-white/5 p-2 z-10 flex items-center justify-between">
+                <div className="absolute top-0 left-0 right-0 bg-accent p-2 z-10 flex items-center justify-between">
                     <div className="text-sm font-medium truncate">{filename}</div>
                     {onClick && (
                         <button
                             onClick={handleClick}
-                            className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                            className="cursor-pointer p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
                         >
                             <ExternalLink size={14} />
                         </button>
@@ -480,7 +480,7 @@ export function FileAttachment({
     // Regular files with details
     const safeStyle = { ...customStyle };
     delete safeStyle.height;
-    delete safeStyle['--attachment-height'];
+    delete (safeStyle as any)['--attachment-height'];
 
     return (
         <button

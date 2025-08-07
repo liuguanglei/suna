@@ -57,7 +57,12 @@ class Configuration:
     STRIPE_TIER_50_400_YEARLY_ID_PROD: str = 'price_1ReH9fG6l1KZGqIrsPtu5KIA'
     STRIPE_TIER_125_800_YEARLY_ID_PROD: str = 'price_1ReH9GG6l1KZGqIrfgqaJyat'
     STRIPE_TIER_200_1000_YEARLY_ID_PROD: str = 'price_1ReH8qG6l1KZGqIrK1akY90q'
-    
+
+    # Yearly commitment prices - Production (15% discount, monthly payments with 12-month commitment via schedules)
+    STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_PROD: str = 'price_1RqtqiG6l1KZGqIrhjVPtE1s'  # $17/month
+    STRIPE_TIER_6_42_YEARLY_COMMITMENT_ID_PROD: str = 'price_1Rqtr8G6l1KZGqIrQ0ql0qHi'  # $42.50/month
+    STRIPE_TIER_25_170_YEARLY_COMMITMENT_ID_PROD: str = 'price_1RqtrUG6l1KZGqIrEb8hLsk3'  # $170/month
+
     # Subscription tier IDs - Staging
     STRIPE_FREE_TIER_ID_STAGING: str = 'price_1RIGvuG6l1KZGqIrw14abxeL'
     STRIPE_TIER_2_20_ID_STAGING: str = 'price_1RIGvuG6l1KZGqIrCRu0E4Gi'
@@ -76,6 +81,11 @@ class Configuration:
     STRIPE_TIER_50_400_YEARLY_ID_STAGING: str = 'price_1ReGmgG6l1KZGqIrn5nBc7e5'
     STRIPE_TIER_125_800_YEARLY_ID_STAGING: str = 'price_1ReGmMG6l1KZGqIrvE2ycrAX'
     STRIPE_TIER_200_1000_YEARLY_ID_STAGING: str = 'price_1ReGlXG6l1KZGqIrlgurP5GU'
+
+    # Yearly commitment prices - Staging (15% discount, monthly payments with 12-month commitment via schedules)
+    STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_STAGING: str = 'price_1RqYGaG6l1KZGqIrIzcdPzeQ'  # $17/month
+    STRIPE_TIER_6_42_YEARLY_COMMITMENT_ID_STAGING: str = 'price_1RqYH1G6l1KZGqIrWDKh8xIU'  # $42.50/month
+    STRIPE_TIER_25_170_YEARLY_COMMITMENT_ID_STAGING: str = 'price_1RqYHbG6l1KZGqIrAUVf8KpG'  # $170/month
     
     # Computed subscription tier IDs based on environment
     @property
@@ -169,11 +179,33 @@ class Configuration:
             return self.STRIPE_TIER_200_1000_YEARLY_ID_STAGING
         return self.STRIPE_TIER_200_1000_YEARLY_ID_PROD
     
+    # Yearly commitment prices computed properties
+    @property
+    def STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID(self) -> str:
+        if self.ENV_MODE == EnvMode.STAGING:
+            return self.STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_STAGING
+        return self.STRIPE_TIER_2_17_YEARLY_COMMITMENT_ID_PROD
+
+    @property
+    def STRIPE_TIER_6_42_YEARLY_COMMITMENT_ID(self) -> str:
+        if self.ENV_MODE == EnvMode.STAGING:
+            return self.STRIPE_TIER_6_42_YEARLY_COMMITMENT_ID_STAGING
+        return self.STRIPE_TIER_6_42_YEARLY_COMMITMENT_ID_PROD
+
+    @property
+    def STRIPE_TIER_25_170_YEARLY_COMMITMENT_ID(self) -> str:
+        if self.ENV_MODE == EnvMode.STAGING:
+            return self.STRIPE_TIER_25_170_YEARLY_COMMITMENT_ID_STAGING
+        return self.STRIPE_TIER_25_170_YEARLY_COMMITMENT_ID_PROD
+    
     # LLM API keys
     ANTHROPIC_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = None
     OPENROUTER_API_KEY: Optional[str] = None
+    XAI_API_KEY: Optional[str] = None
+    MORPH_API_KEY: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
     OPENROUTER_API_BASE: Optional[str] = "https://openrouter.ai/api/v1"
     OR_SITE_URL: Optional[str] = "https://kortix.ai"
     OR_APP_NAME: Optional[str] = "Kortix AI"    
@@ -221,6 +253,7 @@ class Configuration:
     
     # Sandbox configuration
     SANDBOX_IMAGE_NAME = "kortix/suna:0.1.3"
+    SANDBOX_SNAPSHOT_NAME = "kortix/suna:0.1.3"
     SANDBOX_ENTRYPOINT = "/usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.conf"
 
     # LangFuse configuration
@@ -228,6 +261,40 @@ class Configuration:
     LANGFUSE_SECRET_KEY: Optional[str] = None
     LANGFUSE_HOST: str = "https://cloud.langfuse.com"
 
+    # Admin API key for server-side operations
+    KORTIX_ADMIN_API_KEY: Optional[str] = None
+
+    # API Keys system configuration
+    API_KEY_SECRET: str = "default-secret-key-change-in-production"
+    API_KEY_LAST_USED_THROTTLE_SECONDS: int = 900
+    
+    # Agent execution limits (can be overridden via environment variable)
+    _MAX_PARALLEL_AGENT_RUNS_ENV: Optional[str] = None
+
+    @property
+    def MAX_PARALLEL_AGENT_RUNS(self) -> int:
+        """
+        Get the maximum parallel agent runs limit.
+        
+        Can be overridden via MAX_PARALLEL_AGENT_RUNS environment variable.
+        Defaults:
+        - Production: 3
+        - Local/Staging: 999999 (effectively infinite)
+        """
+        # Check for environment variable override first
+        if self._MAX_PARALLEL_AGENT_RUNS_ENV is not None:
+            try:
+                return int(self._MAX_PARALLEL_AGENT_RUNS_ENV)
+            except ValueError:
+                logger.warning(f"Invalid MAX_PARALLEL_AGENT_RUNS value: {self._MAX_PARALLEL_AGENT_RUNS_ENV}, using default")
+        
+        # Environment-based defaults
+        if self.ENV_MODE == EnvMode.PRODUCTION:
+            return 3
+        else:
+            # Local and staging: effectively infinite
+            return 999999
+    
     @property
     def STRIPE_PRODUCT_ID(self) -> str:
         if self.ENV_MODE == EnvMode.STAGING:
@@ -277,6 +344,11 @@ class Configuration:
                 else:
                     # String or other type
                     setattr(self, key, env_val)
+        
+        # Custom handling for environment-dependent properties
+        max_parallel_runs_env = os.getenv("MAX_PARALLEL_AGENT_RUNS")
+        if max_parallel_runs_env is not None:
+            self._MAX_PARALLEL_AGENT_RUNS_ENV = max_parallel_runs_env
     
     def _validate(self):
         """Validate configuration based on type hints."""

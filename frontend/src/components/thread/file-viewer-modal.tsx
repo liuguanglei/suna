@@ -8,11 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   File,
   Folder,
-  FolderOpen,
   Upload,
   Download,
   ChevronRight,
@@ -23,15 +21,15 @@ import {
   FileText,
   ChevronDown,
   Archive,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   FileRenderer,
-  getFileTypeFromExtension,
 } from '@/components/file-renderers';
 import {
   listSandboxFiles,
-  getSandboxFileContent,
   type FileInfo,
   Project,
 } from '@/lib/api';
@@ -47,7 +45,6 @@ import {
 import {
   useDirectoryQuery,
   useFileContentQuery,
-  useFileUpload,
   FileCache
 } from '@/hooks/react-query/files';
 import JSZip from 'jszip';
@@ -109,7 +106,6 @@ export function FileViewerModal({
   });
 
   // Add a navigation lock to prevent race conditions
-  const [isNavigationLocked, setIsNavigationLocked] = useState(false);
   const currentNavigationRef = useRef<string | null>(null);
 
   // File content state
@@ -130,7 +126,7 @@ export function FileViewerModal({
     error: cachedFileError,
   } = useFileContentQuery(
     sandboxId,
-    selectedFilePath,
+    selectedFilePath || undefined,
     {
       // Auto-detect content type consistently with other components
       enabled: !!selectedFilePath,
@@ -153,13 +149,7 @@ export function FileViewerModal({
 
   // Add state for PDF export
   const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const markdownContainerRef = useRef<HTMLDivElement>(null);
   const markdownRef = useRef<HTMLDivElement>(null);
-
-  // Add state for print orientation
-  const [pdfOrientation, setPdfOrientation] = useState<
-    'portrait' | 'landscape'
-  >('portrait');
 
   // Add a ref to track active download URLs
   const activeDownloadUrls = useRef<Set<string>>(new Set());
@@ -171,6 +161,10 @@ export function FileViewerModal({
     total: number;
     currentFile: string;
   } | null>(null);
+
+  // Add state for copy functionality
+  const [isCopyingPath, setIsCopyingPath] = useState(false);
+  const [isCopyingContent, setIsCopyingContent] = useState(false);
 
   // Setup project with sandbox URL if not provided directly
   useEffect(() => {
@@ -572,7 +566,7 @@ export function FileViewerModal({
   );
 
   // Add a helper to directly interact with the raw cache
-  const directlyAccessCache = useCallback(
+  const _directlyAccessCache = useCallback(
     (filePath: string): {
       found: boolean;
       content: any;
@@ -783,7 +777,14 @@ export function FileViewerModal({
         console.log(`[FILE VIEWER] Created blob URL: ${url} for ${selectedFilePath}`);
         setBlobUrlForRenderer(url);
         setTextContentForRenderer(null);
-      } else {
+      } else if (typeof cachedFileContent === 'object') {
+        // convert to json string if file_contents is a object
+        const jsonString = JSON.stringify(cachedFileContent, null, 2);
+        console.log(`[FILE VIEWER] Setting text content for object file: ${selectedFilePath}`);
+        setTextContentForRenderer(jsonString);
+        setBlobUrlForRenderer(null);
+      }
+      else {
         // Unknown content type
         console.warn(`[FILE VIEWER] Unknown content type for: ${selectedFilePath}`, typeof cachedFileContent);
         setTextContentForRenderer(null);
@@ -854,6 +855,43 @@ export function FileViewerModal({
     return filePath ? filePath.toLowerCase().endsWith('.md') : false;
   }, []);
 
+  // Copy functions
+  const copyToClipboard = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      return false;
+    }
+  }, []);
+
+  const handleCopyPath = useCallback(async () => {
+    if (!textContentForRenderer) return;
+    
+    setIsCopyingPath(true);
+    const success = await copyToClipboard(textContentForRenderer);
+    if (success) {
+      toast.success('File content copied to clipboard');
+    } else {
+      toast.error('Failed to copy file content');
+    }
+    setTimeout(() => setIsCopyingPath(false), 500);
+  }, [textContentForRenderer, copyToClipboard]);
+
+  const handleCopyContent = useCallback(async () => {
+    if (!textContentForRenderer) return;
+    
+    setIsCopyingContent(true);
+    const success = await copyToClipboard(textContentForRenderer);
+    if (success) {
+      toast.success('File content copied to clipboard');
+    } else {
+      toast.error('Failed to copy file content');
+    }
+    setTimeout(() => setIsCopyingContent(false), 500);
+  }, [textContentForRenderer, copyToClipboard]);
+
   // Handle PDF export for markdown files
   const handleExportPdf = useCallback(
     async (orientation: 'portrait' | 'landscape' = 'portrait') => {
@@ -881,7 +919,7 @@ export function FileViewerModal({
         }
 
         // Get the base URL for resolving relative URLs
-        const baseUrl = window.location.origin;
+        const _baseUrl = window.location.origin;
 
         // Generate HTML content
         const fileName = selectedFilePath.split('/').pop() || 'document';
@@ -1246,13 +1284,13 @@ export function FileViewerModal({
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <div className="text-xs text-muted-foreground px-1">
-                    {currentFileIndex + 1} / {filePathList.length}
+                    {currentFileIndex + 1} / {(filePathList?.length || 0)}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={navigateNext}
-                    disabled={currentFileIndex >= filePathList.length - 1}
+                    disabled={currentFileIndex >= (filePathList?.length || 0) - 1}
                     className="h-8 w-8 p-0"
                     title="Next file (→)"
                   >
@@ -1287,7 +1325,7 @@ export function FileViewerModal({
 
             {currentPath !== '/workspace' && (
               <>
-                {getBreadcrumbSegments(currentPath).map((segment, index) => (
+                {getBreadcrumbSegments(currentPath).map((segment) => (
                   <Fragment key={segment.path}>
                     <ChevronRight className="h-4 w-4 mx-1 text-muted-foreground opacity-50 flex-shrink-0" />
                     <Button
@@ -1318,6 +1356,24 @@ export function FileViewerModal({
           <div className="flex items-center gap-2 flex-shrink-0">
             {selectedFilePath && (
               <>
+                {/* Copy content button - only show for text files */}
+                {textContentForRenderer && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyContent}
+                    disabled={isCopyingContent || isCachedFileLoading}
+                    className="h-8 gap-1"
+                  >
+                    {isCopyingContent ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">Copy</span>
+                  </Button>
+                )}
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -1551,7 +1607,7 @@ export function FileViewerModal({
                     {files.map((file) => (
                       <button
                         key={file.path}
-                        className={`flex flex-col items-center p-3 rounded-lg border hover:bg-muted/50 transition-colors ${selectedFilePath === file.path
+                        className={`flex flex-col items-center p-3 rounded-2xl border hover:bg-muted/50 transition-colors ${selectedFilePath === file.path
                           ? 'bg-muted border-primary/20'
                           : ''
                           }`}

@@ -3,7 +3,7 @@ FROM ghcr.io/astral-sh/uv:python3.11-alpine
 ENV ENV_MODE production
 WORKDIR /app
 
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl git
 
 # Install Python dependencies
 COPY pyproject.toml uv.lock ./
@@ -15,7 +15,7 @@ COPY . .
 
 # Calculate optimal worker count based on 16 vCPUs
 # Using (2*CPU)+1 formula for CPU-bound applications
-ENV WORKERS=33
+ENV WORKERS=7
 ENV THREADS=2
 ENV WORKER_CONNECTIONS=2000
 
