@@ -25,6 +25,7 @@ RUN npm install
 COPY . .
 
 ENV NEXT_PUBLIC_VERCEL_ENV production
+ENV NEXT_PUBLIC_BASE_PATH /ainnolink
 
 RUN npm run build
 
