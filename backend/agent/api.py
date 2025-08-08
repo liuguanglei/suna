@@ -309,7 +309,7 @@ async def start_agent(
         logger.info(f"Using model from config: {model_name}")
 
     # model_name = "openrouter/claude-sonnet-4"  # TODO
-    resolved_model = MODEL_NAME_ALIASES.get(model_name, model_name = config.MODEL_TO_USE)
+    resolved_model = MODEL_NAME_ALIASES.get(model_name, config.MODEL_TO_USE)
     logger.info(f"Resolved model name: {resolved_model}")
 
     # Update model_name to use the resolved version
