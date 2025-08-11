@@ -293,9 +293,11 @@ MODEL_ACCESS_TIERS = {
 MODEL_NAME_ALIASES = {
     "openrouter/claude-sonnet-4": "openrouter/anthropic/claude-sonnet-4",
     "openrouter/gpt-5-chat": "openrouter/openai/gpt-5-chat",
+    "openrouter/openai/gpt-5-mini": "openrouter/openai/gpt-5-mini",
     "openrouter/deepseek-chat-v3-0324": "openrouter/deepseek/deepseek-chat-v3-0324",
     "openrouter/kimi-k2": "openrouter/moonshotai/kimi-k2",
     "openrouter/qwen3-235b-a22b-2507": "openrouter/qwen/qwen3-235b-a22b-2507",
+    
     
     
     # Short names to full names
