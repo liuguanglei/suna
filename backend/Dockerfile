@@ -8,12 +8,9 @@ RUN apk add --no-cache curl git
 # Install Python dependencies
 COPY pyproject.toml uv.lock ./
 ENV UV_LINK_MODE=copy
-<<<<<<< HEAD
-RUN --mount=type=cache,target=/root/.cache/uv uv sync --quiet --index-url https://pypi.tuna.tsinghua.edu.cn/simple
-=======
+# RUN --mount=type=cache,target=/root/.cache/uv uv sync --quiet --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 # RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --quiet
 RUN uv sync --index-url https://pypi.tuna.tsinghua.edu.cn/simple
->>>>>>> e465b9e1bc7e382986da893a557cc45f44307523
 
 # Copy application code
 COPY . .

@@ -1,4 +1,4 @@
-# syntax=docker.io/docker/dockerfile:1
+# # syntax=docker.io/docker/dockerfile:1
 # ---- Base Stage ----
 FROM node:22-slim AS base
 
@@ -43,12 +43,13 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NEXT_OUTPUT=standalone
 ENV NEXT_PUBLIC_BASE_PATH=/ainnolink
 
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+RUN npm run build
+#RUN \
+#  if [ -f yarn.lock ]; then yarn run build; \
+#  elif [ -f package-lock.json ]; then npm run build; \
+#  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+#  else echo "Lockfile not found." && exit 1; \
+#  fi
 
 # ---- Runner Stage ----
 FROM base AS runner
