@@ -310,6 +310,7 @@ const TOOL_DISPLAY_NAMES = new Map([
 
   ['create-tasks', '创建任务'],
   ['update-tasks', '更新任务'],
+  ['view-tasks', '查看任务'],
 
   ['browser-click-element', '点击元素'],
   ['browser-close-tab', '关闭标签页'],
