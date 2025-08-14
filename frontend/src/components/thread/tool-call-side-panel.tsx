@@ -309,9 +309,9 @@ export function ToolCallSidePanel({
     setIsCopyingContent(true);
     const success = await copyToClipboard(fileContent);
     if (success) {
-      toast.success('File content copied to clipboard');
+      toast.success('文件内容已复制到剪贴板');
     } else {
-      toast.error('Failed to copy file content');
+      console.error('Failed to copy file content');
     }
     setTimeout(() => setIsCopyingContent(false), 500);
   }, [displayToolCall?.toolResult?.content, copyToClipboard]);

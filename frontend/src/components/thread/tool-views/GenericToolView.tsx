@@ -151,9 +151,9 @@ export function GenericToolView({
     setIsCopyingInput(true);
     const success = await copyToClipboard(formattedAssistantContent);
     if (success) {
-      toast.success('File content copied to clipboard');
+      toast.success('文件内容已复制到剪贴板');
     } else {
-      toast.error('Failed to copy file content');
+      console.error('Failed to copy file content');
     }
     setTimeout(() => setIsCopyingInput(false), 500);
   }, [formattedAssistantContent, copyToClipboard]);
@@ -164,9 +164,9 @@ export function GenericToolView({
     setIsCopyingOutput(true);
     const success = await copyToClipboard(formattedToolContent);
     if (success) {
-      toast.success('File content copied to clipboard');
+      toast.success('文件内容已复制到剪贴板');
     } else {
-      toast.error('Failed to copy file content');
+      console.error('Failed to copy file content');
     }
     setTimeout(() => setIsCopyingOutput(false), 500);
   }, [formattedToolContent, copyToClipboard]);

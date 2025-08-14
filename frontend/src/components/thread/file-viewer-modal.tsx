@@ -1016,9 +1016,9 @@ export function FileViewerModal({
     setIsCopyingPath(true);
     const success = await copyToClipboard(textContentForRenderer);
     if (success) {
-      toast.success('File content copied to clipboard');
+      toast.success('文件内容已复制到剪贴板');
     } else {
-      toast.error('Failed to copy file content');
+      console.error('Failed to copy file content');
     }
     setTimeout(() => setIsCopyingPath(false), 500);
   }, [textContentForRenderer, copyToClipboard]);
@@ -1029,9 +1029,9 @@ export function FileViewerModal({
     setIsCopyingContent(true);
     const success = await copyToClipboard(textContentForRenderer);
     if (success) {
-      toast.success('File content copied to clipboard');
+      toast.success('文件内容已复制到剪贴板');
     } else {
-      toast.error('Failed to copy file content');
+      console.error('Failed to copy file content');
     }
     setTimeout(() => setIsCopyingContent(false), 500);
   }, [textContentForRenderer, copyToClipboard]);
@@ -1527,7 +1527,7 @@ export function FileViewerModal({
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
-                    <span className="hidden sm:inline">Copy</span>
+                    <span className="hidden sm:inline">复制</span>
                   </Button>
                 )}
 
