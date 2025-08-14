@@ -832,11 +832,11 @@ export default function ThreadPage({
         </div>
       </ThreadLayout>
 
-      <UpgradeDialog
+      {/* <UpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
         onDismiss={handleDismissUpgradeDialog}
-      />
+      /> */}
 
       {agentLimitData && (
         <AgentRunLimitDialog
