@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { extractDataProviderCallData } from './_utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const PROVIDER_CONFIG = {
   linkedin: {
@@ -108,7 +109,7 @@ export function ExecuteDataProviderCallToolView({
   const IconComponent = providerConfig.icon;
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
@@ -163,106 +164,108 @@ export function ExecuteDataProviderCallToolView({
             </div>
           </div>
         ) : (
-          <div className="p-4 space-y-6">
-            <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
-              <div
-                className={cn(
-                  'w-12 h-12 rounded-lg flex items-center justify-center shadow-sm border-2',
-                  `bg-gradient-to-br ${providerConfig.color}`,
-                  'border-white/20',
+          <ScrollArea className="h-full w-full">
+            <div className="p-4 space-y-6">
+              <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                <div
+                  className={cn(
+                    'w-12 h-12 rounded-lg flex items-center justify-center shadow-sm border-2',
+                    `bg-gradient-to-br ${providerConfig.color}`,
+                    'border-white/20',
+                  )}
+                >
+                  <IconComponent className="h-6 w-6 text-white drop-shadow-sm" />
+                </div>
+
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    {providerConfig.name}
+                  </h3>
+                  {serviceName && (
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      服务: {serviceName}
+                    </p>
+                  )}
+                </div>
+
+                {route && (
+                  <Badge variant="outline" className="text-xs font-mono">
+                    {route}
+                  </Badge>
                 )}
-              >
-                <IconComponent className="h-6 w-6 text-white drop-shadow-sm" />
               </div>
 
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                  {providerConfig.name}
-                </h3>
-                {serviceName && (
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    服务：{serviceName}
+              {output && !actualIsSuccess && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    <span className="text-sm font-medium text-red-800 dark:text-red-300">
+                      执行失败
+                    </span>
+                  </div>
+                  <p className="text-xs text-red-700 dark:text-red-300 font-mono">
+                    {output}
                   </p>
-                )}
-              </div>
+                </div>
+              )}
 
-              {route && (
-                <Badge variant="outline" className="text-xs font-mono">
-                  {route}
-                </Badge>
+              {payload && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <Settings className="h-4 w-4" />
+                    <span>调用参数</span>
+                    <ChevronRight className="h-3 w-3 text-zinc-400" />
+                  </div>
+                  <div className="grid gap-3">
+                    {Object.entries(payload).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-zinc-300 dark:bg-zinc-600"></div>
+                          <code className="text-sm font-mono font-medium text-zinc-900 dark:text-zinc-100">
+                            {key}
+                          </code>
+                        </div>
+                        <span className="text-sm text-zinc-600 dark:text-zinc-400 max-w-xs truncate font-mono">
+                          {typeof value === 'string'
+                            ? `"${value}"`
+                            : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <details className="group">
+                    <summary className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+                      <Code className="h-4 w-4" />
+                      <span>原始 JSON</span>
+                      <ChevronRight className="h-3 w-3 text-zinc-400 group-open:rotate-90 transition-transform" />
+                    </summary>
+
+                    <div className="mt-3 p-4 bg-zinc-900 dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                      <pre className="text-xs font-mono text-emerald-400 dark:text-emerald-300 overflow-x-auto">
+                        {JSON.stringify(payload, null, 2)}
+                      </pre>
+                    </div>
+                  </details>
+                </div>
+              )}
+              {!serviceName && !route && !payload && (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center mb-3">
+                    <Database className="h-6 w-6 text-zinc-400" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-zinc-500 dark:text-zinc-400" />
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      执行调用后将填充数据...
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
-
-            {output && !actualIsSuccess && (
-              <div className="p-4 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  <span className="text-sm font-medium text-red-800 dark:text-red-300">
-                    执行失败
-                  </span>
-                </div>
-                <p className="text-xs text-red-700 dark:text-red-300 font-mono">
-                  {output}
-                </p>
-              </div>
-            )}
-
-            {payload && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  <Settings className="h-4 w-4" />
-                  <span>调用参数</span>
-                  <ChevronRight className="h-3 w-3 text-zinc-400" />
-                </div>
-                <div className="grid gap-3">
-                  {Object.entries(payload).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-zinc-300 dark:bg-zinc-600"></div>
-                        <code className="text-sm font-mono font-medium text-zinc-900 dark:text-zinc-100">
-                          {key}
-                        </code>
-                      </div>
-                      <span className="text-sm text-zinc-600 dark:text-zinc-400 max-w-xs truncate font-mono">
-                        {typeof value === 'string'
-                          ? `"${value}"`
-                          : String(value)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <details className="group">
-                  <summary className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-                    <Code className="h-4 w-4" />
-                    <span>原始 JSON</span>
-                    <ChevronRight className="h-3 w-3 text-zinc-400 group-open:rotate-90 transition-transform" />
-                  </summary>
-
-                  <div className="mt-3 p-4 bg-zinc-900 dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                    <pre className="text-xs font-mono text-emerald-400 dark:text-emerald-300 overflow-x-auto">
-                      {JSON.stringify(payload, null, 2)}
-                    </pre>
-                  </div>
-                </details>
-              </div>
-            )}
-            {!serviceName && !route && !payload && (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center mb-3">
-                  <Database className="h-6 w-6 text-zinc-400" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-zinc-500 dark:text-zinc-400" />
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    调用执行后将填充内容...
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+          </ScrollArea>
         )}
       </CardContent>
       {/* <div className="px-4 py-2 h-10 bg-zinc-50/50 dark:bg-zinc-900/50 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">

@@ -1,38 +1,19 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React from 'react';
 import {
   ExternalLink,
   CheckCircle,
   AlertTriangle,
-  Globe,
-  Loader2,
-  Link2,
   Computer,
-  Check,
 } from 'lucide-react';
 import { ToolViewProps } from '../types';
-import {
-  formatTimestamp,
-  getToolTitle,
-  normalizeContentToString,
-  extractToolData,
-} from '../utils';
+import { formatTimestamp } from '../utils';
 import { extractExposePortData } from './_utils';
-import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
 import { LoadingState } from '../shared/LoadingState';
 
 export function ExposePortToolView({
-  name = 'expose-port',
   assistantContent,
   toolContent,
   isSuccess = true,
@@ -40,23 +21,17 @@ export function ExposePortToolView({
   assistantTimestamp,
   toolTimestamp,
 }: ToolViewProps) {
-  const {
-    port,
-    url,
-    message,
-    actualIsSuccess,
-    actualToolTimestamp,
-    actualAssistantTimestamp,
-  } = extractExposePortData(
-    assistantContent,
-    toolContent,
-    isSuccess,
-    toolTimestamp,
-    assistantTimestamp,
-  );
+  const { port, url, message, actualIsSuccess, actualToolTimestamp } =
+    extractExposePortData(
+      assistantContent,
+      toolContent,
+      isSuccess,
+      toolTimestamp,
+      assistantTimestamp,
+    );
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">

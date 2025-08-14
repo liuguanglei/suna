@@ -3,8 +3,10 @@ import { ToolViewProps } from '../types';
 import { GenericToolView } from '../GenericToolView';
 import { BrowserToolView } from '../BrowserToolView';
 import { CommandToolView } from '../command-tool/CommandToolView';
+import { CheckCommandOutputToolView } from '../command-tool/CheckCommandOutputToolView';
 import { ExposePortToolView } from '../expose-port-tool/ExposePortToolView';
 import { FileOperationToolView } from '../file-operation/FileOperationToolView';
+import { FileEditToolView } from '../file-operation/FileEditToolView';
 import { StrReplaceToolView } from '../str-replace/StrReplaceToolView';
 import { WebCrawlToolView } from '../WebCrawlToolView';
 import { WebScrapeToolView } from '../web-scrape-tool/WebScrapeToolView';
@@ -16,6 +18,15 @@ import { CompleteToolView } from '../CompleteToolView';
 import { ExecuteDataProviderCallToolView } from '../data-provider-tool/ExecuteDataProviderCallToolView';
 import { DataProviderEndpointsToolView } from '../data-provider-tool/DataProviderEndpointsToolView';
 import { DeployToolView } from '../DeployToolView';
+import { SearchMcpServersToolView } from '../search-mcp-servers/search-mcp-servers';
+import { GetAppDetailsToolView } from '../get-app-details/get-app-details';
+import { CreateCredentialProfileToolView } from '../create-credential-profile/create-credential-profile';
+import { ConnectCredentialProfileToolView } from '../connect-credential-profile/connect-credential-profile';
+import { CheckProfileConnectionToolView } from '../check-profile-connection/check-profile-connection';
+import { ConfigureProfileForAgentToolView } from '../configure-profile-for-agent/configure-profile-for-agent';
+import { GetCredentialProfilesToolView } from '../get-credential-profiles/get-credential-profiles';
+import { GetCurrentAgentConfigToolView } from '../get-current-agent-config/get-current-agent-config';
+import { TaskListToolView } from '../task-list/TaskListToolView';
 
 
 export type ToolViewComponent = React.ComponentType<ToolViewProps>;
@@ -40,7 +51,7 @@ const defaultRegistry: ToolViewRegistryType = {
   'browser-click-coordinates': BrowserToolView,
 
   'execute-command': CommandToolView,
-  'check-command-output': GenericToolView,
+  'check-command-output': CheckCommandOutputToolView,
   'terminate-command': TerminateCommandToolView,
   'list-commands': GenericToolView,
 
@@ -48,6 +59,7 @@ const defaultRegistry: ToolViewRegistryType = {
   'delete-file': FileOperationToolView,
   'full-file-rewrite': FileOperationToolView,
   'read-file': FileOperationToolView,
+  'edit-file': FileEditToolView,
 
   'str-replace': StrReplaceToolView,
 
@@ -58,11 +70,24 @@ const defaultRegistry: ToolViewRegistryType = {
   'execute-data-provider-call': ExecuteDataProviderCallToolView,
   'get-data-provider-endpoints': DataProviderEndpointsToolView,
 
+  'search-mcp-servers': SearchMcpServersToolView,
+  'get-app-details': GetAppDetailsToolView,
+  'create-credential-profile': CreateCredentialProfileToolView,
+  'connect-credential-profile': ConnectCredentialProfileToolView,
+  'check-profile-connection': CheckProfileConnectionToolView,
+  'configure-profile-for-agent': ConfigureProfileForAgentToolView,
+  'get-credential-profiles': GetCredentialProfilesToolView,
+  'get-current-agent-config': GetCurrentAgentConfigToolView,
+  'create-tasks': TaskListToolView,
+  'view-tasks': TaskListToolView,
+  'update-tasks': TaskListToolView,
+  'delete-tasks': TaskListToolView,
+  'clear-all': TaskListToolView,
+
+
   'expose-port': ExposePortToolView,
 
   'see-image': SeeImageToolView,
-
-  'call-mcp-tool': GenericToolView,
 
   'ask': AskToolView,
   'complete': CompleteToolView,
@@ -76,7 +101,14 @@ class ToolViewRegistry {
   private registry: ToolViewRegistryType;
 
   constructor(initialRegistry: Partial<ToolViewRegistryType> = {}) {
-    this.registry = { ...defaultRegistry, ...initialRegistry };
+    this.registry = { ...defaultRegistry };
+
+    // Only add non-undefined values from initialRegistry
+    Object.entries(initialRegistry).forEach(([key, value]) => {
+      if (value !== undefined) {
+        this.registry[key] = value;
+      }
+    });
   }
 
   register(toolName: string, component: ToolViewComponent): void {

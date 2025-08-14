@@ -14,7 +14,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { Check, ChevronDown, Search, AlertTriangle, Crown, ArrowUpRight, Brain, Plus, Edit, Trash } from 'lucide-react';
+import { Check, ChevronDown, Search, AlertTriangle, Crown, ArrowUpRight, Brain, Plus, Edit, Trash, Cpu, Key, KeyRound } from 'lucide-react';
 import {
   ModelOption,
   SubscriptionStatus,
@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { isLocalMode } from '@/lib/config';
 import { CustomModelDialog, CustomModelFormData } from './custom-model-dialog';
+import Link from 'next/link';
 
 interface CustomModel {
   id: string;
@@ -90,9 +91,6 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       localStorage.setItem(STORAGE_KEY_CUSTOM_MODELS, JSON.stringify(customModels));
     }
   }, [customModels]);
-
-  // Get current custom models from state
-  const currentCustomModels = customModels || [];
 
   // Enhance model options with capabilities - using a Map to ensure uniqueness
   const modelMap = new Map();
@@ -511,30 +509,29 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   return (
     <div className="relative">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={hasBorder ? "outline" : "ghost"}
-            size="default"
-            className="h-8 rounded-lg text-muted-foreground shadow-none border-none focus:ring-0 px-3"
-          >
-            <div className="flex items-center gap-1 text-sm font-medium">
-              {MODELS[selectedModel]?.lowQuality && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500 mr-1" />
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">
-                      <p>Basic model with limited capabilities</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              <span className="truncate max-w-[100px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-none">{selectedLabel}</span>
-              <ChevronDown className="h-3 w-3 opacity-50 ml-1 flex-shrink-0" />
-            </div>
-          </Button>
-        </DropdownMenuTrigger>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 py-2 bg-transparent border-0 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/50 flex items-center gap-2"
+                >
+                  <div className="relative flex items-center justify-center">
+                    <Cpu className="h-4 w-4" />
+                    {MODELS[selectedModel]?.lowQuality && (
+                      <AlertTriangle className="h-2.5 w-2.5 text-amber-500 absolute -top-1 -right-1" />
+                    )}
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">
+              <p>Choose a model</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         <DropdownMenuContent
           align="end"
@@ -603,8 +600,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                 {/* Premium Models Section */}
                 <div className="mt-4 border-t border-border pt-2">
                   <div className="px-3 py-1.5 text-xs font-medium text-blue-500 flex items-center">
-                    <Crown className="h-3.5 w-3.5 mr-1.5" />
-                    Premium Models
+                    {/* <Crown className="h-3.5 w-3.5 mr-1.5" /> */}
+                    Additional Models
                   </div>
 
                   {/* Premium models container with paywall overlay */}
@@ -678,6 +675,22 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                 <div className="px-3 py-3 flex justify-between items-center">
                   <span className="text-xs font-medium text-muted-foreground">All Models</span>
                   {isLocalMode() && (
+                    <div className="flex items-center gap-1">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link
+                              href="/settings/env-manager"
+                              className="h-6 w-6 p-0 flex items-center justify-center"
+                            >
+                              <KeyRound className="h-3.5 w-3.5" />
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="text-xs">
+                          Local .Env Manager
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -698,6 +711,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+                    </div>
                   )}
                 </div>
                 {uniqueModels

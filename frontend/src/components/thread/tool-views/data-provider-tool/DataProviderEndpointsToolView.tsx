@@ -14,11 +14,12 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { ToolViewProps } from '../types';
-import { formatTimestamp, getToolTitle } from '../utils';
+import { formatTimestamp } from '../utils';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { extractDataProviderEndpointsData } from './_utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const PROVIDER_CONFIG = {
   linkedin: {
@@ -66,7 +67,6 @@ const PROVIDER_CONFIG = {
 };
 
 export function DataProviderEndpointsToolView({
-  name = 'get-data-provider-endpoints',
   assistantContent,
   toolContent,
   assistantTimestamp,
@@ -89,8 +89,8 @@ export function DataProviderEndpointsToolView({
   );
 
   const providerConfig =
-    serviceName && PROVIDER_CONFIG[serviceName]
-      ? PROVIDER_CONFIG[serviceName]
+    serviceName && PROVIDER_CONFIG[serviceName as keyof typeof PROVIDER_CONFIG]
+      ? PROVIDER_CONFIG[serviceName as keyof typeof PROVIDER_CONFIG]
       : PROVIDER_CONFIG['linkedin'];
   const IconComponent = providerConfig.icon;
 
@@ -100,7 +100,7 @@ export function DataProviderEndpointsToolView({
       : 0;
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
@@ -155,124 +155,121 @@ export function DataProviderEndpointsToolView({
             </div>
           </div>
         ) : (
-          <div className="p-4 space-y-6">
-            <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
-              <div
-                className={cn(
-                  'w-12 h-12 rounded-lg flex items-center justify-center shadow-sm border-2',
-                  `bg-gradient-to-br ${providerConfig.color}`,
-                  'border-white/20',
-                )}
-              >
-                <IconComponent className="h-6 w-6 text-white drop-shadow-sm" />
-              </div>
-
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                  {providerConfig.name}
-                </h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  {endpointCount > 0
-                    ? `${endpointCount} 个端点已加载并准备就绪`
-                    : '端点已加载并准备就绪'}
-                </p>
-              </div>
-              <Badge
-                variant="secondary"
-                className="bg-gradient-to-br from-neutral-200 to-neutral-300"
-              >
-                {/* <Badge
-                variant="secondary"
-                className={cn(
-                  'text-xs font-medium',
-                  actualIsSuccess
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800'
-                    : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800',
-                )}
-              >
-                {actualIsSuccess ? (
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                ) : (
-                  <AlertTriangle className="h-3 w-3 mr-1" />
-                )} */}
-                {actualIsSuccess ? '已连接' : '连接失败'}
-              </Badge>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                <Database className="h-4 w-4" />
-                <span>提供者状态</span>
-                <ChevronRight className="h-3 w-3 text-zinc-400" />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      连接状态
-                    </span>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="bg-gradient-to-br from-neutral-200 to-neutral-300"
-                  >
-                    {/* <Badge
-                    variant="secondary"
-                    className={cn(
-                      'text-xs font-medium',
-                      actualIsSuccess
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800'
-                        : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800',
-                    )}
-                  >
-                    {actualIsSuccess ? (
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                    ) : (
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                    )} */}
-                    {actualIsSuccess ? '活动' : '非活动'}
-                  </Badge>
+          <ScrollArea className="h-full w-full">
+            <div className="p-4 space-y-6">
+              <div className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                <div
+                  className={cn(
+                    'w-12 h-12 rounded-lg flex items-center justify-center shadow-sm border-2',
+                    `bg-gradient-to-br ${providerConfig.color}`,
+                    'border-white/20',
+                  )}
+                >
+                  <IconComponent className="h-6 w-6 text-white drop-shadow-sm" />
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      可用端点
-                    </span>
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {endpointCount > 0 ? `${endpointCount} 个端点` : '准备就绪'}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      数据提供者
-                    </span>
-                  </div>
-                  <span className="text-sm text-zinc-600 dark:text-zinc-400 font-mono">
-                    {serviceName || 'linkedin'}
-                  </span>
-                </div>
-              </div>
-              {actualIsSuccess && (
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400/70" />
-                    <span className="text-sm font-medium text-emerald-800 dark:text-emerald-300/70">
-                      提供者已准备就绪
-                    </span>
-                  </div>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-300/70">
-                    数据提供者端点已成功加载，现已准备好处理请求。
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    {providerConfig.name}
+                  </h3>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {endpointCount > 0
+                      ? `${endpointCount} 个端点已加载并准备就绪`
+                      : '端点已加载并准备就绪'}
                   </p>
                 </div>
-              )}
+
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    'text-xs font-medium',
+                    actualIsSuccess
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800'
+                      : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800',
+                  )}
+                >
+                  {/* {actualIsSuccess ? (
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                  ) : (
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                  )} */}
+                  {actualIsSuccess ? '已连接' : '失败'}
+                </Badge>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <Database className="h-4 w-4" />
+                  <span>提供者状态</span>
+                  <ChevronRight className="h-3 w-3 text-zinc-400" />
+                </div>
+                <div className="grid gap-3">
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                        连接状态
+                      </span>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        'text-xs font-medium',
+                        actualIsSuccess
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800'
+                          : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800',
+                      )}
+                    >
+                      {/* {actualIsSuccess ? (
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                      ) : (
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                      )} */}
+                      {actualIsSuccess ? '活跃' : '非活跃'}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                        可用端点
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {endpointCount > 0
+                        ? `${endpointCount} 个端点`
+                        : '准备就绪'}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                        数据提供者
+                      </span>
+                    </div>
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400 font-mono">
+                      {serviceName || 'linkedin'}
+                    </span>
+                  </div>
+                </div>
+                {actualIsSuccess && (
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400/70" />
+                      <span className="text-sm font-medium text-emerald-800 dark:text-emerald-300/70">
+                        提供者已准备就绪
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300/70">
+                      数据提供者端点已成功加载，准备好处理请求。
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         )}
       </CardContent>
 

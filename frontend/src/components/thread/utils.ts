@@ -108,6 +108,8 @@ export const getToolIcon = (toolName: string): ElementType => {
       return FilePlus;
     case 'read-file':
       return FileText;
+    case 'edit-file':
+      return FileEdit;
 
     // Shell commands
     case 'execute-command':
@@ -153,11 +155,6 @@ export const getToolIcon = (toolName: string): ElementType => {
     case 'complete':
       return CheckCircle2;
 
-    // MCP tools
-    case 'call-mcp-tool':
-      return PlugIcon;
-
-    // Default case
     default:
       if (toolName?.startsWith('mcp_')) {
         const parts = toolName.split('_');
@@ -247,6 +244,13 @@ export const extractPrimaryParam = (
         match = content.match(/file_path=(?:"|')([^"|']+)(?:"|')/);
         // Return just the filename part
         return match ? match[1].split('/').pop() || match[1] : null;
+      case 'edit-file':
+        // Try to match target_file attribute for edit-file
+        match =
+          content.match(/target_file=(?:"|')([^"|']+)(?:"|')/) ||
+          content.match(/<parameter\s+name=["']target_file["']>([^<]+)/i);
+        // Return just the filename part
+        return match ? (match[1].split('/').pop() || match[1]).trim() : null;
 
       // Shell commands
       case 'execute-command':
@@ -295,13 +299,39 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['check-command-output', '检查命令输出'],
   ['terminate-command', '终止命令'],
   ['list-commands', '列出命令'],
-
   ['create-file', '创建文件'],
   ['delete-file', '删除文件'],
   ['full-file-rewrite', '重写文件'],
   ['str-replace', '编辑文本'],
   ['str_replace', '编辑文本'],
-
+  ['edit_file', 'AI 文件编辑'],
+  ['edit-file', 'AI 文件编辑'],
+  ['browser-click-element', '点击元素'],
+  ['browser-close-tab', '关闭标签'],
+  ['browser-drag-drop', '拖动元素'],
+  ['browser-get-dropdown-options', '获取选项'],
+  ['browser-go-back', '返回'],
+  ['browser-input-text', '输入文本'],
+  ['browser-navigate-to', '导航到页面'],
+  ['browser-scroll-down', '向下滚动'],
+  ['browser-scroll-to-text', '滚动到文本'],
+  ['browser-scroll-up', '向上滚动'],
+  ['browser-select-dropdown-option', '选择选项'],
+  ['browser-click-coordinates', '点击坐标'],
+  ['browser-send-keys', '按键操作'],
+  ['browser-switch-tab', '切换标签'],
+  ['browser-wait', '等待'],
+  ['execute-data-provider-call', '调用数据提供者'],
+  ['execute_data-provider_call', '调用数据提供者'],
+  ['get-data-provider-endpoints', '获取端点'],
+  ['deploy', '部署'],
+  ['ask', '询问'],
+  ['complete', '完成任务'],
+  ['crawl-webpage', '爬取网页'],
+  ['expose-port', '暴露端口'],
+  ['scrape-webpage', '抓取网页'],
+  ['web-search', '网页搜索'],
+  ['see-image', '查看图片'],
   ['browser-click-element', '点击元素'],
   ['browser-close-tab', '关闭标签'],
   ['browser-drag-drop', '拖动元素'],
@@ -317,11 +347,9 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['browser-send-keys', '按键操作'],
   ['browser-switch-tab', '切换标签'],
   ['browser-wait', '等待'],
-
   ['execute-data-provider-call', '调用数据提供者'],
   ['execute_data_provider_call', '调用数据提供者'],
   ['get-data-provider-endpoints', '获取端点'],
-
   ['deploy', '部署'],
   ['ask', '询问'],
   ['complete', '完成任务'],
@@ -330,29 +358,55 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['scrape-webpage', '抓取网页'],
   ['web-search', '网页搜索'],
   ['see-image', '查看图片'],
-
-  ['call-mcp-tool', '调用外部工具'],
-
-  ['update-agent', '更新代理'],
-  ['get-current-agent-config', '获取代理配置'],
-  ['search-mcp-servers', '搜索 MCP 服务器'],
-  ['get-mcp-server-tools', '获取 MCP 服务器工具'],
-  ['configure-mcp-server', '配置 MCP 服务器'],
-  ['get-popular-mcp-servers', '获取热门 MCP 服务器'],
-  ['test-mcp-server-connection', '测试 MCP 服务器连接'],
-
-  // V2
-
   ['execute_command', '执行命令'],
   ['check_command_output', '检查命令输出'],
   ['terminate_command', '终止命令'],
   ['list_commands', '列出命令'],
-
   ['create_file', '创建文件'],
   ['delete_file', '删除文件'],
   ['full_file_rewrite', '重写文件'],
   ['str_replace', '编辑文本'],
-
+  ['edit_file', 'AI 文件编辑'],
+  ['browser_click_element', '点击元素'],
+  ['browser_close_tab', '关闭标签'],
+  ['browser_drag_drop', '拖动元素'],
+  ['browser_get_dropdown_options', '获取选项'],
+  ['browser_go_back', '返回'],
+  ['browser_input_text', '输入文本'],
+  ['browser_navigate_to', '导航到页面'],
+  ['browser_scroll_down', '向下滚动'],
+  ['browser_scroll_to_text', '滚动到文本'],
+  ['browser_scroll_up', '向上滚动'],
+  ['browser_select_dropdown_option', '选择选项'],
+  ['browser_click_coordinates', '点击坐标'],
+  ['browser_send_keys', '按键操作'],
+  ['browser_switch_tab', '切换标签'],
+  ['browser_wait', '等待'],
+  ['execute_data_provider_call', '调用数据提供者'],
+  ['get_data_provider_endpoints', '获取端点'],
+  ['deploy', '部署'],
+  ['ask', '询问'],
+  ['complete', '完成任务'],
+  ['crawl_webpage', '爬取网页'],
+  ['expose_port', '暴露端口'],
+  ['scrape_webpage', '抓取网页'],
+  ['web_search', '网页搜索'],
+  ['see_image', '查看图片'],
+  ['update_agent', '更新代理'],
+  ['get_current_agent_config', '获取代理配置'],
+  ['search_mcp_servers', '搜索 MCP 服务器'],
+  ['get_mcp_server_tools', '获取 MCP 服务器工具'],
+  ['configure_mcp_server', '配置 MCP 服务器'],
+  ['get_popular_mcp_servers', '获取热门 MCP 服务器'],
+  ['test_mcp_server_connection', '测试 MCP 服务器连接'],
+  ['execute_command', '执行命令'],
+  ['check_command_output', '检查命令输出'],
+  ['terminate_command', '终止命令'],
+  ['list_commands', '列出命令'],
+  ['create_file', '创建文件'],
+  ['delete_file', '删除文件'],
+  ['full_file_rewrite', '重写文件'],
+  ['str_replace', '编辑文本'],
   ['browser_click_element', '点击元素'],
   ['browser_close_tab', '关闭标签'],
   ['browser_drag_drop', '拖动元素'],
@@ -368,10 +422,8 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['browser_send_keys', '按键操作'],
   ['browser_switch_tab', '切换标签'],
   ['browser_wait', '等待'],
-
   ['execute_data_provider_call', '调用数据提供者'],
   ['get_data_provider_endpoints', '获取端点'],
-
   ['deploy', '部署'],
   ['ask', '询问'],
   ['complete', '完成任务'],
@@ -380,9 +432,7 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['scrape_webpage', '抓取网页'],
   ['web_search', '网页搜索'],
   ['see_image', '查看图片'],
-
   ['call_mcp_tool', '调用外部工具'],
-
   ['update_agent', '更新代理'],
   ['get_current_agent_config', '获取代理配置'],
   ['search_mcp_servers', '搜索 MCP 服务器'],
@@ -464,3 +514,38 @@ export function getUserFriendlyToolName(toolName: string): string {
   }
   return TOOL_DISPLAY_NAMES.get(toolName) || toolName;
 }
+
+export const HIDE_STREAMING_XML_TAGS = new Set([
+  'create-tasks',
+  'execute-command',
+  'create-file',
+  'delete-file',
+  'full-file-rewrite',
+  'edit-file',
+  'str-replace',
+  'browser-click-element',
+  'browser-close-tab',
+  'browser-drag-drop',
+  'browser-get-dropdown-options',
+  'browser-go-back',
+  'browser-input-text',
+  'browser-navigate-to',
+  'browser-scroll-down',
+  'browser-scroll-to-text',
+  'browser-scroll-up',
+  'browser-select-dropdown-option',
+  'browser-send-keys',
+  'browser-switch-tab',
+  'browser-wait',
+  'deploy',
+  'ask',
+  'complete',
+  'crawl-webpage',
+  'web-search',
+  'see-image',
+  'execute_data_provider_call',
+  'execute_data_provider_endpoint',
+
+  'execute-data-provider-call',
+  'execute-data-provider-endpoint',
+]);

@@ -194,6 +194,7 @@ interface FileUploadHandlerProps {
   setUploadedFiles: React.Dispatch<React.SetStateAction<UploadedFile[]>>;
   setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
   messages?: any[]; // Add messages prop
+  isLoggedIn?: boolean;
 }
 
 export const FileUploadHandler = forwardRef<
@@ -211,6 +212,7 @@ export const FileUploadHandler = forwardRef<
       setUploadedFiles,
       setIsUploading,
       messages = [],
+      isLoggedIn = true,
     },
     ref,
   ) => {
@@ -261,22 +263,28 @@ export const FileUploadHandler = forwardRef<
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                type="button"
-                onClick={handleFileUpload}
-                variant="ghost"
-                size="default"
-                className="h-7 rounded-md text-muted-foreground"
-                disabled={
-                  loading || (disabled && !isAgentRunning) || isUploading
-                }
-              >
-                {isUploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Paperclip className="h-4 w-4" />
-                )}
-              </Button>
+              <span className="inline-block">
+                <Button
+                  type="button"
+                  onClick={handleFileUpload}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-3 py-2 bg-transparent border border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/50 flex items-center gap-2"
+                  disabled={
+                    !isLoggedIn ||
+                    loading ||
+                    (disabled && !isAgentRunning) ||
+                    isUploading
+                  }
+                >
+                  {isUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Paperclip className="h-4 w-4" />
+                  )}
+                  <span className="text-sm">附件</span>
+                </Button>
+              </span>
             </TooltipTrigger>
             <TooltipContent side="top">
               <p>上传附件</p>

@@ -2,7 +2,16 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Bot, Menu, Store, Shield, Key, Workflow } from 'lucide-react';
+import {
+  Bot,
+  Menu,
+  Store,
+  Plus,
+  Zap,
+  Plug,
+  ChevronRight,
+  Loader2,
+} from 'lucide-react';
 
 import { NavAgents } from '@/components/sidebar/nav-agents';
 import { NavUserWithTeams } from '@/components/sidebar/nav-user-with-teams';
@@ -14,11 +23,22 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarHeader,
+  SidebarMenu,
   SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { NewAgentDialog } from '@/components/agents/new-agent-dialog';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -27,9 +47,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useFeatureFlags } from '@/lib/feature-flags';
 
 export function SidebarLeft({
@@ -48,14 +67,14 @@ export function SidebarLeft({
   });
 
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { flags, loading: flagsLoading } = useFeatureFlags([
     'custom_agents',
     'agent_marketplace',
-    'workflows',
   ]);
   const customAgentsEnabled = flags.custom_agents;
   const marketplaceEnabled = flags.agent_marketplace;
-  const workflowsEnabled = flags.workflows;
+  const [showNewAgentDialog, setShowNewAgentDialog] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -220,6 +239,10 @@ export function SidebarLeft({
         <NavUserWithTeams user={user} />
       </SidebarFooter>
       <SidebarRail />
+      <NewAgentDialog
+        open={showNewAgentDialog}
+        onOpenChange={setShowNewAgentDialog}
+      />
     </Sidebar>
   );
 }

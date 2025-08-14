@@ -3,15 +3,9 @@ import {
   Globe,
   CheckCircle,
   AlertTriangle,
-  ExternalLink,
   Loader2,
   FileText,
-  Clock,
   Copy,
-  Download,
-  Folder,
-  ChevronRight,
-  Server,
   Calendar,
   Check,
   ArrowUpRight,
@@ -44,17 +38,12 @@ export function WebScrapeToolView({
   isStreaming = false,
 }: ToolViewProps) {
   const { resolvedTheme } = useTheme();
-  const isDarkTheme = resolvedTheme === 'dark';
   const [progress, setProgress] = useState(0);
   const [copiedFile, setCopiedFile] = useState<string | null>(null);
 
   const {
     url,
-    urls,
-    success,
-    message,
     files,
-    urlCount,
     actualIsSuccess,
     actualToolTimestamp,
     actualAssistantTimestamp,
@@ -130,7 +119,7 @@ export function WebScrapeToolView({
   };
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
@@ -149,15 +138,12 @@ export function WebScrapeToolView({
               variant="secondary"
               className="bg-gradient-to-br from-neutral-200 to-neutral-300"
             >
-              {/* <Badge
-              variant="secondary"
-              className={
+              {/* className={
                 actualIsSuccess
                   ? 'bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300'
                   : 'bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300'
-              }
-            >
-              {actualIsSuccess ? (
+              } */}
+              {/* {actualIsSuccess ? (
                 <CheckCircle className="h-3.5 w-3.5" />
               ) : (
                 <AlertTriangle className="h-3.5 w-3.5" />
@@ -343,7 +329,7 @@ export function WebScrapeToolView({
         )}
       </CardContent>
 
-      {/* 底部 */}
+      {/* Footer */}
       {/* <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center gap-4">
         <div className="h-full flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           {!isStreaming && files.length > 0 && (

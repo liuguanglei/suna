@@ -274,7 +274,7 @@ export function StrReplaceToolView({
     !isStreaming && (!oldStr || !newStr) && (assistantContent || toolContent);
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
@@ -334,7 +334,7 @@ export function StrReplaceToolView({
           <ScrollArea className="h-full w-full">
             <div className="p-4">
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden mb-4">
-                <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex items-center justify-between">
+                <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 bg-accent flex items-center justify-between">
                   <div className="flex items-center">
                     <File className="h-4 w-4 mr-2 text-zinc-500 dark:text-zinc-400" />
                     <code className="text-xs font-mono text-zinc-700 dark:text-zinc-300">
@@ -420,7 +420,7 @@ export function StrReplaceToolView({
         )}
       </CardContent>
 
-      <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center">
+      {/* <div className="px-4 py-2 h-10 bg-gradient-to-r from-zinc-50/90 to-zinc-100/90 dark:from-zinc-900/90 dark:to-zinc-800/90 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-800 flex justify-between items-center">
         <div className="h-full flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
           {!isStreaming && (
             <div className="flex items-center gap-1">
@@ -450,7 +450,7 @@ export function StrReplaceToolView({
               ? formatTimestamp(actualAssistantTimestamp)
               : ''}
         </div>
-      </div>
+      </div> */}
     </Card>
   );
 }

@@ -29,6 +29,23 @@ export type Agent = {
   updated_at: string;
   avatar?: string;
   avatar_color?: string;
+  current_version_id?: string | null;
+  version_count?: number;
+  current_version?: AgentVersion | null;
+  metadata?: {
+    is_suna_default?: boolean;
+    centrally_managed?: boolean;
+    management_version?: string;
+    restrictions?: {
+      system_prompt_editable?: boolean;
+      tools_editable?: boolean;
+      name_editable?: boolean;
+      description_editable?: boolean;
+      mcps_editable?: boolean;
+    };
+    installation_date?: string;
+    last_central_update?: string;
+  };
 };
 
 export type PaginationInfo = {
@@ -92,6 +109,8 @@ export type AgentVersionCreateRequest = {
     enabledTools: string[];
   }>;
   agentpress_tools?: Record<string, any>;
+  version_name?: string;
+  description?: string;
 };
 
 export type AgentVersion = {
@@ -107,6 +126,7 @@ export type AgentVersion = {
   created_at: string;
   updated_at: string;
   created_by?: string;
+  change_description?: string;
 };
 
 export type AgentUpdateRequest = {
@@ -125,6 +145,8 @@ export type AgentUpdateRequest = {
   }>;
   agentpress_tools?: Record<string, any>;
   is_default?: boolean;
+  avatar?: string;
+  avatar_color?: string;
 };
 
 export const getAgents = async (params: AgentsParams = {}): Promise<AgentsResponse> => {

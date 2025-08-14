@@ -15,6 +15,35 @@ export interface ApiResponse<T = any> {
   success: boolean;
 }
 
+// API Key Management Types
+export interface APIKeyCreateRequest {
+  title: string;
+  description?: string;
+  expires_in_days?: number;
+}
+
+export interface APIKeyResponse {
+  key_id: string;
+  public_key: string;
+  title: string;
+  description?: string;
+  status: 'active' | 'revoked' | 'expired';
+  expires_at?: string;
+  last_used_at?: string;
+  created_at: string;
+}
+
+export interface APIKeyCreateResponse {
+  key_id: string;
+  public_key: string;
+  secret_key: string;
+  title: string;
+  description?: string;
+  status: 'active' | 'revoked' | 'expired';
+  expires_at?: string;
+  created_at: string;
+}
+
 export const apiClient = {
   async request<T = any>(
     url: string,
@@ -43,6 +72,10 @@ export const apiClient = {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
+      if (session?.refresh_token) {
+        headers['X-Refresh-Token'] = session.refresh_token;
+      }
+
       const response = await fetch(url, {
         ...fetchOptions,
         headers,
@@ -52,17 +85,22 @@ export const apiClient = {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const error: ApiError = new Error(`HTTP ${response.status}: ${response.statusText}`);
-        error.status = response.status;
-        error.response = response;
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        let errorData: any = null;
 
         try {
-          const errorData = await response.json();
-          error.details = errorData;
+          errorData = await response.json();
           if (errorData.message) {
-            error.message = errorData.message;
+            errorMessage = errorData.message;
           }
         } catch {
+        }
+
+        const error: ApiError = new Error(errorMessage);
+        error.status = response.status;
+        error.response = response;
+        if (errorData) {
+          error.details = errorData;
         }
 
         if (showErrors) {
@@ -240,4 +278,31 @@ export const backendApi = {
 
   upload: <T = any>(endpoint: string, formData: FormData, options?: Omit<RequestInit & ApiClientOptions, 'method' | 'body'>) =>
     apiClient.upload<T>(`${API_URL}${endpoint}`, formData, options),
+};
+
+// API Key Management API
+export const apiKeysApi = {
+  /**
+   * Create a new API key
+   */
+  create: (data: APIKeyCreateRequest, options?: ApiClientOptions): Promise<ApiResponse<APIKeyCreateResponse>> =>
+    backendApi.post<APIKeyCreateResponse>('/api-keys', data, options),
+
+  /**
+   * List all API keys for the authenticated user
+   */
+  list: (options?: ApiClientOptions): Promise<ApiResponse<APIKeyResponse[]>> =>
+    backendApi.get<APIKeyResponse[]>('/api-keys', options),
+
+  /**
+   * Revoke an API key
+   */
+  revoke: (keyId: string, options?: ApiClientOptions): Promise<ApiResponse<{ message: string }>> =>
+    backendApi.patch<{ message: string }>(`/api-keys/${keyId}/revoke`, {}, options),
+
+  /**
+   * Delete an API key permanently
+   */
+  delete: (keyId: string, options?: ApiClientOptions): Promise<ApiResponse<{ message: string }>> =>
+    backendApi.delete<{ message: string }>(`/api-keys/${keyId}`, options),
 }; 

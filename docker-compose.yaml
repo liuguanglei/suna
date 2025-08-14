@@ -14,6 +14,7 @@ services:
       timeout: 5s
       retries: 3
 
+<<<<<<< HEAD
   rabbitmq:
     image: registry.ainnovation.com/bg_cto/newagent-rabbitmq
     ports:
@@ -32,6 +33,10 @@ services:
   backend:
     image: registry.ainnovation.com/bg_cto/newagent-backend
     restart: always
+=======
+  backend:
+    image: suna-backend:latest
+>>>>>>> e465b9e1bc7e382986da893a557cc45f44307523
     platform: linux/amd64
 #    build:
 #      context: ./backend
@@ -39,8 +44,12 @@ services:
     ports:
       - "3457:8000"
     volumes:
+<<<<<<< HEAD
       - ./backend/.env:/app/.env:ro
       - ../data/logs:/app/logs
+=======
+      - ./backend/.env:/app/.env
+>>>>>>> e465b9e1bc7e382986da893a557cc45f44307523
     env_file:
       - ./backend/.env
     environment:
@@ -48,18 +57,18 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_SSL=False
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
     depends_on:
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
       worker:
         condition: service_started
 
   worker:
+<<<<<<< HEAD
     image: registry.ainnovation.com/bg_cto/newagent-backend
+=======
+    image: suna-backend:latest
+>>>>>>> e465b9e1bc7e382986da893a557cc45f44307523
     platform: linux/amd64
     restart: always
 #    build:
@@ -75,12 +84,8 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_SSL=False
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
     depends_on:
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
 
   frontend:
@@ -94,9 +99,6 @@ services:
       - "3458:3000"
     volumes:
       - ./frontend/.env.local:/app/.env.local:ro
-    environment:
-      - NODE_ENV=production
-    command: ["npm", "run", "start"]
     depends_on:
       - backend
 
@@ -119,4 +121,3 @@ services:
 
 volumes:
   redis_data:
-  rabbitmq_data:
