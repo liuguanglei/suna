@@ -298,8 +298,7 @@ MODEL_NAME_ALIASES = {
     "openrouter/kimi-k2": "openrouter/moonshotai/kimi-k2",
     "openrouter/qwen3-235b-a22b-2507": "openrouter/qwen/qwen3-235b-a22b-2507",
     
-    
-    
+
     # Short names to full names
     #"openrouter/sonnet-3.7": "openrouter/anthropic/claude-3.7-sonnet",
     # "sonnet-3.7": "anthropic/claude-3-7-sonnet-latest",
@@ -336,11 +335,9 @@ MODEL_NAME_ALIASES = {
     # "deepseek/deepseek-r1": "openrouter/deepseek/deepseek-r1",
     # "qwen/qwen3-235b-a22b": "openrouter/qwen/qwen3-235b-a22b",
     # "xai/grok-3-mini-fast-beta": "xai/grok-3-mini-fast-beta",  # Commented out in constants.py
-<<<<<<< HEAD
-    "openrouter/sonnet-3.7": "openrouter/anthropic/claude-3.7-sonnet",
-    "openrouter/claude-sonnet-4": "openrouter/anthropic/claude-sonnet-4",
-    "openrouter/kimi-k2": "openrouter/moonshotai/kimi-k2",
-=======
+    # "openrouter/sonnet-3.7": "openrouter/anthropic/claude-3.7-sonnet",
+    # "openrouter/claude-sonnet-4": "openrouter/anthropic/claude-sonnet-4",
+    # "openrouter/kimi-k2": "openrouter/moonshotai/kimi-k2",
     # "free": FREE_TIER_MODELS,
     # "tier_2_20": PAID_TIER_MODELS,
     # "tier_6_50": PAID_TIER_MODELS,
@@ -349,5 +346,4 @@ MODEL_NAME_ALIASES = {
     # "tier_50_400": PAID_TIER_MODELS,
     # "tier_125_800": PAID_TIER_MODELS,
     # "tier_200_1000": PAID_TIER_MODELS,
->>>>>>> e465b9e1bc7e382986da893a557cc45f44307523
 }
