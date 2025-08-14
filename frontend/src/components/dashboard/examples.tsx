@@ -202,27 +202,27 @@ export const Examples = ({
   onSelectShareChat?: (id: string) => void;
 }) => {
   const [shareChats, setShareChats] = useState(allShareChat);
-  const [displayedPrompts, setDisplayedPrompts] = useState<PromptExample[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  // const [displayedPrompts, setDisplayedPrompts] = useState<PromptExample[]>([]);
+  // const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Initialize with random prompts on mount
-  useEffect(() => {
-    setDisplayedPrompts(getRandomPrompts(3));
-  }, []);
+  // useEffect(() => {
+  //   setDisplayedPrompts(getRandomPrompts(3));
+  // }, []);
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setDisplayedPrompts(getRandomPrompts(3));
-    setTimeout(() => setIsRefreshing(false), 300);
-  };
+  // const handleRefresh = () => {
+  //   setIsRefreshing(true);
+  //   setDisplayedPrompts(getRandomPrompts(3));
+  //   setTimeout(() => setIsRefreshing(false), 300);
+  // };
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4">
       <div className="group relative">
         <div className="flex gap-2 justify-center py-2">
-          {displayedPrompts.map((prompt, index) => (
+          {shareChats.map((share, index) => (
             <motion.div
-              key={`${prompt.title}-${index}`}
+              key={`${share.title}-${index}`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{
@@ -234,15 +234,15 @@ export const Examples = ({
               <Button
                 variant="outline"
                 className="w-fit h-fit px-3 py-2 rounded-full border-neutral-200 dark:border-neutral-800 bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-sm font-normal text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => onSelectPrompt && onSelectPrompt(prompt.query)}
+                onClick={() => onSelectShareChat(share.id)}
               >
                 <div className="flex items-center gap-2">
-                  <div className="flex-shrink-0">
+                  {/* <div className="flex-shrink-0">
                     {React.cloneElement(prompt.icon as React.ReactElement, {
                       size: 14,
                     })}
-                  </div>
-                  <span className="whitespace-nowrap">{prompt.title}</span>
+                  </div> */}
+                  <span className="whitespace-nowrap">{share.title}</span>
                 </div>
               </Button>
             </motion.div>
