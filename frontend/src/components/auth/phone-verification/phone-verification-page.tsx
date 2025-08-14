@@ -12,7 +12,7 @@ import {
   useGetAAL,
   useUnenrollFactor,
 } from '@/hooks/react-query/phone-verification';
-import { signOut } from '@/app/auth/actions';
+import { signOut } from '@/app/(home)/actions';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { LogOut, Loader2 } from 'lucide-react';
@@ -326,17 +326,13 @@ export function PhoneVerificationPage({
 
         {error && (
           <Alert variant="destructive">
-            <AlertDescription>
-              {error}
-            </AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
         {success && (
           <Alert>
-            <AlertDescription>
-              {success}
-            </AlertDescription>
+            <AlertDescription>{success}</AlertDescription>
           </Alert>
         )}
 
