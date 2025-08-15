@@ -38,7 +38,7 @@ function extractDeployData(
   let deployResult: DeployResult | null = null;
   let rawContent: string | null = null;
 
-  // 尝试从 assistant 内容中提取数据
+  // Try to extract from assistant content first
   const assistantStr = normalizeContentToString(assistantContent);
   if (assistantStr) {
     try {
@@ -48,7 +48,7 @@ function extractDeployData(
         directoryPath = parsed.parameters.directory_path || null;
       }
     } catch (e) {
-      // 尝试使用正则表达式提取
+      // Try regex extraction
       const nameMatch = assistantStr.match(/name["']\s*:\s*["']([^"']+)["']/);
       const dirMatch = assistantStr.match(
         /directory_path["']\s*:\s*["']([^"']+)["']/,
@@ -58,25 +58,25 @@ function extractDeployData(
     }
   }
 
-  // 从 tool 内容中提取部署结果
+  // Extract deploy result from tool content
   const toolStr = normalizeContentToString(toolContent);
   if (toolStr) {
     rawContent = toolStr;
     try {
       const parsed = JSON.parse(toolStr);
 
-      // 处理嵌套的 tool_execution 结构
+      // Handle the nested tool_execution structure
       let resultData = null;
       if (parsed.tool_execution && parsed.tool_execution.result) {
         resultData = parsed.tool_execution.result;
-        // 如果在 assistant 内容中未找到参数，则从这里提取
+        // Also extract arguments if not found in assistant content
         if (!name && parsed.tool_execution.arguments) {
           name = parsed.tool_execution.arguments.name || null;
           directoryPath =
             parsed.tool_execution.arguments.directory_path || null;
         }
       } else if (parsed.output) {
-        // 回退到旧格式
+        // Fallback to old format
         resultData = parsed;
       }
 
@@ -87,7 +87,7 @@ function extractDeployData(
           success: resultData.success !== undefined ? resultData.success : true,
         };
 
-        // 尝试从输出中提取部署 URL
+        // Try to extract deployment URL from output
         if (deployResult.output) {
           const urlMatch = deployResult.output.match(
             /https:\/\/[^\s]+\.pages\.dev[^\s]*/,
@@ -98,9 +98,9 @@ function extractDeployData(
         }
       }
     } catch (e) {
-      // 如果解析失败，则将内容视为原始内容
+      // If parsing fails, treat as raw content
       deployResult = {
-        message: '部署完成',
+        message: 'Deploy completed',
         output: toolStr,
         success: true,
       };
@@ -130,26 +130,26 @@ export function DeployToolView({
   const actualIsSuccess =
     deployResult?.success !== undefined ? deployResult.success : isSuccess;
 
-  // 清理终端输出以便显示
+  // Clean up terminal output for display
   const cleanOutput = React.useMemo(() => {
     if (!deployResult?.output) return [];
 
     let output = deployResult.output;
-    // 移除 ANSI 转义码
+    // Remove ANSI escape codes
     output = output.replace(/\u001b\[[0-9;]*m/g, '');
-    // 将转义的换行符替换为实际的换行符
+    // Replace escaped newlines with actual newlines
     output = output.replace(/\\n/g, '\n');
 
     return output.split('\n').filter((line) => line.trim().length > 0);
   }, [deployResult?.output]);
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-lg bg-gradient-to-br from-neutral-200 to-neutral-300 border border-neutral-200">
-              <Rocket className="w-5 h-5 text-neutral-600 dark:text-neutral-600" />
+            <div className="relative p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-600/10 border border-orange-500/20">
+              <Rocket className="w-5 h-5 text-orange-500 dark:text-orange-400" />
             </div>
             <div>
               <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">
@@ -161,10 +161,6 @@ export function DeployToolView({
           {!isStreaming && (
             <Badge
               variant="secondary"
-              className="bg-gradient-to-br from-neutral-200 to-neutral-300"
-            >
-              {/* <Badge
-              variant="secondary"
               className={
                 actualIsSuccess
                   ? 'bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300'
@@ -175,8 +171,8 @@ export function DeployToolView({
                 <CheckCircle className="h-3.5 w-3.5 mr-1" />
               ) : (
                 <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-              )} */}
-              {actualIsSuccess ? '部署成功' : '部署失败'}
+              )}
+              {actualIsSuccess ? 'Deploy successful' : 'Deploy failed'}
             </Badge>
           )}
         </div>
@@ -188,17 +184,17 @@ export function DeployToolView({
             icon={Rocket}
             iconColor="text-orange-500 dark:text-orange-400"
             bgColor="bg-gradient-to-b from-orange-100 to-orange-50 shadow-inner dark:from-orange-800/40 dark:to-orange-900/60 dark:shadow-orange-950/20"
-            title="正在部署网站"
-            filePath={projectName || '正在处理部署...'}
+            title="Deploying website"
+            filePath={projectName || 'Processing deployment...'}
             showProgress={true}
           />
         ) : (
           <ScrollArea className="h-full w-full">
             <div className="p-4">
-              {/* 成功状态 */}
+              {/* Success State */}
               {actualIsSuccess && deployResult ? (
                 <div className="space-y-4">
-                  {/* 部署 URL 卡片 */}
+                  {/* Deployment URL Card */}
                   {deployResult.url && (
                     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-sm">
                       <div className="p-3">
@@ -207,13 +203,13 @@ export function DeployToolView({
                             <Globe className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           </div>
                           <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                            网站已部署
+                            Website Deployed
                           </span>
                           <Badge
                             variant="outline"
                             className="text-xs h-5 px-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
                           >
-                            已上线
+                            Live
                           </Badge>
                         </div>
 
@@ -234,20 +230,20 @@ export function DeployToolView({
                             rel="noopener noreferrer"
                           >
                             <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                            打开网站
+                            Open Website
                           </a>
                         </Button>
                       </div>
                     </div>
                   )}
 
-                  {/* 终端输出 */}
+                  {/* Terminal Output */}
                   {cleanOutput.length > 0 && (
                     <div className="bg-zinc-100 dark:bg-neutral-900 rounded-lg overflow-hidden border border-zinc-200/20">
-                      <div className="bg-zinc-200 dark:bg-zinc-800 px-4 py-2 flex items-center gap-2">
+                      <div className="bg-accent px-4 py-2 flex items-center gap-2">
                         <TerminalIcon className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                         <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                          部署日志
+                          Deployment Log
                         </span>
                       </div>
                       <div className="p-4 max-h-96 overflow-auto scrollbar-hide">
@@ -263,27 +259,28 @@ export function DeployToolView({
                   )}
                 </div>
               ) : (
-                /* 失败状态 */
+                /* Failure State */
                 <div className="space-y-4">
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="h-5 w-5 text-red-600" />
                       <h3 className="font-medium text-red-900 dark:text-red-100">
-                        部署失败
+                        Deployment Failed
                       </h3>
                     </div>
                     <p className="text-sm text-red-700 dark:text-red-300">
-                      部署过程中遇到错误。请查看下方日志了解详情。
+                      The deployment encountered an error. Check the logs below
+                      for details.
                     </p>
                   </div>
 
-                  {/* 原始错误输出 */}
+                  {/* Raw Error Output */}
                   {rawContent && (
                     <div className="bg-zinc-100 dark:bg-neutral-900 rounded-lg overflow-hidden border border-zinc-200/20">
-                      <div className="bg-zinc-200 dark:bg-zinc-800 px-4 py-2 flex items-center gap-2">
+                      <div className="bg-accent px-4 py-2 flex items-center gap-2">
                         <TerminalIcon className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
                         <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                          错误详情
+                          Error Details
                         </span>
                       </div>
                       <div className="p-4 max-h-96 overflow-auto scrollbar-hide">

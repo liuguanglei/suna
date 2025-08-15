@@ -8,7 +8,148 @@ import {
   File,
 } from 'lucide-react';
 
-export type FileOperation = 'create' | 'rewrite' | 'delete';
+export type DiffType = 'unchanged' | 'added' | 'removed';
+
+export interface LineDiff {
+  type: DiffType;
+  oldLine: string | null;
+  newLine: string | null;
+  lineNumber: number;
+}
+
+export interface CharDiffPart {
+  text: string;
+  type: DiffType;
+}
+
+export interface DiffStats {
+  additions: number;
+  deletions: number;
+}
+
+export const parseNewlines = (text: string): string => {
+  return text.replace(/\\n/g, '\n');
+};
+
+export const generateLineDiff = (
+  oldText: string,
+  newText: string,
+): LineDiff[] => {
+  const parsedOldText = parseNewlines(oldText);
+  const parsedNewText = parseNewlines(newText);
+
+  const oldLines = parsedOldText.split('\n');
+  const newLines = parsedNewText.split('\n');
+
+  const diffLines: LineDiff[] = [];
+  const maxLines = Math.max(oldLines.length, newLines.length);
+
+  for (let i = 0; i < maxLines; i++) {
+    const oldLine = i < oldLines.length ? oldLines[i] : null;
+    const newLine = i < newLines.length ? newLines[i] : null;
+
+    if (oldLine === newLine) {
+      diffLines.push({
+        type: 'unchanged',
+        oldLine,
+        newLine,
+        lineNumber: i + 1,
+      });
+    } else {
+      if (oldLine !== null) {
+        diffLines.push({
+          type: 'removed',
+          oldLine,
+          newLine: null,
+          lineNumber: i + 1,
+        });
+      }
+      if (newLine !== null) {
+        diffLines.push({
+          type: 'added',
+          oldLine: null,
+          newLine,
+          lineNumber: i + 1,
+        });
+      }
+    }
+  }
+
+  return diffLines;
+};
+
+export const generateCharDiff = (
+  oldText: string,
+  newText: string,
+): CharDiffPart[] => {
+  const parsedOldText = parseNewlines(oldText);
+  const parsedNewText = parseNewlines(newText);
+
+  let prefixLength = 0;
+  while (
+    prefixLength < parsedOldText.length &&
+    prefixLength < parsedNewText.length &&
+    parsedOldText[prefixLength] === parsedNewText[prefixLength]
+  ) {
+    prefixLength++;
+  }
+
+  let oldSuffixStart = parsedOldText.length;
+  let newSuffixStart = parsedNewText.length;
+  while (
+    oldSuffixStart > prefixLength &&
+    newSuffixStart > prefixLength &&
+    parsedOldText[oldSuffixStart - 1] === parsedNewText[newSuffixStart - 1]
+  ) {
+    oldSuffixStart--;
+    newSuffixStart--;
+  }
+
+  const parts: CharDiffPart[] = [];
+
+  if (prefixLength > 0) {
+    parts.push({
+      text: parsedOldText.substring(0, prefixLength),
+      type: 'unchanged',
+    });
+  }
+
+  if (oldSuffixStart > prefixLength) {
+    parts.push({
+      text: parsedOldText.substring(prefixLength, oldSuffixStart),
+      type: 'removed',
+    });
+  }
+  if (newSuffixStart > prefixLength) {
+    parts.push({
+      text: parsedNewText.substring(prefixLength, newSuffixStart),
+      type: 'added',
+    });
+  }
+
+  if (oldSuffixStart < parsedOldText.length) {
+    parts.push({
+      text: parsedOldText.substring(oldSuffixStart),
+      type: 'unchanged',
+    });
+  }
+
+  return parts;
+};
+
+export const calculateDiffStats = (lineDiff: LineDiff[]): DiffStats => {
+  return {
+    additions: lineDiff.filter((line) => line.type === 'added').length,
+    deletions: lineDiff.filter((line) => line.type === 'removed').length,
+  };
+};
+
+export type FileOperation =
+  | 'create'
+  | 'rewrite'
+  | 'delete'
+  | 'edit'
+  | 'str-replace';
 
 export interface OperationConfig {
   icon: LucideIcon;
@@ -85,6 +226,157 @@ export const getLanguageFromFileName = (fileName: string): string => {
   return extensionMap[extension] || 'text';
 };
 
+export interface ExtractedEditData {
+  filePath: string | null;
+  originalContent: string | null;
+  updatedContent: string | null;
+  success?: boolean;
+  timestamp?: string;
+  errorMessage?: string;
+}
+
+const parseContent = (content: any): any => {
+  if (typeof content === 'string') {
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      return content;
+    }
+  }
+  return content;
+};
+
+const parseOutput = (output: any) => {
+  if (typeof output === 'string') {
+    try {
+      return JSON.parse(output);
+    } catch {
+      return output; // Return as string if not JSON
+    }
+  }
+  return output;
+};
+
+export const extractFileEditData = (
+  assistantContent: any,
+  toolContent: any,
+  isSuccess: boolean,
+  toolTimestamp?: string,
+  assistantTimestamp?: string,
+): {
+  filePath: string | null;
+  originalContent: string | null;
+  updatedContent: string | null;
+  actualIsSuccess: boolean;
+  actualToolTimestamp?: string;
+  actualAssistantTimestamp?: string;
+  errorMessage?: string;
+} => {
+  const parseOutput = (output: any) => {
+    if (typeof output === 'string') {
+      try {
+        return JSON.parse(output);
+      } catch {
+        return output; // Return as string if not JSON
+      }
+    }
+    return output;
+  };
+
+  const extractData = (content: any) => {
+    let parsed = typeof content === 'string' ? parseContent(content) : content;
+
+    // Handle nested content structures like { role: '...', content: '...' }
+    if (parsed?.role && parsed?.content) {
+      parsed =
+        typeof parsed.content === 'string'
+          ? parseContent(parsed.content)
+          : parsed.content;
+    }
+
+    if (parsed?.tool_execution) {
+      const args = parsed.tool_execution.arguments || {};
+      const output = parseOutput(parsed.tool_execution.result?.output);
+      const success = parsed.tool_execution.result?.success;
+
+      let errorMessage: string | undefined;
+      if (success === false) {
+        if (typeof output === 'object' && output !== null && output.message) {
+          errorMessage = output.message;
+        } else if (typeof output === 'string') {
+          errorMessage = output;
+        } else {
+          errorMessage = JSON.stringify(output);
+        }
+      }
+
+      return {
+        filePath:
+          args.target_file ||
+          (typeof output === 'object' && output?.file_path) ||
+          null,
+        originalContent:
+          (typeof output === 'object' && output?.original_content) ?? null,
+        updatedContent:
+          (typeof output === 'object' && output?.updated_content) ?? null,
+        success: success,
+        timestamp: parsed.tool_execution.execution_details?.timestamp,
+        errorMessage: errorMessage,
+      };
+    }
+
+    // Fallback for when toolContent is just the output object from the tool result
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      (parsed.original_content !== undefined ||
+        parsed.updated_content !== undefined)
+    ) {
+      return {
+        filePath: parsed.file_path || null,
+        originalContent: parsed.original_content ?? null,
+        updatedContent: parsed.updated_content ?? null,
+        success: parsed.updated_content !== null, // Success is false if updated_content is null
+        timestamp: null,
+        errorMessage: parsed.message,
+      };
+    }
+    return {};
+  };
+
+  const toolData = extractData(toolContent);
+  const assistantData = extractData(assistantContent);
+
+  const filePath = toolData.filePath || assistantData.filePath;
+  const originalContent =
+    toolData.originalContent || assistantData.originalContent;
+  const updatedContent =
+    toolData.updatedContent || assistantData.updatedContent;
+  const errorMessage = toolData.errorMessage || assistantData.errorMessage;
+
+  let actualIsSuccess = isSuccess;
+  let actualToolTimestamp = toolTimestamp;
+  let actualAssistantTimestamp = assistantTimestamp;
+
+  if (toolData.success !== undefined) {
+    actualIsSuccess = toolData.success;
+    actualToolTimestamp = toolData.timestamp || toolTimestamp;
+  } else if (assistantData.success !== undefined) {
+    actualIsSuccess = assistantData.success;
+    actualAssistantTimestamp = assistantData.timestamp || assistantTimestamp;
+  }
+
+  return {
+    filePath,
+    originalContent,
+    updatedContent,
+    actualIsSuccess,
+    actualToolTimestamp,
+    actualAssistantTimestamp,
+    errorMessage,
+  };
+};
+
 export const getOperationType = (
   name?: string,
   assistantContent?: any,
@@ -93,6 +385,8 @@ export const getOperationType = (
     if (name.includes('create')) return 'create';
     if (name.includes('rewrite')) return 'rewrite';
     if (name.includes('delete')) return 'delete';
+    if (name.includes('edit-file')) return 'edit'; // Specific for edit_file
+    if (name.includes('str-replace')) return 'str-replace';
   }
 
   if (!assistantContent) return 'create';
@@ -106,11 +400,13 @@ export const getOperationType = (
 
   if (contentStr.includes('<create-file>')) return 'create';
   if (contentStr.includes('<full-file-rewrite>')) return 'rewrite';
+  if (contentStr.includes('<edit-file>')) return 'edit';
   if (contentStr.includes('delete-file') || contentStr.includes('<delete>'))
     return 'delete';
 
   if (contentStr.toLowerCase().includes('create file')) return 'create';
   if (contentStr.toLowerCase().includes('rewrite file')) return 'rewrite';
+  if (contentStr.toLowerCase().includes('edit file')) return 'edit';
   if (contentStr.toLowerCase().includes('delete file')) return 'delete';
 
   return 'create';
@@ -130,6 +426,18 @@ export const getOperationConfigs = (): Record<
     borderColor: 'border-neutral-200',
     badgeColor:
       'bg-gradient-to-b from-neutral-200 to-neutral-100 text-neutral-700 shadow-sm dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300',
+    hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800',
+  },
+  edit: {
+    icon: Replace,
+    color: 'text-neutral-600',
+    successMessage: 'File edited successfully',
+    progressMessage: 'Editing file...',
+    bgColor: 'bg-gradient-to-br from-neutral-200 to-neutral-300',
+    gradientBg: 'bg-gradient-to-br from-neutral-500/20 to-neutral-600/10',
+    borderColor: 'border-neutral-200',
+    badgeColor:
+      'bg-gradient-to-b from-neutral-200 to-neutral-100 text-neutral-700 shadow-sm dark:from-blue-800/50 dark:to-blue-900/60 dark:text-blue-300',
     hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800',
   },
   rewrite: {
@@ -155,6 +463,17 @@ export const getOperationConfigs = (): Record<
     badgeColor:
       'bg-gradient-to-b from-neutral-200 to-neutral-100 text-neutral-700 shadow-sm dark:from-neutral-800/50 dark:to-rose-900/60 dark:text-rose-300',
     hoverColor: 'hover:bg-neutral-200 dark:hover:bg-neutral-800',
+  },
+  'str-replace': {
+    icon: Replace,
+    color: 'text-blue-600',
+    successMessage: '字符串替换成功',
+    progressMessage: '正在替换字符串...',
+    bgColor: 'bg-blue-50',
+    gradientBg: 'from-blue-50 to-blue-100',
+    borderColor: 'border-blue-200',
+    badgeColor: 'bg-blue-100 text-blue-700 border-blue-200',
+    hoverColor: 'hover:bg-blue-100',
   },
 });
 

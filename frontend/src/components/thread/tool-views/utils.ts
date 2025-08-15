@@ -1,5 +1,5 @@
 // Import at the top
-import { formatDistanceToNow } from 'date-fns';
+// import { formatDistanceToNow } from 'date-fns';
 import {
   FileText,
   FileCode,
@@ -51,11 +51,25 @@ export function getToolTitle(toolName: string): string {
     'see-image': '查看图片',
     ask: '询问',
     complete: '任务完成',
-    'execute-data-provider-call': '调用数据提供者',
+    'execute-data-provider-call': '数据提供者调用',
     'get-data-provider-endpoints': '获取数据端点',
+    'search-mcp-servers': '搜索MCP服务器',
+    'get-app-details': '获取应用详情',
+    'create-credential-profile': '创建凭证配置文件',
+    'connect-credential-profile': '连接凭证配置文件',
+    'check-profile-connection': '检查配置文件连接',
+    'configure-profile-for-agent': '为代理配置配置文件',
+    'get-credential-profiles': '获取凭证配置文件',
+    'get-current-agent-config': '获取当前代理配置',
     deploy: '部署',
     'generic-tool': '工具',
     default: '工具',
+    'view-tasks': '查看任务',
+    'create-tasks': '创建任务',
+    'update-tasks': '更新任务',
+    'list-commands': '命令列表',
+    'browser-click-element': '浏览器点击元素',
+    'browser-navigate-to': '浏览器跳转',
   };
 
   // Return the mapped title or a formatted version of the name
@@ -96,7 +110,7 @@ export function extractCommand(
     const parsed = JSON.parse(contentStr);
     if (parsed.tool_calls && Array.isArray(parsed.tool_calls)) {
       const execCommand = parsed.tool_calls.find(
-        (tc) =>
+        (tc: any) =>
           tc.function?.name === 'execute-command' ||
           tc.function?.name === 'execute_command',
       );
@@ -161,7 +175,7 @@ export function extractSessionName(
     const parsed = JSON.parse(contentStr);
     if (parsed.tool_calls && Array.isArray(parsed.tool_calls)) {
       const checkCommand = parsed.tool_calls.find(
-        (tc) =>
+        (tc: any) =>
           tc.function?.name === 'check-command-output' ||
           tc.function?.name === 'check_command_output',
       );
@@ -352,15 +366,19 @@ export function extractFilePath(
         // Look for XML tags in the content string
         const xmlFilePathMatch =
           content.content.match(
-            /<(?:create-file|delete-file|full-file-rewrite|str-replace)[^>]*\s+file_path=["']([\s\S]*?)["']/i,
+            /<(?:create-file|delete-file|full-file-rewrite|str-replace|edit-file)[^>]*\s+file_path=["']([\s\S]*?)["']/i,
+          ) ||
+          content.content.match(
+            /<edit-file[^>]*\s+target_file=["']([\s\S]*?)["']/i,
           ) ||
           content.content.match(
             /<delete[^>]*\s+file_path=["']([\s\S]*?)["']/i,
           ) ||
           content.content.match(/<delete-file[^>]*>([^<]+)<\/delete-file>/i) ||
           content.content.match(
-            /<(?:create-file|delete-file|full-file-rewrite)\s+file_path=["']([^"']+)/i,
-          );
+            /<(?:create-file|delete-file|full-file-rewrite|edit-file)\s+file_path=["']([^"']+)/i,
+          ) ||
+          content.content.match(/<edit-file\s+target_file=["']([^"']+)/i);
         if (xmlFilePathMatch) {
           return cleanFilePath(xmlFilePathMatch[1]);
         }
@@ -369,6 +387,11 @@ export function extractFilePath(
       // Check for direct file_path property
       if ('file_path' in content) {
         return cleanFilePath(content.file_path as string);
+      }
+
+      // Check for direct target_file property (edit-file tool)
+      if ('target_file' in content) {
+        return cleanFilePath(content.target_file as string);
       }
 
       // Check for arguments.file_path
@@ -380,6 +403,9 @@ export function extractFilePath(
         const args = content.arguments as any;
         if (args.file_path) {
           return cleanFilePath(args.file_path);
+        }
+        if (args.target_file) {
+          return cleanFilePath(args.target_file);
         }
       }
     } catch (e) {
@@ -414,14 +440,16 @@ export function extractFilePath(
   // Look for file_path in XML-like tags (including incomplete ones for streaming)
   const xmlFilePathMatch =
     contentStr.match(
-      /<(?:create-file|delete-file|full-file-rewrite|str-replace)[^>]*\s+file_path=["']([\s\S]*?)["']/i,
+      /<(?:create-file|delete-file|full-file-rewrite|str-replace|edit-file)[^>]*\s+file_path=["']([\s\S]*?)["']/i,
     ) ||
+    contentStr.match(/<edit-file[^>]*\s+target_file=["']([\s\S]*?)["']/i) ||
     contentStr.match(/<delete[^>]*\s+file_path=["']([\s\S]*?)["']/i) ||
     contentStr.match(/<delete-file[^>]*>([^<]+)<\/delete-file>/i) ||
     // Handle incomplete tags during streaming
     contentStr.match(
-      /<(?:create-file|delete-file|full-file-rewrite)\s+file_path=["']([^"']+)/i,
-    );
+      /<(?:create-file|delete-file|full-file-rewrite|edit-file)\s+file_path=["']([^"']+)/i,
+    ) ||
+    contentStr.match(/<edit-file\s+target_file=["']([^"']+)/i);
   if (xmlFilePathMatch) {
     return cleanFilePath(xmlFilePathMatch[1]);
   }
@@ -499,7 +527,7 @@ export function extractStrReplaceContent(
 // Helper to extract file content from create-file or file-rewrite
 export function extractFileContent(
   content: string | object | undefined | null,
-  toolType: 'create-file' | 'full-file-rewrite',
+  toolType: 'create-file' | 'full-file-rewrite' | 'edit-file',
 ): string | null {
   const contentStr = normalizeContentToString(content);
   if (!contentStr) return null;
@@ -518,7 +546,11 @@ export function extractFileContent(
 
       // Fall back to old format
       const tagName =
-        toolType === 'create-file' ? 'create-file' : 'full-file-rewrite';
+        toolType === 'create-file'
+          ? 'create-file'
+          : toolType === 'edit-file'
+            ? 'edit-file'
+            : 'full-file-rewrite';
       const fileContentMatch = parsedContent.content.match(
         new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i'),
       );
@@ -540,7 +572,11 @@ export function extractFileContent(
 
   // Direct regex search in the content string (old format)
   const tagName =
-    toolType === 'create-file' ? 'create-file' : 'full-file-rewrite';
+    toolType === 'create-file'
+      ? 'create-file'
+      : toolType === 'edit-file'
+        ? 'edit-file'
+        : 'full-file-rewrite';
   const fileContentMatch = contentStr.match(
     new RegExp(`<${tagName}[^>]*>([\\s\\S]*?)<\\/${tagName}>`, 'i'),
   );
@@ -551,18 +587,30 @@ export function extractFileContent(
   return null;
 }
 
-// Helper to process and clean file content
-function processFileContent(content: string): string {
-  if (!content) return content;
+function processFileContent(content: string | object): string {
+  if (!content) return '';
+  if (typeof content === 'object') {
+    return JSON.stringify(content, null, 2);
+  }
 
-  // Handle escaped characters
+  const trimmedContent = content.trim();
+  const isLikelyJson =
+    (trimmedContent.startsWith('{') && trimmedContent.endsWith('}')) ||
+    (trimmedContent.startsWith('[') && trimmedContent.endsWith(']'));
+
+  if (isLikelyJson) {
+    try {
+      const parsed = JSON.parse(content);
+      return JSON.stringify(parsed, null, 2);
+    } catch (e) {}
+  }
   return content
-    .replace(/\\n/g, '\n') // Replace \n with actual newlines
-    .replace(/\\t/g, '\t') // Replace \t with actual tabs
-    .replace(/\\r/g, '') // Remove \r
-    .replace(/\\\\/g, '\\') // Replace \\ with \
-    .replace(/\\"/g, '"') // Replace \" with "
-    .replace(/\\'/g, "'"); // Replace \' with '
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\r/g, '')
+    .replace(/\\\\/g, '\\')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'");
 }
 
 // Helper to determine file type (for syntax highlighting)
@@ -728,7 +776,7 @@ export function extractUrlsAndTitles(
       }));
     }
     if (parsed.results && Array.isArray(parsed.results)) {
-      return parsed.results.map((result) => ({
+      return parsed.results.map((result: any) => ({
         title: result.title || '',
         url: result.url || '',
         snippet: result.content || '',
@@ -1200,7 +1248,7 @@ export function extractSearchResults(
 
     // Check if this is the new Tavily response format
     if (parsedContent.results && Array.isArray(parsedContent.results)) {
-      return parsedContent.results.map((result) => ({
+      return parsedContent.results.map((result: any) => ({
         title: result.title || '',
         url: result.url || '',
         snippet: result.content || '',
@@ -1271,6 +1319,7 @@ export function getToolComponent(toolName: string): string {
     case 'delete-file':
     case 'full-file-rewrite':
     case 'read-file':
+    case 'edit-file':
       return 'FileOperationToolView';
 
     // String operations
@@ -1289,6 +1338,24 @@ export function getToolComponent(toolName: string): string {
     case 'execute-data-provider-call':
     case 'get-data-provider-endpoints':
       return 'DataProviderToolView';
+
+    // MCP operations
+    case 'search-mcp-servers':
+      return 'SearchMcpServersToolView';
+    case 'get-app-details':
+      return 'GetAppDetailsToolView';
+    case 'create-credential-profile':
+      return 'CreateCredentialProfileToolView';
+    case 'connect-credential-profile':
+      return 'ConnectCredentialProfileToolView';
+    case 'check-profile-connection':
+      return 'CheckProfileConnectionToolView';
+    case 'configure-profile-for-agent':
+      return 'ConfigureProfileForAgentToolView';
+    case 'get-credential-profiles':
+      return 'GetCredentialProfilesToolView';
+    case 'get-current-agent-config':
+      return 'GetCurrentAgentConfigToolView';
 
     //Deploy
     case 'deploy':
@@ -1405,13 +1472,17 @@ export function normalizeContentToString(
 // Helper function to extract file content for streaming (handles incomplete XML)
 export function extractStreamingFileContent(
   content: string | object | undefined | null,
-  toolType: 'create-file' | 'full-file-rewrite',
+  toolType: 'create-file' | 'full-file-rewrite' | 'edit-file',
 ): string | null {
   const contentStr = normalizeContentToString(content);
   if (!contentStr) return null;
 
   const tagName =
-    toolType === 'create-file' ? 'create-file' : 'full-file-rewrite';
+    toolType === 'create-file'
+      ? 'create-file'
+      : toolType === 'edit-file'
+        ? 'edit-file'
+        : 'full-file-rewrite';
 
   // First check if content is already a parsed object (new format)
   if (typeof content === 'object' && content !== null) {

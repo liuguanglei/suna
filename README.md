@@ -101,7 +101,7 @@ The setup process includes:
 - Configuring web search and scraping capabilities (Tavily, Firecrawl)
 - Setting up QStash for background job processing and workflows
 - Configuring webhook handling for automated tasks
-- Optional integrations (RapidAPI, Smithery for custom agents)
+- Optional integrations (RapidAPI for data providers)
 
 ### Quick Start
 
@@ -151,11 +151,12 @@ We welcome contributions from the community! Please see our [Contributing Guide]
 - [Playwright](https://playwright.dev/) - Browser automation
 - [OpenAI](https://openai.com/) - LLM provider
 - [Anthropic](https://www.anthropic.com/) - LLM provider
+- [Morph](https://morphllm.com/) - For AI-powered code editing
 - [Tavily](https://tavily.com/) - Search capabilities
 - [Firecrawl](https://firecrawl.dev/) - Web scraping capabilities
 - [QStash](https://upstash.com/qstash) - Background job processing and workflows
 - [RapidAPI](https://rapidapi.com/) - API services
-- [Smithery](https://smithery.ai/) - Custom agent development
+- Custom MCP servers - Extend functionality with custom tools
 
 ## License
 

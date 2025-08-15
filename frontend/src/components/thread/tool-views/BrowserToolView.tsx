@@ -77,7 +77,7 @@ export function BrowserToolView({
           const cleanedOutput = outputString
             .replace(/\\n/g, '\n')
             .replace(/\\"/g, '"')
-            .replace(/\\u([0-9a-fA-F]{4})/g, (match, grp) =>
+            .replace(/\\u([0-9a-fA-F]{4})/g, (_match, grp) =>
               String.fromCharCode(parseInt(grp, 16)),
             );
           const outputJson = JSON.parse(cleanedOutput);
@@ -289,12 +289,12 @@ export function BrowserToolView({
   };
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative p-2 rounded-lg bg-gradient-to-br from-neutral-200 to-neutral-300 border border-neutral-200">
-              <MonitorPlay className="w-5 h-5 text-neutral-600 dark:text-neutral-600" />
+            <div className="relative p-2 rounded-lg border bg-gradient-to-br from-neutral-500/20 to-neutral-600/10 border-neutral-200">
+              <MonitorPlay className="w-5 h-5 text-neutral-600 dark:text-purple-400" />
             </div>
             <div>
               <CardTitle className="text-base font-medium text-zinc-900 dark:text-zinc-100">

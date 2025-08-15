@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useTranscription } from '@/hooks/react-query/transcription/use-transcription';
 
 interface VoiceRecorderProps {

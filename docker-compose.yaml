@@ -17,8 +17,8 @@ services:
   rabbitmq:
     image: registry.ainnovation.com/bg_cto/newagent-rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5671:5672"
+      - "15671:15672"
     volumes:
       - ../data/rabbitmq_data:/var/lib/rabbitmq
     restart: always
@@ -48,12 +48,8 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_SSL=False
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
     depends_on:
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
       worker:
         condition: service_started
@@ -75,12 +71,8 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_SSL=False
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
     depends_on:
       redis:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
 
   frontend:
@@ -94,9 +86,6 @@ services:
       - "3458:3000"
     volumes:
       - ./frontend/.env.local:/app/.env.local:ro
-    environment:
-      - NODE_ENV=production
-    command: ["npm", "run", "start"]
     depends_on:
       - backend
 
@@ -119,4 +108,3 @@ services:
 
 volumes:
   redis_data:
-  rabbitmq_data:

@@ -10,6 +10,7 @@ import {
   ChevronsUpDown,
   Command,
   CreditCard,
+  Key,
   LogOut,
   Plus,
   Settings,
@@ -17,6 +18,7 @@ import {
   AudioWaveform,
   Sun,
   Moon,
+  KeyRound,
 } from 'lucide-react';
 import { useAccounts } from '@/hooks/use-accounts';
 import NewTeamForm from '@/components/basejump/new-team-form';
@@ -48,6 +50,8 @@ import {
 } from '@/components/ui/dialog';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from 'next-themes';
+import { isLocalMode } from '@/lib/config';
+import { useFeatureFlag } from '@/lib/feature-flags';
 
 export function NavUserWithTeams({
   user,
@@ -63,6 +67,8 @@ export function NavUserWithTeams({
   const { data: accounts } = useAccounts();
   const [showNewTeamDialog, setShowNewTeamDialog] = React.useState(false);
   const { theme, setTheme } = useTheme();
+  const { enabled: customAgentsEnabled, loading: flagLoading } =
+    useFeatureFlag('custom_agents');
 
   // Prepare personal account and team accounts
   const personalAccount = React.useMemo(
@@ -182,7 +188,7 @@ export function NavUserWithTeams({
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+              className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
               side={isMobile ? 'bottom' : 'top'}
               align="start"
               sideOffset={4}

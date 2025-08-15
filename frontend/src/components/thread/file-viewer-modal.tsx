@@ -8,11 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   File,
   Folder,
-  FolderOpen,
   Upload,
   Download,
   ChevronRight,
@@ -23,18 +21,12 @@ import {
   FileText,
   ChevronDown,
   Archive,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  FileRenderer,
-  getFileTypeFromExtension,
-} from '@/components/file-renderers';
-import {
-  listSandboxFiles,
-  getSandboxFileContent,
-  type FileInfo,
-  Project,
-} from '@/lib/api';
+import { FileRenderer } from '@/components/file-renderers';
+import { listSandboxFiles, type FileInfo, Project } from '@/lib/api';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/AuthProvider';
@@ -47,7 +39,6 @@ import {
 import {
   useDirectoryQuery,
   useFileContentQuery,
-  useFileUpload,
   FileCache,
 } from '@/hooks/react-query/files';
 import JSZip from 'jszip';
@@ -110,7 +101,6 @@ export function FileViewerModal({
   });
 
   // Add a navigation lock to prevent race conditions
-  const [isNavigationLocked, setIsNavigationLocked] = useState(false);
   const currentNavigationRef = useRef<string | null>(null);
 
   // File content state
@@ -129,7 +119,7 @@ export function FileViewerModal({
     data: cachedFileContent,
     isLoading: isCachedFileLoading,
     error: cachedFileError,
-  } = useFileContentQuery(sandboxId, selectedFilePath, {
+  } = useFileContentQuery(sandboxId, selectedFilePath || undefined, {
     // Auto-detect content type consistently with other components
     enabled: !!selectedFilePath,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -150,13 +140,7 @@ export function FileViewerModal({
 
   // Add state for PDF export
   const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const markdownContainerRef = useRef<HTMLDivElement>(null);
   const markdownRef = useRef<HTMLDivElement>(null);
-
-  // Add state for print orientation
-  const [pdfOrientation, setPdfOrientation] = useState<
-    'portrait' | 'landscape'
-  >('portrait');
 
   // Add a ref to track active download URLs
   const activeDownloadUrls = useRef<Set<string>>(new Set());
@@ -168,6 +152,10 @@ export function FileViewerModal({
     total: number;
     currentFile: string;
   } | null>(null);
+
+  // Add state for copy functionality
+  const [isCopyingPath, setIsCopyingPath] = useState(false);
+  const [isCopyingContent, setIsCopyingContent] = useState(false);
 
   // Setup project with sandbox URL if not provided directly
   useEffect(() => {
@@ -248,7 +236,7 @@ export function FileViewerModal({
       setDownloadProgress({
         current: 0,
         total: 0,
-        currentFile: 'Discovering files...',
+        currentFile: '正在查找文件...',
       });
 
       // Step 1: Discover all files
@@ -628,7 +616,7 @@ export function FileViewerModal({
   );
 
   // Add a helper to directly interact with the raw cache
-  const directlyAccessCache = useCallback(
+  const _directlyAccessCache = useCallback(
     (
       filePath: string,
     ): {
@@ -904,6 +892,14 @@ export function FileViewerModal({
         );
         setBlobUrlForRenderer(url);
         setTextContentForRenderer(null);
+      } else if (typeof cachedFileContent === 'object') {
+        // convert to json string if file_contents is a object
+        const jsonString = JSON.stringify(cachedFileContent, null, 2);
+        console.log(
+          `[FILE VIEWER] Setting text content for object file: ${selectedFilePath}`,
+        );
+        setTextContentForRenderer(jsonString);
+        setBlobUrlForRenderer(null);
       } else {
         // Unknown content type
         console.warn(
@@ -1003,6 +999,43 @@ export function FileViewerModal({
     return filePath ? filePath.toLowerCase().endsWith('.md') : false;
   }, []);
 
+  // Copy functions
+  const copyToClipboard = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      return false;
+    }
+  }, []);
+
+  const handleCopyPath = useCallback(async () => {
+    if (!textContentForRenderer) return;
+
+    setIsCopyingPath(true);
+    const success = await copyToClipboard(textContentForRenderer);
+    if (success) {
+      toast.success('文件内容已复制到剪贴板');
+    } else {
+      console.error('Failed to copy file content');
+    }
+    setTimeout(() => setIsCopyingPath(false), 500);
+  }, [textContentForRenderer, copyToClipboard]);
+
+  const handleCopyContent = useCallback(async () => {
+    if (!textContentForRenderer) return;
+
+    setIsCopyingContent(true);
+    const success = await copyToClipboard(textContentForRenderer);
+    if (success) {
+      toast.success('文件内容已复制到剪贴板');
+    } else {
+      console.error('Failed to copy file content');
+    }
+    setTimeout(() => setIsCopyingContent(false), 500);
+  }, [textContentForRenderer, copyToClipboard]);
+
   // Handle PDF export for markdown files
   const handleExportPdf = useCallback(
     async (orientation: 'portrait' | 'landscape' = 'portrait') => {
@@ -1030,7 +1063,7 @@ export function FileViewerModal({
         }
 
         // Get the base URL for resolving relative URLs
-        const baseUrl = window.location.origin;
+        const _baseUrl = window.location.origin;
 
         // Generate HTML content
         const fileName = selectedFilePath.split('/').pop() || 'document';
@@ -1449,7 +1482,7 @@ export function FileViewerModal({
 
             {currentPath !== '/workspace' && (
               <>
-                {getBreadcrumbSegments(currentPath).map((segment, index) => (
+                {getBreadcrumbSegments(currentPath).map((segment) => (
                   <Fragment key={segment.path}>
                     <ChevronRight className="h-4 w-4 mx-1 text-muted-foreground opacity-50 flex-shrink-0" />
                     <Button
@@ -1480,6 +1513,24 @@ export function FileViewerModal({
           <div className="flex items-center gap-2 flex-shrink-0">
             {selectedFilePath && (
               <>
+                {/* Copy content button - only show for text files */}
+                {textContentForRenderer && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyContent}
+                    disabled={isCopyingContent || isCachedFileLoading}
+                    className="h-8 gap-1"
+                  >
+                    {isCopyingContent ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                    <span className="hidden sm:inline">复制</span>
+                  </Button>
+                )}
+
                 <Button
                   variant="outline"
                   size="sm"

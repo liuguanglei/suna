@@ -150,7 +150,7 @@ export function TerminateCommandToolView({
 
     processedOutput = processedOutput.replace(
       /\\u([0-9a-fA-F]{4})/g,
-      (match, group) => {
+      (_match, group) => {
         return String.fromCharCode(parseInt(group, 16));
       },
     );
@@ -162,7 +162,7 @@ export function TerminateCommandToolView({
   const linesToShow = showFullOutput ? formattedOutput : previewLines;
 
   return (
-    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
+    <Card className="gap-0 flex border shadow-none border-t border-b-0 border-x-0 p-0 rounded-none flex-col h-full overflow-hidden bg-card">
       <CardHeader className="h-14 bg-zinc-50/80 dark:bg-zinc-900/80 backdrop-blur-sm border-b p-2 px-4 space-y-2">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
@@ -181,15 +181,7 @@ export function TerminateCommandToolView({
               variant="secondary"
               className="bg-gradient-to-br from-neutral-200 to-neutral-300"
             >
-              {/* <Badge
-              variant="secondary"
-              className={
-                terminationSuccess
-                  ? 'bg-gradient-to-b from-emerald-200 to-emerald-100 text-emerald-700 dark:from-emerald-800/50 dark:to-emerald-900/60 dark:text-emerald-300'
-                  : 'bg-gradient-to-b from-rose-200 to-rose-100 text-rose-700 dark:from-rose-800/50 dark:to-rose-900/60 dark:text-rose-300'
-              }
-            >
-              {terminationSuccess ? (
+              {/* {terminationSuccess ? (
                 <CheckCircle className="h-3.5 w-3.5 mr-1" />
               ) : (
                 <AlertTriangle className="h-3.5 w-3.5 mr-1" />

@@ -1,10 +1,8 @@
 import React from 'react';
-import Image from 'next/image';
 import {
   FileText,
   FileImage,
   FileCode,
-  FilePlus,
   FileSpreadsheet,
   FileVideo,
   FileAudio,
@@ -13,7 +11,6 @@ import {
   Archive,
   File,
   ExternalLink,
-  Download,
   Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,7 +22,7 @@ import { useFileContent, useImageContent } from '@/hooks/react-query/files';
 import { useAuth } from '@/components/AuthProvider';
 import { Project } from '@/lib/api';
 
-// 定义基本文件类型
+// Define basic file types
 export type FileType =
   | 'image'
   | 'code'
@@ -40,7 +37,7 @@ export type FileType =
   | 'csv'
   | 'other';
 
-// 基于扩展名的简单文件类型检测
+// Simple extension-based file type detection
 function getFileType(filename: string): FileType {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
 
@@ -75,7 +72,7 @@ function getFileType(filename: string): FileType {
   return 'other';
 }
 
-// 获取文件类型对应的图标
+// Get appropriate icon for file type
 function getFileIcon(type: FileType): React.ElementType {
   const icons: Record<FileType, React.ElementType> = {
     image: FileImage,
@@ -95,36 +92,36 @@ function getFileIcon(type: FileType): React.ElementType {
   return icons[type];
 }
 
-// 生成文件类型的可读标签
+// Generate a human-readable display name for file type
 function getTypeLabel(type: FileType, extension?: string): string {
   if (type === 'code' && extension) {
     return extension.toUpperCase();
   }
 
   const labels: Record<FileType, string> = {
-    image: '图片',
-    code: '代码',
-    text: '文本',
+    image: 'Image',
+    code: 'Code',
+    text: 'Text',
     markdown: 'Markdown',
     pdf: 'PDF',
-    audio: '音频',
-    video: '视频',
-    spreadsheet: '表格',
+    audio: 'Audio',
+    video: 'Video',
+    spreadsheet: 'Spreadsheet',
     csv: 'CSV',
-    archive: '压缩包',
-    database: '数据库',
-    other: '文件',
+    archive: 'Archive',
+    database: 'Database',
+    other: 'File',
   };
 
   return labels[type];
 }
 
-// 根据文件路径和类型生成合理的文件大小
+// Generate realistic file size based on file path and type
 function getFileSize(filepath: string, type: FileType): string {
-  // 基础大小计算
+  // Base size calculation
   const base = ((filepath.length * 5) % 800) + 200;
 
-  // 类型特定的乘数
+  // Type-specific multipliers
   const multipliers: Record<FileType, number> = {
     image: 5.0,
     video: 20.0,
@@ -147,31 +144,31 @@ function getFileSize(filepath: string, type: FileType): string {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// 获取文件内容的 API URL
+// Get the API URL for file content
 function getFileUrl(sandboxId: string | undefined, path: string): string {
   if (!sandboxId) return path;
 
-  // 检查路径是否以 /workspace 开头
+  // Check if the path already starts with /workspace
   if (!path.startsWith('/workspace')) {
-    // 如果不是，则在路径前添加 /workspace
+    // Prepend /workspace to the path if it doesn't already have it
     path = `/workspace/${path.startsWith('/') ? path.substring(1) : path}`;
   }
 
-  // 处理可能的 Unicode 转义序列
+  // Handle any potential Unicode escape sequences
   try {
-    // 将转义的 Unicode 序列替换为实际字符
+    // Replace escaped Unicode sequences with actual characters
     path = path.replace(/\\u([0-9a-fA-F]{4})/g, (_, hexCode) => {
       return String.fromCharCode(parseInt(hexCode, 16));
     });
   } catch (e) {
-    console.error('处理路径中的 Unicode 转义时出错:', e);
+    console.error('Error processing Unicode escapes in path:', e);
   }
 
   const url = new URL(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/sandboxes/${sandboxId}/files/content`,
   );
 
-  // 正确编码路径参数以支持 UTF-8
+  // Properly encode the path parameter for UTF-8 support
   url.searchParams.append('path', path);
 
   return url.toString();
@@ -186,17 +183,18 @@ interface FileAttachmentProps {
   localPreviewUrl?: string;
   customStyle?: React.CSSProperties;
   /**
-   * 控制 HTML、Markdown 和 CSV 文件是否显示内容预览。
-   * - true: 文件以普通附件形式显示（默认）
-   * - false: HTML、MD 和 CSV 文件在网格布局中显示渲染后的内容
+   * Controls whether HTML, Markdown, and CSV files show their content preview.
+   * - true: files are shown as regular file attachments (default)
+   * - false: HTML, MD, and CSV files show rendered content in grid layout
    */
   collapsed?: boolean;
   project?: Project;
 }
 
-// 在挂载之间缓存获取的内容，避免重复请求
-const contentCache = new Map<string, string>();
-const errorCache = new Set<string>();
+// Cache fetched content between mounts to avoid duplicate fetches
+// Content caches for file attachment optimization
+// const contentCache = new Map<string, string>();
+// const errorCache = new Set<string>();
 
 export function FileAttachment({
   filepath,
@@ -209,14 +207,14 @@ export function FileAttachment({
   collapsed = true,
   project,
 }: FileAttachmentProps) {
-  // 身份验证
+  // Authentication
   const { session } = useAuth();
 
-  // 简化的状态管理
+  // Simplified state management
   const [hasError, setHasError] = React.useState(false);
 
-  // 基本文件信息
-  const filename = filepath.split('/').pop() || '文件';
+  // Basic file info
+  const filename = filepath.split('/').pop() || 'file';
   const extension = filename.split('.').pop()?.toLowerCase() || '';
   const fileType = getFileType(filename);
   const fileUrl =
@@ -225,7 +223,7 @@ export function FileAttachment({
   const fileSize = getFileSize(filepath, fileType);
   const IconComponent = getFileIcon(fileType);
 
-  // 显示标志
+  // Display flags
   const isImage = fileType === 'image';
   const isHtmlOrMd =
     extension === 'html' ||
@@ -236,12 +234,12 @@ export function FileAttachment({
   const isGridLayout =
     customStyle?.gridColumn === '1 / -1' ||
     Boolean(customStyle && '--attachment-height' in customStyle);
-  // 提前定义 isInlineMode，在任何 hooks 之前
+  // Define isInlineMode early, before any hooks
   const isInlineMode = !isGridLayout;
   const shouldShowPreview =
     (isHtmlOrMd || isCsv) && showPreview && collapsed === false;
 
-  // 使用 React Query hook 获取文件内容
+  // Use the React Query hook to fetch file content
   const {
     data: fileContent,
     isLoading: fileContentLoading,
@@ -251,7 +249,7 @@ export function FileAttachment({
     shouldShowPreview ? filepath : undefined,
   );
 
-  // 使用 React Query hook 获取图片内容（带身份验证）
+  // Use the React Query hook to fetch image content with authentication
   const {
     data: imageUrl,
     isLoading: imageLoading,
@@ -261,7 +259,7 @@ export function FileAttachment({
     isImage && showPreview ? filepath : undefined,
   );
 
-  // 根据查询错误设置错误状态
+  // Set error state based on query errors
   React.useEffect(() => {
     if (fileContentError || imageError) {
       setHasError(true);
@@ -274,14 +272,14 @@ export function FileAttachment({
     }
   };
 
-  // 图片以其自然宽高比显示
+  // Images are displayed with their natural aspect ratio
   if (isImage && showPreview) {
-    // 如果通过 CSS 变量提供了自定义高度，则用于图片
+    // Use custom height for images if provided through CSS variable
     const imageHeight = isGridLayout
-      ? (customStyle['--attachment-height'] as string)
+      ? ((customStyle as any)['--attachment-height'] as string)
       : '54px';
 
-    // 显示图片加载状态
+    // Show loading state for images
     if (imageLoading && sandboxId) {
       return (
         <button
@@ -307,7 +305,7 @@ export function FileAttachment({
       );
     }
 
-    // 检查错误
+    // Check for errors
     if (imageError || hasError) {
       return (
         <button
@@ -329,7 +327,7 @@ export function FileAttachment({
           title={filename}
         >
           <IconComponent className="h-6 w-6 text-red-500 mb-1" />
-          <div className="text-xs text-red-500">加载图片失败</div>
+          <div className="text-xs text-red-500">Failed to load image</div>
         </button>
       );
     }
@@ -338,80 +336,79 @@ export function FileAttachment({
       <button
         onClick={handleClick}
         className={cn(
-          'group relative min-h-[54px] rounded-xl cursor-pointer',
+          'group relative min-h-[54px] rounded-2xl cursor-pointer',
           'border border-black/10 dark:border-white/10',
           'bg-black/5 dark:bg-black/20',
-          'p-0 overflow-hidden', // 无内边距，内容紧贴边框
-          'flex items-center justify-center', // 图片居中
-          isGridLayout ? 'w-full' : 'inline-block', // 网格中占满宽度
+          'p-0 overflow-hidden', // No padding, content touches borders
+          'flex items-center justify-center', // Center the image
+          isGridLayout ? 'w-full' : 'inline-block', // Full width in grid
           className,
         )}
         style={{
-          maxWidth: '100%', // 确保不超过容器宽度
+          maxWidth: '100%', // Ensure doesn't exceed container width
           height: isGridLayout ? imageHeight : 'auto',
           ...customStyle,
         }}
         title={filename}
       >
         <img
-          src={sandboxId && session?.access_token ? imageUrl : fileUrl}
+          src={sandboxId && session?.access_token ? imageUrl : fileUrl || ''}
           alt={filename}
           className={cn(
-            'max-h-full', // 遵守父级高度限制
-            isGridLayout ? 'w-full h-full object-cover' : 'w-auto', // 网格中占满宽度高度并使用 object-cover
+            'max-h-full', // Respect parent height constraint
+            isGridLayout ? 'w-full h-full object-cover' : 'w-auto', // Full width & height in grid with object-cover
           )}
           style={{
             height: imageHeight,
             objectPosition: 'center',
             objectFit: isGridLayout ? 'cover' : 'contain',
           }}
-          onLoad={() => {
-            console.log('图片加载成功:', filename);
-          }}
+          onLoad={() => {}}
           onError={(e) => {
-            // 避免对同一图片的所有实例记录错误
-            console.error('图片加载错误:', filename);
+            // Avoid logging the error for all instances of the same image
+            console.error('Image load error for:', filename);
 
-            // 仅在开发环境中记录详细信息，避免控制台垃圾信息
+            // Only log details in dev environments to avoid console spam
             if (process.env.NODE_ENV === 'development') {
               const imgSrc =
                 sandboxId && session?.access_token ? imageUrl : fileUrl;
-              console.error('图片 URL:', imgSrc);
+              console.error('Image URL:', imgSrc);
 
-              // 对 blob URL 的额外调试
+              // Additional debugging for blob URLs
               if (typeof imgSrc === 'string' && imgSrc.startsWith('blob:')) {
-                console.error('Blob URL 加载失败。可能的原因：');
-                console.error('- Blob URL 被过早撤销');
-                console.error('- Blob 数据损坏或无效');
-                console.error('- MIME 类型不匹配');
+                console.error('Blob URL failed to load. This could indicate:');
+                console.error('- Blob URL was revoked prematurely');
+                console.error('- Blob data is corrupted or invalid');
+                console.error('- MIME type mismatch');
 
-                // 尝试检查 blob URL 是否仍然有效
+                // Try to check if the blob URL is still valid
                 fetch(imgSrc, { method: 'HEAD' })
                   .then((response) => {
-                    console.error(`Blob URL HEAD 请求状态: ${response.status}`);
                     console.error(
-                      `Blob URL 内容类型: ${response.headers.get('content-type')}`,
+                      `Blob URL HEAD request status: ${response.status}`,
+                    );
+                    console.error(
+                      `Blob URL content type: ${response.headers.get('content-type')}`,
                     );
                   })
                   .catch((err) => {
-                    console.error('Blob URL HEAD 请求失败:', err.message);
+                    console.error('Blob URL HEAD request failed:', err.message);
                   });
               }
 
-              // 检查错误是否可能由于身份验证引起
+              // Check if the error is potentially due to authentication
               if (sandboxId && (!session || !session.access_token)) {
-                console.error('身份验证问题：缺少会话或令牌');
+                console.error('Authentication issue: Missing session or token');
               }
             }
 
             setHasError(true);
-            // 如果图片加载失败且 localPreviewUrl 是 blob URL，则尝试直接使用它
+            // If the image failed to load and we have a localPreviewUrl that's a blob URL, try using it directly
             if (
               localPreviewUrl &&
               typeof localPreviewUrl === 'string' &&
               localPreviewUrl.startsWith('blob:')
             ) {
-              console.log('回退到 localPreviewUrl:', filename);
               (e.target as HTMLImageElement).src = localPreviewUrl;
             }
           }}
@@ -429,32 +426,32 @@ export function FileAttachment({
     tsv: CsvRenderer,
   };
 
-  // 当未折叠且处于网格布局时，显示 HTML/MD/CSV 预览
+  // HTML/MD/CSV preview when not collapsed and in grid layout
   if (shouldShowPreview && isGridLayout) {
-    // 确定渲染器组件
+    // Determine the renderer component
     const Renderer = rendererMap[extension as keyof typeof rendererMap];
 
     return (
       <div
         className={cn(
           'group relative rounded-xl w-full',
-          'border border-black/10 dark:border-white/10',
-          'bg-black/5 dark:bg-black/20',
+          'border',
+          'bg-card',
           'overflow-hidden',
-          'h-[300px]', // 预览固定高度
-          'pt-10', // 为标题留出空间
+          'h-[300px]', // Fixed height for previews
+          'pt-10', // Room for header
           className,
         )}
         style={{
-          gridColumn: '1 / -1', // 在网格中占满宽度
-          width: '100%', // 确保占满宽度
+          gridColumn: '1 / -1', // Make it take full width in grid
+          width: '100%', // Ensure full width
           ...customStyle,
         }}
-        onClick={hasError ? handleClick : undefined} // 如果有错误则可点击
+        onClick={hasError ? handleClick : undefined} // Make clickable if error
       >
-        {/* 内容区域 */}
+        {/* Content area */}
         <div className="h-full w-full relative">
-          {/* 仅在无错误且有内容时显示内容 */}
+          {/* Only show content if we have it and no errors */}
           {!hasError && fileContent && (
             <>
               {Renderer ? (
@@ -466,20 +463,20 @@ export function FileAttachment({
                 />
               ) : (
                 <div className="p-4 text-muted-foreground">
-                  此文件类型无可用预览
+                  No preview available for this file type
                 </div>
               )}
             </>
           )}
 
-          {/* 错误状态 */}
+          {/* Error state */}
           {hasError && (
             <div className="h-full w-full flex flex-col items-center justify-center p-4">
-              <div className="text-red-500 mb-2">加载内容出错</div>
+              <div className="text-red-500 mb-2">Error loading content</div>
               <div className="text-muted-foreground text-sm text-center mb-2">
                 {fileUrl && (
                   <div className="text-xs max-w-full overflow-hidden truncate opacity-70">
-                    路径可能需要 /workspace 前缀
+                    Path may need /workspace prefix
                   </div>
                 )}
               </div>
@@ -487,36 +484,38 @@ export function FileAttachment({
                 onClick={handleClick}
                 className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 rounded-md text-sm"
               >
-                在查看器中打开
+                Open in viewer
               </button>
             </div>
           )}
 
-          {/* 加载状态 */}
+          {/* Loading state */}
           {fileContentLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/50">
               <Loader2 className="h-6 w-6 text-primary animate-spin" />
             </div>
           )}
 
-          {/* 空内容状态 - 当未加载且无内容时显示 */}
+          {/* Empty content state - show when not loading and no content yet */}
           {!fileContent && !fileContentLoading && !hasError && (
             <div className="h-full w-full flex flex-col items-center justify-center p-4 pointer-events-none">
-              <div className="text-muted-foreground text-sm mb-2">预览可用</div>
+              <div className="text-muted-foreground text-sm mb-2">
+                Preview available
+              </div>
               <div className="text-muted-foreground text-xs text-center">
-                点击标题打开
+                Click header to open externally
               </div>
             </div>
           )}
         </div>
 
-        {/* 带文件名的标题 */}
-        <div className="absolute top-0 left-0 right-0 bg-black/5 dark:bg-white/5 p-2 z-10 flex items-center justify-between">
+        {/* Header with filename */}
+        <div className="absolute top-0 left-0 right-0 bg-accent p-2 z-10 flex items-center justify-between">
           <div className="text-sm font-medium truncate">{filename}</div>
           {onClick && (
             <button
               onClick={handleClick}
-              className="p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+              className="cursor-pointer p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
             >
               <ExternalLink size={14} />
             </button>
@@ -526,10 +525,10 @@ export function FileAttachment({
     );
   }
 
-  // 带详情的普通文件
+  // Regular files with details
   const safeStyle = { ...customStyle };
   delete safeStyle.height;
-  delete safeStyle['--attachment-height'];
+  delete (safeStyle as any)['--attachment-height'];
 
   return (
     <button
@@ -539,10 +538,10 @@ export function FileAttachment({
         'border border-black/10 dark:border-white/10',
         'bg-sidebar',
         'text-left',
-        'pr-7', // 右侧内边距用于 X 按钮
+        'pr-7', // Right padding for X button
         isInlineMode
-          ? 'min-w-[170px] w-full sm:max-w-[300px] sm:w-fit' // 移动端占满宽度，大屏幕受限
-          : 'min-w-[170px] max-w-[300px] w-fit', // 网格布局的原始约束
+          ? 'min-w-[170px] w-full sm:max-w-[300px] sm:w-fit' // Full width on mobile, constrained on larger screens
+          : 'min-w-[170px] max-w-[300px] w-fit', // Original constraints for grid layout
         className,
       )}
       style={safeStyle}
@@ -603,7 +602,7 @@ export function FileAttachmentGrid({
       sandboxId={sandboxId}
       showPreviews={showPreviews}
       layout="grid"
-      gridImageHeight={150} // 网格布局使用更大的高度
+      gridImageHeight={150} // Use larger height for grid layout
       collapsed={collapsed}
       project={project}
     />

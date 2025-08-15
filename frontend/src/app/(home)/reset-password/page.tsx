@@ -8,7 +8,7 @@ import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { SubmitButton } from '@/components/ui/submit-button';
-import { resetPassword } from '../actions';
+import { resetPassword } from '../../(home)/actions';
 
 function ResetPasswordContent() {
   const router = useRouter();
