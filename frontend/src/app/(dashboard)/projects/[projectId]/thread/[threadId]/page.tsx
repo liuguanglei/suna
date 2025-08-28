@@ -571,7 +571,7 @@ export default function ThreadPage({
   // SEO title update
   useEffect(() => {
     if (projectName) {
-      document.title = `${projectName} | Kortix Suna`;
+      document.title = `${projectName}`;
 
       const metaDescription = document.querySelector(
         'meta[name="description"]',
@@ -585,7 +585,7 @@ export default function ThreadPage({
 
       const ogTitle = document.querySelector('meta[property="og:title"]');
       if (ogTitle) {
-        ogTitle.setAttribute('content', `${projectName} | Kortix Suna`);
+        ogTitle.setAttribute('content', `${projectName}`);
       }
 
       const ogDescription = document.querySelector(
