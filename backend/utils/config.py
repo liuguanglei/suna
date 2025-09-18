@@ -233,6 +233,7 @@ class Configuration:
     DAYTONA_API_KEY: str
     DAYTONA_SERVER_URL: str
     DAYTONA_TARGET: str
+    DAYTONA_PROXY_URL: str
     
     # Search and other API keys
     TAVILY_API_KEY: str

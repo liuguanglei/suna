@@ -76,10 +76,10 @@ class SandboxExposeTool(SandboxToolsBase):
 
             # Get the preview link for the specified port
             preview_link = await self.sandbox.get_preview_link(port)
-            preview_link = convert_daytona_proxy_url(preview_link)
             
             # Extract the actual URL from the preview link object
             url = preview_link.url if hasattr(preview_link, 'url') else str(preview_link)
+            url = convert_daytona_proxy_url(url)
             
             return self.success_response({
                 "url": url,
