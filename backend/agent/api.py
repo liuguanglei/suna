@@ -1094,6 +1094,7 @@ async def initiate_agent_with_files(
           vnc_link = await sandbox.get_preview_link(6080)
           website_link = await sandbox.get_preview_link(8080)
           vnc_url = vnc_link.url if hasattr(vnc_link, 'url') else str(vnc_link).split("url='")[1].split("'")[0]
+          vnc_url = convert_daytona_proxy_url(vnc_url)
           website_url = website_link.url if hasattr(website_link, 'url') else str(website_link).split("url='")[1].split("'")[0]
           website_url = convert_daytona_proxy_url(website_url)
           token = None
@@ -3019,6 +3020,7 @@ async def create_thread(
             vnc_link = await sandbox.get_preview_link(6080)
             website_link = await sandbox.get_preview_link(8080)
             vnc_url = vnc_link.url if hasattr(vnc_link, 'url') else str(vnc_link).split("url='")[1].split("'")[0]
+            vnc_url = convert_daytona_proxy_url(vnc_url)
             website_url = website_link.url if hasattr(website_link, 'url') else str(website_link).split("url='")[1].split("'")[0]
             website_url = convert_daytona_proxy_url(website_url)
             token = None

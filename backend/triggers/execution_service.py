@@ -139,6 +139,7 @@ class SessionManager:
             vnc_link = await sandbox.get_preview_link(6080)
             website_link = await sandbox.get_preview_link(8080)
             vnc_url = self._extract_url(vnc_link)
+            vnc_url = convert_daytona_proxy_url(vnc_url)
             website_url = self._extract_url(website_link)
             website_url = convert_daytona_proxy_url(website_url)
             token = self._extract_token(vnc_link)
