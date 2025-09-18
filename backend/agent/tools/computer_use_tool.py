@@ -10,6 +10,7 @@ import os
 from agentpress.tool import Tool, ToolResult, openapi_schema, usage_example
 from sandbox.tool_base import SandboxToolsBase
 from daytona_sdk import AsyncSandbox
+from utils.daytona_proxy_utils import convert_daytona_proxy_url
 
 KEYBOARD_KEYS = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -43,6 +44,7 @@ class ComputerUseTool(SandboxToolsBase):
             await self._ensure_sandbox()
             # Get automation service URL using port 8000
             preview_link = await self.sandbox.get_preview_link(8000)
+            preview_link = convert_daytona_proxy_url(preview_link)
             self.api_base_url = preview_link.url if hasattr(preview_link, 'url') else str(preview_link)
             self._url_initialized = True
             logging.info(f"Initialized Computer Use Tool with API URL: {self.api_base_url}")

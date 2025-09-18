@@ -10,6 +10,7 @@ from utils.config import config
 from run_agent_background import run_agent_background
 from .trigger_service import TriggerEvent, TriggerResult
 from .utils import format_workflow_for_llm
+from utils.daytona_proxy_utils import convert_daytona_proxy_url
 
 
 class ExecutionService:
@@ -139,6 +140,7 @@ class SessionManager:
             website_link = await sandbox.get_preview_link(8080)
             vnc_url = self._extract_url(vnc_link)
             website_url = self._extract_url(website_link)
+            website_url = convert_daytona_proxy_url(website_url)
             token = self._extract_token(vnc_link)
             
             update_result = await client.table('projects').update({

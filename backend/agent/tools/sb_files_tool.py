@@ -4,6 +4,7 @@ from utils.files_utils import should_exclude_file, clean_path
 from agentpress.thread_manager import ThreadManager
 from utils.logger import logger
 from utils.config import config
+from utils.daytona_proxy_utils import convert_daytona_proxy_url
 import os
 import json
 import litellm
@@ -292,6 +293,7 @@ class SandboxFilesTool(SandboxToolsBase):
                 try:
                     website_link = await self.sandbox.get_preview_link(8080)
                     website_url = website_link.url if hasattr(website_link, 'url') else str(website_link).split("url='")[1].split("'")[0]
+                    website_url = convert_daytona_proxy_url(website_url)
                     message += f"\n\n[Auto-detected index.html - HTTP server available at: {website_url}]"
                     message += "\n[Note: Use the provided HTTP server URL above instead of starting a new server]"
                 except Exception as e:
