@@ -25,7 +25,7 @@ from utils.logger import logger
 from utils.auth_utils import get_account_id_from_thread
 from services.billing import check_billing_status
 from agent.tools.sb_vision_tool import SandboxVisionTool
-from agent.tools.sb_image_edit_tool import SandboxImageEditTool
+from agent.tools.sb_image_edit_tool import SandboxImageEditToolAli
 from services.langfuse import langfuse
 from langfuse.client import StatefulTraceClient
 from agent.gemini_prompt import get_gemini_system_prompt
@@ -70,7 +70,7 @@ class ToolManager:
         self.thread_manager.add_tool(SandboxExposeTool, project_id=self.project_id, thread_manager=self.thread_manager)
         self.thread_manager.add_tool(SandboxWebSearchTool, project_id=self.project_id, thread_manager=self.thread_manager)
         self.thread_manager.add_tool(SandboxVisionTool, project_id=self.project_id, thread_id=self.thread_id, thread_manager=self.thread_manager)
-        self.thread_manager.add_tool(SandboxImageEditTool, project_id=self.project_id, thread_id=self.thread_id, thread_manager=self.thread_manager)
+        self.thread_manager.add_tool(SandboxImageEditToolAli, project_id=self.project_id, thread_id=self.thread_id, thread_manager=self.thread_manager)
         self.thread_manager.add_tool(TaskListTool, project_id=self.project_id, thread_manager=self.thread_manager, thread_id=self.thread_id)
         if config.RAPID_API_KEY:
             self.thread_manager.add_tool(DataProvidersTool)

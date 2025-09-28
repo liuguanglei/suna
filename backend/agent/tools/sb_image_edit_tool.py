@@ -7,6 +7,11 @@ from io import BytesIO
 import uuid
 from litellm import aimage_generation, aimage_edit
 import base64
+import json
+import mimetypes
+import os
+from urllib.parse import urlparse
+from core.utils.config import config
 
 
 class SandboxImageEditTool(SandboxToolsBase):
@@ -162,3 +167,234 @@ class SandboxImageEditTool(SandboxToolsBase):
 
         except Exception as e:
             return self.fail_response(f"Failed to download and save image: {str(e)}")
+
+
+class SandboxImageEditToolAli(SandboxImageEditTool):
+    """Tool for generating or editing images using Alibaba Tongyi models."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.api_key = config.DASHSCOPE_API_KEY or ""
+        
+        # Import dashscope here to avoid dependency issues
+        from dashscope import MultiModalConversation
+        import dashscope
+        
+        self.MultiModalConversation = MultiModalConversation
+        self.dashscope = dashscope
+        
+        # Set API URL to Beijing region
+        dashscope.base_http_api_url = 'https://dashscope.aliyuncs.com/api/v1'
+    
+    @openapi_schema(
+        {
+            "type": "function",
+            "function": {
+                "name": "image_edit_or_generate",
+                "description": "Generate a new image from a prompt, or edit an existing image using Alibaba Tongyi models.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "mode": {
+                            "type": "string",
+                            "enum": ["generate", "edit"],
+                            "description": "'generate' to create a new image from a prompt, 'edit' to edit an existing image.",
+                        },
+                        "prompt": {
+                            "type": "string",
+                            "description": "Text prompt describing the desired image or edit.",
+                        },
+                        "model": {
+                            "type": "string",
+                            "enum": ["qwen-image-plus", "qwen-image-edit"],
+                            "description": "The image model to use. 'qwen-image-plus' for generation, 'qwen-image-edit' for editing. Auto-selected based on mode if not specified.",
+                            "default": "auto"
+                        },
+                        "image_path": {
+                            "type": "string",
+                            "description": "(edit mode only) Path to the image file to edit. Can be: 1) Relative path to /workspace, or 2) Full URL.",
+                        },
+                        "size": {
+                            "type": "string",
+                            "enum": ["1328*1328", "1024*1024", "768*768"],
+                            "description": "Image size for generation. Defaults to '1328*1328'.",
+                            "default": "1328*1328"
+                        },
+                        "watermark": {
+                            "type": "boolean",
+                            "description": "Whether to add watermark for generated images. Defaults to True.",
+                            "default": True
+                        },
+                        "prompt_extend": {
+                            "type": "boolean",
+                            "description": "Whether to extend the prompt for better results. Defaults to True.",
+                            "default": True
+                        }
+                    },
+                    "required": ["mode", "prompt"],
+                },
+            },
+        }
+    )
+    @usage_example("""
+        阿里通义生成图片示例:
+        <function_calls>
+        <invoke name="image_edit_or_generate">
+        <parameter name="mode">generate</parameter>
+        <parameter name="prompt">一副典雅庄重的对联悬挂于厅堂之中，房间是个安静古典的中式布置</parameter>
+        <parameter name="model">qwen-image-plus</parameter>
+        <parameter name="size">1328*1328</parameter>
+        </invoke>
+        </function_calls>
+        
+        阿里通义编辑图片示例:
+        <function_calls>
+        <invoke name="image_edit_or_generate">
+        <parameter name="mode">edit</parameter>
+        <parameter name="prompt">将图中的人物改为站立姿势，弯腰握住狗的前爪</parameter>
+        <parameter name="image_path">generated_image_abc123.png</parameter>
+        <parameter name="model">qwen-image-edit</parameter>
+        </invoke>
+        </function_calls>
+
+        Multi-turn workflow (follow-up edits):
+        1. User: "Create a logo" → generate mode
+        2. User: "Make it more colorful" → edit mode (automatic)
+        3. User: "Add text to it" → edit mode (automatic)
+        """)
+    async def image_edit_or_generate(
+        self,
+        mode: str,
+        prompt: str,
+        model: str = "auto",
+        image_path: Optional[str] = None,
+        size: str = "1328*1328",
+        watermark: bool = True,
+        prompt_extend: bool = True,
+    ) -> ToolResult:
+        """Generate or edit images using Alibaba Tongyi models."""
+        try:
+            await self._ensure_sandbox()
+            
+            # Auto-select model based on mode
+            if model == "auto":
+                model = "qwen-image-plus" if mode == "generate" else "qwen-image-edit"
+            
+            if mode == "generate":
+                # 生成图片逻辑，参考gen_img函数
+                messages = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"text": prompt}
+                        ]
+                    }
+                ]
+                
+                response = self.MultiModalConversation.call(
+                    api_key=self.api_key,
+                    model=model,
+                    messages=messages,
+                    result_format='message',
+                    stream=False,
+                    watermark=watermark,
+                    prompt_extend=prompt_extend,
+                    negative_prompt='',
+                    size=size
+                )
+                
+            elif mode == "edit":
+                # 编辑图片逻辑，参考edit_img函数
+                if not image_path:
+                    return self.fail_response("'image_path' is required for edit mode.")
+                
+                # 获取图片字节数据
+                image_bytes = await self._get_image_bytes(image_path)
+                if isinstance(image_bytes, ToolResult):  # Error occurred
+                    return image_bytes
+                
+                # 将图片转换为Base64编码，格式为 data:{mime_type};base64,{base64_data}
+                mime_type = self._get_mime_type(image_path)
+                encoded_string = base64.b64encode(image_bytes).decode('utf-8')
+                base64_image = f"data:{mime_type};base64,{encoded_string}"
+                
+                # 构建消息
+                messages = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"image": base64_image},
+                            {"text": prompt}
+                        ]
+                    }
+                ]
+                
+                # 调用编辑图片API
+                response = self.MultiModalConversation.call(
+                    api_key=self.api_key,
+                    model=model,
+                    messages=messages,
+                    stream=False,
+                    watermark=False,
+                    negative_prompt=""
+                )
+                
+            else:
+                return self.fail_response("Invalid mode. Use 'generate' or 'edit'.")
+            
+            # 处理响应
+            if response.status_code == 200:
+                try:
+                    # 解析响应获取图片URL
+                    image_url = response.output.choices[0].message.content[0]['image']
+                    
+                    # 下载并保存图片到sandbox
+                    image_data = await self._download_image_from_url(image_url)
+                    if isinstance(image_data, ToolResult):
+                        return image_data
+                    
+                    # 生成随机文件名
+                    random_filename = f"generated_image_{uuid.uuid4().hex[:8]}.png"
+                    sandbox_path = f"{self.workspace_path}/{random_filename}"
+                    
+                    # 保存图片到sandbox
+                    await self.sandbox.fs.upload_file(image_data, sandbox_path)
+                    
+                    return self.success_response(
+                        f"Successfully processed image using mode '{mode}' with Alibaba Tongyi model '{model}'. Image saved as: {random_filename}. You can use the ask tool to display the image."
+                    )
+                    
+                except Exception as e:
+                    return self.fail_response(f"Failed to process API response: {str(e)}")
+                    
+            else:
+                # 与参考函数保持一致的错误处理
+                error_msg = f"HTTP返回码：{response.status_code}"
+                if hasattr(response, 'code'):
+                    error_msg += f", 错误码：{response.code}"
+                if hasattr(response, 'message'):
+                    error_msg += f", 错误信息：{response.message}"
+                return self.fail_response(error_msg)
+                
+        except Exception as e:
+            return self.fail_response(
+                f"An error occurred during image processing: {str(e)}"
+            )
+    
+    def _get_mime_type(self, image_path: str) -> str:
+        """Get MIME type from image path, similar to encode_file function."""
+        try:
+            if image_path.startswith(("http://", "https://")):
+                # For URLs, extract the path part
+                parsed = urlparse(image_path)
+                mime_type, _ = mimetypes.guess_type(parsed.path)
+            else:
+                # For local files
+                mime_type, _ = mimetypes.guess_type(image_path)
+            
+            if mime_type and mime_type.startswith("image/"):
+                return mime_type
+            else:
+                return "image/png"  # Default fallback
+        except Exception:
+            return "image/png"  # Default fallback
