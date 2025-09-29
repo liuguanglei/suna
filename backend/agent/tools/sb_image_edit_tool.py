@@ -11,7 +11,7 @@ import json
 import mimetypes
 import os
 from urllib.parse import urlparse
-from core.utils.config import config
+from utils.config import config
 import requests
 
 
