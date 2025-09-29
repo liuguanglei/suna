@@ -340,6 +340,7 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['scrape-webpage', '抓取网页'],
   ['web-search', '搜索网页'],
   ['see-image', '查看图片'],
+  ['image-edit-or-generate', '编辑或生成图片'],
 
   ['create-sheet', '创建表格'],
   ['update-sheet', '更新表格'],
@@ -395,7 +396,7 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['scrape_webpage', '抓取网页'],
   ['web_search', '搜索网页'],
   ['see_image', '查看图片'],
-   ['image_edit_or_generate', '编辑或生成图片'],
+  ['image_edit_or_generate', '编辑或生成图片'],
 
   ['update_agent', '更新智能体'],
   ['get_current_agent_config', '获取智能体配置'],
