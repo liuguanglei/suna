@@ -12,6 +12,7 @@ import mimetypes
 import os
 from urllib.parse import urlparse
 from core.utils.config import config
+import requests
 
 
 class SandboxImageEditTool(SandboxToolsBase):
@@ -175,16 +176,8 @@ class SandboxImageEditToolAli(SandboxImageEditTool):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.api_key = config.DASHSCOPE_API_KEY or ""
-        
-        # Import dashscope here to avoid dependency issues
-        from dashscope import MultiModalConversation
-        import dashscope
-        
-        self.MultiModalConversation = MultiModalConversation
-        self.dashscope = dashscope
-        
-        # Set API URL to Beijing region
-        dashscope.base_http_api_url = 'https://dashscope.aliyuncs.com/api/v1'
+        self.url = "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation"
+        self.headers = {"Authorization": f"Bearer {self.api_key}"}
     
     @openapi_schema(
         {
@@ -272,7 +265,7 @@ class SandboxImageEditToolAli(SandboxImageEditTool):
         watermark: bool = True,
         prompt_extend: bool = True,
     ) -> ToolResult:
-        """Generate or edit images using Alibaba Tongyi models."""
+        """Generate or edit images using Alibaba Tongyi models via direct HTTP requests."""
         try:
             await self._ensure_sandbox()
             
@@ -282,26 +275,29 @@ class SandboxImageEditToolAli(SandboxImageEditTool):
             
             if mode == "generate":
                 # 生成图片逻辑，参考gen_img函数
-                messages = [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"text": prompt}
+                json_data = {
+                    "model": model,
+                    "input": {
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"text": prompt}
+                                ]
+                            }
                         ]
+                    },
+                    "parameters": {
+                        "negative_prompt": "",
+                        "prompt_extend": prompt_extend,
+                        "watermark": watermark,
+                        "size": size
                     }
-                ]
+                }
                 
-                response = self.MultiModalConversation.call(
-                    api_key=self.api_key,
-                    model=model,
-                    messages=messages,
-                    result_format='message',
-                    stream=False,
-                    watermark=watermark,
-                    prompt_extend=prompt_extend,
-                    negative_prompt='',
-                    size=size
-                )
+                # 使用requests库发送同步请求
+                resp = requests.post(self.url, headers=self.headers, json=json_data)
+                response_json = resp.json()
                 
             elif mode == "edit":
                 # 编辑图片逻辑，参考edit_img函数
@@ -318,62 +314,68 @@ class SandboxImageEditToolAli(SandboxImageEditTool):
                 encoded_string = base64.b64encode(image_bytes).decode('utf-8')
                 base64_image = f"data:{mime_type};base64,{encoded_string}"
                 
-                # 构建消息
-                messages = [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"image": base64_image},
-                            {"text": prompt}
+                # 构建请求数据
+                json_data = {
+                    "model": model,
+                    "input": {
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"image": base64_image},
+                                    {"text": prompt}
+                                ]
+                            }
                         ]
+                    },
+                    "parameters": {
+                        "negative_prompt": "",
+                        "watermark": False
                     }
-                ]
+                }
                 
-                # 调用编辑图片API
-                response = self.MultiModalConversation.call(
-                    api_key=self.api_key,
-                    model=model,
-                    messages=messages,
-                    stream=False,
-                    watermark=False,
-                    negative_prompt=""
-                )
+                # 使用requests库发送同步请求
+                resp = requests.post(self.url, headers=self.headers, json=json_data)
+                response_json = resp.json()
                 
             else:
                 return self.fail_response("Invalid mode. Use 'generate' or 'edit'.")
             
             # 处理响应
-            if response.status_code == 200:
+            if resp.status_code == 200:
                 try:
                     # 解析响应获取图片URL
-                    image_url = response.output.choices[0].message.content[0]['image']
-                    
-                    # 下载并保存图片到sandbox
-                    image_data = await self._download_image_from_url(image_url)
-                    if isinstance(image_data, ToolResult):
-                        return image_data
-                    
-                    # 生成随机文件名
-                    random_filename = f"generated_image_{uuid.uuid4().hex[:8]}.png"
-                    sandbox_path = f"{self.workspace_path}/{random_filename}"
-                    
-                    # 保存图片到sandbox
-                    await self.sandbox.fs.upload_file(image_data, sandbox_path)
-                    
-                    return self.success_response(
-                        f"Successfully processed image using mode '{mode}' with Alibaba Tongyi model '{model}'. Image saved as: {random_filename}. You can use the ask tool to display the image."
-                    )
+                    if 'output' in response_json and 'choices' in response_json['output'] and response_json['output']['choices']:
+                        image_url = response_json['output']['choices'][0]['message']['content'][0]['image']
+                        
+                        # 下载并保存图片到sandbox
+                        image_data = await self._download_image_from_url(image_url)
+                        if isinstance(image_data, ToolResult):
+                            return image_data
+                        
+                        # 生成随机文件名
+                        random_filename = f"generated_image_{uuid.uuid4().hex[:8]}.png"
+                        sandbox_path = f"{self.workspace_path}/{random_filename}"
+                        
+                        # 保存图片到sandbox
+                        await self.sandbox.fs.upload_file(image_data, sandbox_path)
+                        
+                        return self.success_response(
+                            f"Successfully processed image using mode '{mode}' with Alibaba Tongyi model '{model}'. Image saved as: {random_filename}. You can use the ask tool to display the image."
+                        )
+                    else:
+                        return self.fail_response(f"Invalid API response format: {response_json}")
                     
                 except Exception as e:
                     return self.fail_response(f"Failed to process API response: {str(e)}")
                     
             else:
                 # 与参考函数保持一致的错误处理
-                error_msg = f"HTTP返回码：{response.status_code}"
-                if hasattr(response, 'code'):
-                    error_msg += f", 错误码：{response.code}"
-                if hasattr(response, 'message'):
-                    error_msg += f", 错误信息：{response.message}"
+                error_msg = f"HTTP返回码：{resp.status_code}"
+                if 'code' in response_json:
+                    error_msg += f", 错误码：{response_json['code']}"
+                if 'message' in response_json:
+                    error_msg += f", 错误信息：{response_json['message']}"
                 return self.fail_response(error_msg)
                 
         except Exception as e:
