@@ -359,7 +359,7 @@ export function FileAttachment({
             isGridLayout ? 'w-full h-full object-cover' : 'w-auto', // Full width & height in grid with object-cover
           )}
           style={{
-            height: imageHeight,
+            // height: imageHeight,
             objectPosition: 'center',
             objectFit: isGridLayout ? 'cover' : 'contain',
           }}
