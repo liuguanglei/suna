@@ -384,7 +384,6 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['browser_send_keys', '按键'],
   ['browser_switch_tab', '切换标签页'],
   ['browser_wait', '等待'],
-
   ['execute_data_provider_call', '调用数据提供程序'],
   ['get_data_provider_endpoints', '获取接口端点'],
 
@@ -396,6 +395,7 @@ const TOOL_DISPLAY_NAMES = new Map([
   ['scrape_webpage', '抓取网页'],
   ['web_search', '搜索网页'],
   ['see_image', '查看图片'],
+   ['image_edit_or_generate', '编辑或生成图片'],
 
   ['update_agent', '更新智能体'],
   ['get_current_agent_config', '获取智能体配置'],
@@ -507,6 +507,7 @@ export const HIDE_STREAMING_XML_TAGS = new Set([
   'crawl-webpage',
   'web-search',
   'see-image',
+  'image-edit-or-generate',
   'execute_data_provider_call',
   'execute_data_provider_endpoint',
 
